@@ -1,0 +1,35 @@
+#加入启动项
+/adm/etc/preload 追加 /d/xyj_x/daemons/atd
+/adm/obj/simul_efun.c 追加 efun_x.c
+
+##通用##
+cd /d/xyj_x/install
+
+cp xyj_x.h /include
+cp admxd.c /adm/daemons
+cp efun_x.c /adm/simul_efun
+
+
+##任务系统##
+mv /std/quest.c quest.firefox
+cp quest.c /std
+
+
+##盘丝洞##
+chinese ziqing-sword==紫青剑
+chinese baigu-whip==白骨鞭
+chinese pansi-dafa==盘丝大法
+
+cp ziqing-sword.c /daemon/skill/
+cp baigu-whip.c /daemon/skill/
+cp pansi-dafa.c /daemon/skill/
+
+mkdir /daemons
+
+##真身##
+chinese zhenshen-skill==真身技
+cp zhenshen-skill.c /daemon/skill/
+
+
+
+pause
