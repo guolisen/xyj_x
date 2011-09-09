@@ -3,6 +3,8 @@ inherit ITEM;
 
 #include <ansi.h>
 
+string _food = __DIR__"food";
+
 void create()
 {
 	set_name("八仙桌", ({"baxian zhuo", "zhuo", "table"}));
@@ -32,8 +34,10 @@ int do_pick(string arg)
 
 	if (arg != "food")
 		return notify_fail("你要拿什么？\n");
+	else if(_food->eaten())
+		return notify_fail("你已经吃过了，留点给别人吧。\n");
 	else {
-		object ob = new(__DIR__"food");
+		object ob = new(_food);
 		if(ob->move(who)) {
 			message_vision("$N从桌子上拿起一块$n。\n", who, ob);
 		} else {

@@ -41,6 +41,6 @@ void new_task(object who, mapping task)
 void give_reward(object who, int reward)
 {
 	who->add(_stat_prop + "/balance", reward);		//任务奖励可兑换的余额
-	who->add(colors_prop(), 5);
+	who->add(colors_prop(), 10);
 }
 

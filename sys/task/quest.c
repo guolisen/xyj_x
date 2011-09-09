@@ -45,6 +45,16 @@ int color_remove(object who)
 	if(sizeof(arr)) m[random1(arr)] = 0;
 }
 
+//奖励消耗掉花色
+void color_consume(object who)
+{
+	mapping m = color_data(who);
+
+	foreach(string k, int v in m) {
+		if(v > 0) m[k]--;
+	}
+}
+
 mapping _color_code = ([
 	"food"			: HIR"红",
 	"ask"			: HIG"绿",
@@ -87,6 +97,8 @@ void show_clouds(object who)
 //取消全部任务
 void cancel_all(object who)
 {
+	mapping m = data_of(who);
+	if(!sizeof(m)) return;
 	set_data(who, ([]));
 	color_remove(who);
 }
@@ -127,7 +139,7 @@ string reward_skill(object who, int point)
 {
 	mapping skills = who->query_skills();
 	string skill = sizeof(skills) ? random1(keys(skills)) : "force";
-	int level = skills[skill] + 1;
+	int level = (skills ? skills[skill] : 0) + 1;
 
 	point = point / 4 * 20;	//换算成qn，并按40 int学习
 
@@ -182,13 +194,12 @@ void pay(object me, object who)
 	if(balance > 0) {
 		//根据色彩数计算奖励系数
 		int color = color_num(who);
-		int* tab = ({1, 1, 1, 3, 7, 10, 12, 15});		//高端奖励该削弱？
+		int* tab = ({1, 2, 4, 6, 10, 11, 12, 15});		//高端奖励该削弱？
 		int reward = tab[color];
 		string color_str = color > 2 ? (chinese_number(color) + "彩") : "";
 
-		mapping m1 = ([ "张士衡" : 1, "孟子如" : 2, "杜如晦" : 3 ]);
-		mapping m2 = m1 + ([ "段志贤" : 47, "徐茂功" : 47 ]);
-		string dachen = (color == 1) ? roulette(m1) : roulette(m2);
+		mapping m1 = ([ "张士衡" : 1, "孟子如" : 2, "杜如晦" : 3, "段志贤" : 47, "徐茂功" : 47]);
+		string dachen = roulette(m1);
 
 		//计算奖励
 		if(total_exp(who) < 40*K) reward = max2(reward, 10);
@@ -207,6 +218,8 @@ void pay(object me, object who)
 void reward_player(object me, object who, int reward, string dachen)
 {
 	string gain = evaluate(_funs[dachen], who, reward);
+	color_consume(who);
+
 	msvx("\n旁边闪过大臣%s低声向$N说了几句，$N点了点头。\n", me, 0, dachen);
 	msvx("%s对$N一拜：陛下有旨，赐$R%s！\n\n", who, 0, dachen, gain);
 	msv("$N连忙俯身一拜，小心翼翼地站起来。\n", who);

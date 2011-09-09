@@ -6,8 +6,8 @@ inherit ITEM;
 
 #define PROP		"gift/holiday"
 
-#define DATE		20110606
-#define POT			30000
+#define DATE		20111001
+#define POT			60000
 
 #define NAME		""
 //#define ID			"mang guo"
@@ -15,10 +15,11 @@ inherit ITEM;
 //string* _prefixs = ({"芒果", "芒果"});
 
 //#define LONG		"愿MUD西游记一年更比一年红火。"
+//#define LONG		"四时花竞巧，九子粽争新。祝大家端午愉快。"
 
-#define ID			"zong zi"
-#define LONG		"四时花竞巧，九子粽争新。祝大家端午愉快。"
-string* _prefixs = ({"粽子", "粽子"});
+#define ID			"hu bing"
+#define LONG		"唐初最盛胡饼，即后世月饼。祝大家中秋/国庆快乐。"
+string* _prefixs = ({YEL"胡饼"NOR});
 
 void create()
 {
@@ -40,6 +41,12 @@ void init()
 	add_action("do_eat", ({ "eat", "chi" }) );
 }
 
+//吃过了
+int eaten()
+{
+	return this_player()->query(PROP) >= DATE;
+}
+
 
 int do_eat(string arg)
 {
@@ -48,7 +55,7 @@ int do_eat(string arg)
 
 	if (arg != me->query("id") && arg != "food")  return 0;
 
-	if(who->query(PROP) < DATE) {
+	if(!eaten()) {
 		who->set(PROP, DATE);
 		message_vision("$N拿起$n细细品味，感觉回味无穷。\n", who, me);
 		who->add("potential", POT);

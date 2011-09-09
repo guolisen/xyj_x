@@ -7,7 +7,7 @@ inherit TDB_SIMPLE;
 
 void create()
 {
-	init_param(800, 500, 600, 100);		//最高7花平均收益：800*7*150% = 8.4K，最高16.5
+	init_param(990, 600, 780, 100);		//最高7花平均收益：990*7*150% = 10.3K 最大：14.5K
 	tdb_load(X_DATA_DIR + "task/quest/_" + id());
 }
 
