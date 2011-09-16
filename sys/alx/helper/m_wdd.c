@@ -7,7 +7,7 @@ inherit __DIR__"m_base";
 
 void on_init(object me, object who)
 {
-	if(!random(3)) me->command("cast zhua on " + who->query("id"));
+	if(random(2)) me->command("cast zhua on " + who->query("id"));
 }
 
 void create()
@@ -31,7 +31,7 @@ void create()
 			"leave"		: HIY"$N向空中抛了一把土，念句咒，钻入土中不见了。",
 			"init"		: (: on_init :),
 	
-			"cmds"		: ({ "cast huanying", "cast bianfu", "cast suliao"}),
+			"cmds"		: ({ "cast suliao"}),
 		])
 	);
 

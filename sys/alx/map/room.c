@@ -38,6 +38,9 @@ void init()
 	add_action("do_m", "m");
 	add_action("do_bg", "bg");	
 	
+	//屏蔽指令
+	add_action("do_cast", "cast");	
+	add_action("do_burn", "burn");	
 }
 
 int do_move(string type, string arg, string msg1, string msg2)
@@ -117,4 +120,21 @@ int clean_up()
 void alternative_die(object who)
 {
 	ALX->room_sb_die(_this, who);
+}
+
+int do_cast(string arg)
+{
+	string* arr = ({"chuqiao", "townportal", "escape", "tudun", "shuidun"});
+	if(member_array(arg, arr) != -1) 
+		return notify_ok("逃离战场可能导致意外死亡。\n");
+	return 0;
+}
+
+int do_burn(string arg)
+{
+	object ob = arg ? present(arg, this_player()) : 0;
+
+	if(ob && ob->query("id") == "escape seal")
+		return notify_ok("逃离战场可能导致意外死亡。\n");
+	return 0;
 }

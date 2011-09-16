@@ -118,7 +118,7 @@ void for_camp(mapping camp)
 		//拉回离场玩家
 		object env = environment(who);
 		mapping buff = BUFF->find(who, WAIT4R);	//等待复活的buff
-		if(buff || !env || !(env->query("in_bg") || env->query("no_fight"))) {
+		if(buff || !env || !(env->query("in_bg") || env->query("is_fabao"))) {
 			if(!wizardp(who)) room_goto_hell(who);
 		}
 		//增加玩家移动点数

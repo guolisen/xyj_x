@@ -246,7 +246,7 @@ mapping _usage_tab = ([
 varargs int skill_power(object ob, string skill, int usage)
 {
 	int max_sen = ob->query("max_sen");
-	int level = ob->query_skill(skill) + ob->query_skill(skill, 1)/10;
+	int level = ob->query_skill(skill) + ob->query_skill(skill, 1)/4;
 	int exp = ob->query("combat_exp");
 	
 	if(!living(ob)) return 0;
@@ -645,7 +645,7 @@ void start_berserk(object me, object obj)
 	me->set_temp("looking_for_trouble", 0);
 	if( !obj ) return;
 
-	if( wizardp(obj) ) return;	
+	if(userp(obj) || wizardp(obj) ) return;	// 2011.9 firefox
 
 	if(	me->is_fighting(obj)				// Are we busy fighting?
 		||	!living(me)							// Are we capable for a fight?
@@ -658,23 +658,15 @@ void start_berserk(object me, object obj)
 
 	if(	(int)me->query("force") > (random(bellicosity) + bellicosity)/2 ) return;
 
-	if( bellicosity > (int)me->query("score") 
-		&&	!wizardp(obj) ) {
-
-			// auto kill, mark my_killer_list. -- mon 9/23/98
-			if(userp(me) && userp(obj)) {
-				set_my_killer_list(me, obj);
-			}
-
-			message_vision("$N对着$n喝道：" + RANK_D->query_self_rude(me)
-				+ "看你实在很不顺眼，去死吧。\n", me, obj);
-			me->kill_ob(obj);
-	} else {
-		message_vision("$N对着$n喝道：喂！" + RANK_D->query_rude(obj)
-			+ "，" + RANK_D->query_self_rude(me) + "正想找人打架，陪我玩两手吧！\n",
-			me, obj);
-		me->fight_ob(obj);
+	// auto kill, mark my_killer_list. -- mon 9/23/98
+	if(userp(me) && userp(obj)) {
+		set_my_killer_list(me, obj);
 	}
+
+	message_vision("$N对着$n喝道：" + RANK_D->query_self_rude(me)
+		+ "看你实在很不顺眼，去死吧。\n", me, obj);
+	me->kill_ob(obj);
+
 }
 
 void start_hatred(object me, object obj)

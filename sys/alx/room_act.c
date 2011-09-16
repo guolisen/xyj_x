@@ -24,14 +24,17 @@ private int revive_act(mapping buff)
 
 //地狱里凉快，那儿歇着吧
 int room_goto_hell(object who)
-{	
+{
+	object env = environment(who);
+	object dst = load_object(HELL);
 	mapping buff = ([
 		"id"		: WAIT4R,
 		"name"		: HIW"等待复活"NOR,
 		"comment"	: "你在地狱你耐心等待重回人间。",
 		"duration"	: WAIT4DURATION,
 		"post_act"	: (: revive_act :),
-	]);
+	]);	
+
 	HP->full(who, 1);		//不回复内力，让他在危险中打坐
 	HP->add_force(who, DEAD_RECOVER);
 	HP->add_mana(who, DEAD_RECOVER);
@@ -44,7 +47,7 @@ int room_goto_hell(object who)
 	who->delete_temp("no_move");
 	who->start_busy(1);
 
-	who->move(HELL);
+	if(env != dst) who->move(dst);
 	return 1;
 }
 

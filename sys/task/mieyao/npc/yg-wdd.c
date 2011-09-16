@@ -17,7 +17,7 @@ void set_skills(int level)
 	SKI->set_list2(_this, FAMILY->skills_of("ÏÝ¿ÕÉ½ÎÞµ×¶´"), level);
 
 	set("chat_msg_combat", ({
-		(: cast_spell, "huanying" :),
+//		(: cast_spell, "huanying" :),
 		(: cast_spell, "suliao" :),
 	}) );
 

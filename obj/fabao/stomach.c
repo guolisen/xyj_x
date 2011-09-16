@@ -23,6 +23,7 @@ void create()
 	set("no_magic", 1);
 	set("no_fight", 1);
 	set("alternative_die", 1);
+	set("is_fabao", 1);
 
 	set_heart_beat(23);
 

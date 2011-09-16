@@ -19,7 +19,7 @@ void set_skills(int level)
 	set("chat_msg_combat", ({
 		(: cast_spell, "freez" :),
         (: cast_spell, "breathe" :),
-        (: exert_function, "roar" :),
+        //(: exert_function, "roar" :),
         (: exert_function, "shield" :) })
 	);
 
