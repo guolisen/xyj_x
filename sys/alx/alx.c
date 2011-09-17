@@ -184,7 +184,8 @@ int stop()
 			int total = exp + res * truncate(ratio, 30, 100) / 100;
 			total = truncate(total, MIN_TOTAL_POT, MAX_TOTAL_POT);
 
-			score_add_exp(user, total - exp);	//∂‡ÕÀ…Ÿ≤π
+			score_set(user, "exp", total);
+			score_add_total(user);
 			score_add(user, "times", 1);
 			
 			if(interactive(user)) score_add_gold(user, total / K / 3);

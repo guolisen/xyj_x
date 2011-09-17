@@ -39,7 +39,7 @@ int room_get_out(object who);
 varargs int score_query(object who, string item, int history);
 void score_set(object who, string item, int value);
 varargs int score_liveness(object who, int history);
-int score_add(object who, string item, int value);
+varargs int score_add(object who, string item, int value, int history);
 int score_add_exp(object who, int value);
 varargs mapping score_entire(object who, int history);
 varargs mapping score_clear(object who, int history);

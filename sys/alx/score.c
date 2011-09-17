@@ -36,11 +36,10 @@ void score_set(object who, string item, int value)
 
 
 //增加某项分数
-int score_add(object who, string item, int value)
+varargs int score_add(object who, string item, int value, int history)
 {
-	who->add(SCORE_ID"/" + item, value);
-	who->add_temp(SCORE_ID"/" + item, value);
-	return 1;
+	if(history) return who->add(SCORE_ID"/" + item, value);
+	return who->add_temp(SCORE_ID"/" + item, value);
 }
 
 //获取玩家活跃度
@@ -50,8 +49,7 @@ varargs int score_liveness(object who, int history)
 }
 
 
-
-//增加战功
+//增加临时战功
 int score_add_exp(object who, int value)
 {
 	int c = camp_id(who);
@@ -61,12 +59,25 @@ int score_add_exp(object who, int value)
 	return score_add(who, "exp", value);
 }
 
-//增加战功
+//增加金钱
 int score_add_gold(object who, int value)
 {
 	who->add("balance", value * 10000);
 	tell_object(who, "你得到" + value + "两黄金，已经存入银行！\n");
 	return 1;
+}
+
+//临时战功加入总战功
+void score_add_total(object who)
+{
+	mapping m0 = score_entire(who, 0);
+	mapping m1 = score_entire(who, 1);
+
+	foreach(string k, int v in m0) {
+		m1[k] += v;
+	}
+
+	tell_object(who, "你累积得到" + m0["exp"] + "点战功！\n");
 }
 
 //经验余额

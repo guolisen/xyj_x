@@ -44,7 +44,7 @@ void help_allot_hair()
 
 	int res_thr = 200 + (res1 + res2) * 6 / 10;
 	int c = 0;
-	int n = sizeof(_camps[XIAN]["users"]) + sizeof(_camps[MO]["users"]);
+	int n = 0;
 
 	//资源6:4，则强势阵营没毫毛
 	if(res1 > res_thr) c = MO;
@@ -55,17 +55,19 @@ void help_allot_hair()
 
 	foreach(object user in _camps[c]["users"]) {
 		if(user && interactive(user)) {
-			//倾向于发给参与攻守的玩家
-			int score = 1 + score_liveness(user);
+			//倾向于发给参与攻守，分数较低的玩家
 			int ev = HP->eval(user);
-			score = truncate(score, 1, 2);
-			ev = max2(ev, K);
+			int coef = 1 + score_liveness(user);
+			coef = truncate(coef, 1, 3);
+			if(score_query(user, "exp") > MAX_TOTAL_POT) coef = 0;
 
-			tab[user] = score * K * K / ev;	//概率与评价反比，与功绩正比
+			ev = max2(ev, K);
+			tab[user] = coef * K * K / ev;	//概率与评价反比，与功绩正比
+			n++;
 		}
 	}
 	if(!sizeof(tab)) return;
-	n = 1 + n / 15;
+	n = 1 + n / 4;
 	for(int i = 0; i < n; ++i) {
 		object winner = roulette(tab);
 		if(winner) {
