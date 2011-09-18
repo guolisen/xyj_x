@@ -1,3 +1,4 @@
+
 // cracked by vikee 2/09/2002   vikee@263.net
 // bank.c
 
@@ -182,13 +183,14 @@ int do_withdraw(string arg)
 
 	ob = new(what);
 	ob->set_amount(amount);
+	what = ob_str(ob);
 	if(!ob->move(me))
 		return notify_fail("你身上的东西太多了。\n");
 
 	me->add("balance",  -v);
 	me->save();
 
-	message_vision(sprintf("$N从银号里取出%s。\n", ob_str(ob)), me);
+	message_vision("$N从银号里取出" + what + "。\n", me);
 	return 1;
 }
 
