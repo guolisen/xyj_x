@@ -98,6 +98,8 @@ int do_join(string arg)
 		mapping who = find_info(ob, _g["queue"]);
 		if(who) return notify_ok("你已经加入了。\n");
 		
+		//wait for
+
 		who = ([
 			"mid"		: MUD_ID,
 			"id"		: getuid(ob),
@@ -127,19 +129,20 @@ int do_leave(string arg)
 
 	CHK_FAIL_STARTED;
 
-	if(who) {
-		if(who["chip"] > 0) {
-			_localizer->exchange_chip(this_player(), -who["chip"]);
-			msv("$N退掉了筹码。\n", who);
-		}
-		_g["queue"] -= ({ who });
-		msv("$N起身离开了桌子。\n\n", who);
-		refresh_look();
-		ob->move(_stand);
-		ob->save();
-		return 1;
+	if(!who) notify_ok("你没加入游戏。\n");
+
+	//wait for
+
+	if(who["chip"] > 0) {
+		_localizer->exchange_chip(this_player(), -who["chip"]);
+		msv("$N退掉了筹码。\n", who);
 	}
-	return notify_ok("你没加入游戏。\n");
+	_g["queue"] -= ({ who });
+	msv("$N起身离开了桌子。\n\n", who);
+	refresh_look();
+	ob->move(_stand);
+	ob->save();
+	return 1;
 }
 
 //入场选手宣布就绪
@@ -150,6 +153,8 @@ int do_ready(string arg)
 	CHK_FAIL_STARTED;
 	if(!who) return notify_ok("你没加入游戏。\n");
 	if(who["chip"] < MIN_CHIP) return notify_ok("你的筹码太少。\n");
+
+	//wait for
 
 	who["ready"] = 1;
 	
@@ -198,6 +203,8 @@ int do_buy(string arg)
 	if(n < 1) return notify_ok("你要买多少售筹码？\n");
 	CHK_FAIL_STARTED;
 	if(!who) return notify_ok("你没参与游戏。\n");
+
+	//wait for
 	
 	if(_localizer->exchange_chip(this_player(), n)) {
 		who["chip"] += n;
@@ -217,6 +224,8 @@ int do_sell(string arg)
 	CHK_FAIL_STARTED;
 	if(!who) return notify_ok("你没参与游戏。\n");
 	CHK_OOC(who, n);
+
+	//wait for
 	
 	if(_localizer->exchange_chip(this_player(), -n)) {
 		who["chip"] -= n;
@@ -252,6 +261,8 @@ int do_bet(string arg)
 	CHK_CHIP_TOO_MUCH(n);
 	CHK_OOC(who, n);
 
+	//wait for
+
 	sb_bet(who, n);	
 	say(who, n + "!\n");
 
@@ -271,6 +282,8 @@ int do_call(string arg)
 	n = _g["bet"] - who["bet"];
 
 	CHK_OOC(who, n);
+
+	//wait for
 
 	sb_bet(who, n);
 	say(who, "跟了！\n\n");
@@ -294,6 +307,8 @@ int do_raise(string arg)
 	CHK_CHIP_TOO_MUCH(n);	
 	CHK_OOC(who, n);
 
+	//wait for
+
 	sb_bet(who, n);
 	say(who, "加" + add + "！\n\n");
 
@@ -311,6 +326,8 @@ int do_show(string arg)
 		CHK_FAIL_NOT_START;
 		CHK_FAIL_NOT_YOU(who);
 		CHK_OOC(who, n);
+
+		//wait for
 
 		sb_bet(who, n);
 		say(who, "全押！\n\n");
@@ -340,6 +357,8 @@ int do_fold(string arg)
 	CHK_FAIL_NOT_YOU(who);
 
 	if(!_g["pot"]) return notify_ok("你不可弃牌。\n");
+
+	//wait for
 
 	fold(who);
 
