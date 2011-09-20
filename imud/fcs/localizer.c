@@ -7,7 +7,6 @@ mapping _db = ([
 	"prop_root"		: "imud/fcs",				//属性根节点
 	"ROE"			: (500*10000/1000),			//汇率，玩家平均日收入换1K筹码
 	
-	"cashier"		: (["id" : "cashier", "name" : "接待女郎", "title" : "侍者", "gender" : "女性"]),
 	"dealer"		: (["id" : "dealer", "name" : "发牌女郎", "title" : "侍者"]),
 	"desk_name"		: "桌边",
 	"desk_desc"		: "\n这是一张考究的桌子，光洁的桌面上泛着红木特有的幽暗光芒。四下几\n"

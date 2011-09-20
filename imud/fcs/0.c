@@ -95,7 +95,6 @@ int do_join(string arg)
 	
 	if(sizeof(_g["queue"]) < MAX_PLAYER) {
 		object ob = this_player();
-		mapping m = data_of(ob);
 		mapping who = find_info(ob, _g["queue"]);
 		if(who) return notify_ok("你已经加入了。\n");
 		
@@ -104,10 +103,9 @@ int do_join(string arg)
 			"id"		: getuid(ob),
 			"name"		: ob->query("name"),
 			"title"		: ob->query("title"),			
-			"chip"		: m["chip"],
+			"chip"		: 0,
 			"cards"		: allocate(MAX_CARD),
 		]);
-		m["chip"] = 0;
 		_g["queue"] += ({ who });
 		msv("$N在桌边坐下。\n", who);
 		refresh_look();
@@ -130,9 +128,10 @@ int do_leave(string arg)
 	CHK_FAIL_STARTED;
 
 	if(who) {
-		mapping m = data_of(ob);
-
-		m["chip"] = who["chip"];
+		if(who["chip"] > 0) {
+			_localizer->exchange_chip(this_player(), -who["chip"]);
+			msv("$N退掉了筹码。\n", who);
+		}
 		_g["queue"] -= ({ who });
 		msv("$N起身离开了桌子。\n\n", who);
 		refresh_look();
@@ -194,13 +193,14 @@ int do_say(string arg)
 int do_buy(string arg)
 {
 	mapping who = find_info(this_player(), _g["queue"]);
+	int n = to_int(arg);
 		
-	if(arg != "chip") return notify_ok("这里只售筹码(chip)。\n");
+	if(n < 1) return notify_ok("你要买多少售筹码？\n");
 	CHK_FAIL_STARTED;
 	if(!who) return notify_ok("你没参与游戏。\n");
 	
-	if(_localizer->exchange_chip(this_player(), 1000)) {
-		who["chip"] += 1000;
+	if(_localizer->exchange_chip(this_player(), n)) {
+		who["chip"] += n;
 		msv("$N向"DEALER_NAME"买了一千筹码。\n", who);
 		refresh_look();
 	}
@@ -211,14 +211,15 @@ int do_buy(string arg)
 int do_sell(string arg)
 {
 	mapping who = find_info(this_player(), _g["queue"]);
+	int n = to_int(arg);
 	
-	if(arg != "chip") return notify_ok("这里只可以退售筹码(chip)。\n");
+	if(n < 1) return notify_ok("你要退多少售筹码？\n");
 	CHK_FAIL_STARTED;
 	if(!who) return notify_ok("你没参与游戏。\n");
-	CHK_OOC(who, 1000);
+	CHK_OOC(who, n);
 	
-	if(_localizer->exchange_chip(this_player(), -1000)) {
-		who["chip"] -= 1000;
+	if(_localizer->exchange_chip(this_player(), -n)) {
+		who["chip"] -= n;
 		msv("$N向"DEALER_NAME"退了一千筹码。\n", who);
 		refresh_look();
 	}
