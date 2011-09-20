@@ -48,7 +48,7 @@ int cast(object me, object target)
 
 	if(BTL->cmp_random20(me, target, cmp_parm) > 75) {
 		int damage = 50 + mana * 2;
-		string part = random1(({"手上", "裆部"}));
+		string part = (target->query("gender") == "女性") ? "手上" : random1(({"手上", "裆部"}));
 		if(target->query_temp("weapon"))
 			BUFF->start_no_wield(target, DURATION, sprintf(MSG3, part));
 		msvx(MSG1, me, target, part);

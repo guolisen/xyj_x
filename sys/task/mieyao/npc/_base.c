@@ -63,7 +63,7 @@ void create()
 		]);
 
 		set("type", roulette(type));
-		set("env/wimpy", random(10) ? 1 : 20);
+		set("env/wimpy", random(20) ? 1 : 20);
 	}
 
 	setup();
