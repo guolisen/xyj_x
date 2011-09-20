@@ -5,6 +5,7 @@
 #define iMUD_FOR_XYJ			1
 #define IMUD_DIR				"/d/xyj_x/imud/"
 
+#define F_RAND					IMUD_DIR"_lib/rand"
 
 #define iFCS_DIR				IMUD_DIR"fcs/"
 #define iFCS					iFCS_DIR"fcs"
