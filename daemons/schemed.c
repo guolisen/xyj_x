@@ -137,7 +137,7 @@ int stop(object user)
 int abort(object me)
 {
 	stop(me);
-	trace("interactive:" + interactive(me) + getuid(me), D_WIZ);
+	trace("scheme abort:" + interactive(me) + getuid(me), D_WIZ);
 	if(!interactive(me))
 		call_out("user_quit", 1, me);
 	return 1;
@@ -162,7 +162,9 @@ void heart_beat()
 		object user = arr[WHO];
 		if(user) {
 			//条指过多/忙/晕倒，本轮被跳过
-			if(arr[CMDS] * SPC < now - arr[START_TIME] && !user->is_busy() && living(user)) {
+			int thr = arr[CMDS] * (interactive(user) ? 3 : SPC);	//离线计划执行慢
+
+			if((thr < now - arr[START_TIME]) && !user->is_busy() && living(user)) {
 				if(bad_state(user))
 					abort(user);
 				else

@@ -20,7 +20,7 @@ int rand()
 }
 
 //小于n的随机数
-mixed random(int n)
+int random(int n)
 {
 	if(n < 1) n = 1;
 	return rand() % n;
@@ -44,7 +44,7 @@ int* shuffle(int* arr)
 }
 
 //1千万次随机试验：分布78-116，还可以
-int* test(int n, int times)
+int* rand_test(int n, int times)
 {
 	int* arr = allocate(n);
 	int a = times;
