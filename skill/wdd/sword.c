@@ -99,7 +99,7 @@ int on_timer(mapping buff)
 
 	if(in_safy(me) || damage < 10) return 0;
 
-	me->add("force", -damage);		//力气也会随着血流干
+	me->add("force", -damage*5);		//力气也会随着血流干
 	
 	me->receive_damage("kee", damage);
 	me->receive_wound("kee", damage, attacker);

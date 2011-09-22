@@ -8,8 +8,15 @@ int main(object me, string arg)
 {
 	object obj, env;
 
-	if(!arg)
-		return notify_fail("你要接受谁的公开邀请？\n");
+	if(!arg) {
+		string id = me->query_temp("accept");
+		
+		if(id)
+			tell_object(me, GRN"你已接受(" + id + ")的公开邀请。\n"NOR);
+		else
+			tell_object(me, GRN"你未接受公开邀请。\n"NOR);
+		return 1;
+	}
 
 	if(arg == "none") {		
 		me->set_temp("accept", 0);
@@ -66,7 +73,7 @@ int help(object me)
 {
 write(@HELP
 
-指令格式 : accept <某人> | none
+指令格式 : accept [<某人> | none]
 
 这个指令告诉别人你接受他/她的公开邀请，或者取消放弃接受邀请。
 

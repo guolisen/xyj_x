@@ -99,6 +99,7 @@ int do_join(string arg)
 		if(who) return notify_ok("你已经加入了。\n");
 		
 		//wait for
+		rpc(
 
 		who = ([
 			"mid"		: MUD_ID,
