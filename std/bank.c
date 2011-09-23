@@ -10,6 +10,11 @@ string money_str(int amount);
 int pay_player(object who, int amount);
 void reset_balance(object me);
 
+private string mid(string id)
+{
+	return (id == "cash") ? "thousand-cash" : id;
+}
+
 void init()
 {
 	add_action("do_convert", "convert");
@@ -28,6 +33,9 @@ int do_convert(string arg)
 
 	if( !arg || sscanf(arg, "%d %s to %s", amount, from, to)!=3 )
 		return notify_fail("指令格式：convert <数量> <货币种类> to <货币种类>\n");
+
+	from = mid(from);
+	to = mid(to);
 
 	if( this_player()->is_busy() )
 		return notify_fail("你现在正忙着呢...。\n");
@@ -100,6 +108,8 @@ int do_deposit(string arg)
 		if(!arg || sscanf(arg, "%d %s", amount, what) != 2)
 			return notify_fail("命令格式：deposit <数量> <货币单位>\n");
 
+		what = mid(what);
+
 		if( me->is_busy() )
 			return notify_fail("你现在正忙着呢...。\n");
 
@@ -164,6 +174,9 @@ int do_withdraw(string arg)
 
 	if(!arg || sscanf(arg, "%d %s", amount, what) != 2)
 		return notify_fail("命令格式：withdraw <数量> <货币单位>\n");
+
+	what = mid(what);
+
 	if(me->is_busy() )
 		return notify_fail("你现在正忙着呢...。\n");
 	if(amount < 1)

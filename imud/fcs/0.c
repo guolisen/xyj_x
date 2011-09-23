@@ -4,14 +4,45 @@ inherit ROOM;
 
 #include "fcs.h"
 #include "score.c"
+#include "msg.h"
+#include "util_c.h"
 
-#define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify_ok("游戏已经开始了。\n")
-#define CHK_FAIL_NOT_START			if(!_g["round"]) return notify_ok("游戏还未开始。\n")
-#define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify_ok("还没轮到你。\n");
-#define CHK_OOC(who, cn)			if(who["chip"] < (cn)) return notify_ok("你没有足够的筹码。\n");
 
-#define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify_ok("至少要一个筹码。\n");
-#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify_ok("至多可下注" + _g["max_bet"] + "。\n");
+static mapping _msgs = ([
+
+	MSG_STARTED			: "游戏已经开始了。\n",
+	MSG_NOT_START		: "游戏还未开始。\n",
+	MSG_NOT_YOU			: "还没轮到你。\n",
+	MSG_JOINED			: "你已经加入了。\n",
+	MSG_NOT_JOIN		: "你没加入游戏。\n",
+	MSG_FULL			: "桌边已经坐满了。\n",
+
+	MSG_NOT_ENOUGH		: "你没有足够的筹码。\n",
+	MSG_AT_LEAST_1		: "至少要一个筹码。\n",
+	MSG_TOO_LESS		: "至少要有%d筹码。\n",
+	MSG_TOO_MUCH		: "至多可下注%d个筹码。\n",
+	MSG_HOW_MONEY		: "多少个售筹码？\n",	
+	
+	MSG_BETTED			: "已有人投注，可跟(genzhu)，加码(jiazhu|raise)或弃牌(qipai|fold)。\n",
+	MSG_PLS_BET			: "请下注(xiazhu|bet)。\n",
+	MSG_CALL_OR_FOLD	: "你只能选择跟注或弃牌。\n",
+	MSG_NOT_LAST		: "还不到最后时刻。\n",
+	MSG_NO_FOLD			: "你不可弃牌。\n",
+	MSG_NO_HAND_CARD	: "你没有底牌可看。\n",
+				
+]);
+
+
+
+
+
+#define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify(MSG_STARTED)
+#define CHK_FAIL_NOT_START			if(!_g["round"]) return notify(MSG_NOT_START)
+#define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify(MSG_NOT_YOU);
+#define CHK_OOC(who, cn)			if(who["chip"] < (cn)) return notify(MSG_NOT_ENOUGH);
+
+#define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(MSG_AT_LEAST_1);
+#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(MSG_TOO_MUCH, _g["max_bet"]);
 
 
 int next_one();
@@ -56,6 +87,9 @@ void create()
 	fcs_init();
 	_localizer->set_safety(_this);
 	refresh_look();
+
+	set_notify(_msgs);
+
 	setup();
 }
 
@@ -91,36 +125,35 @@ void init()
 //加入游戏
 int do_join(string arg)
 {
-	CHK_FAIL_STARTED;
-	
-	if(sizeof(_g["queue"]) < MAX_PLAYER) {
-		object ob = this_player();
-		mapping who = find_info(ob, _g["queue"]);
-		if(who) return notify_ok("你已经加入了。\n");
-		
-		//wait for
-		rpc(
+	object who = this_player();
+	mapping info = ([
+		"id"		: getuid(who),
+		"name"		: filter_color(who->query("name")),
+	]);
 
-		who = ([
-			"mid"		: MUD_ID,
-			"id"		: getuid(ob),
-			"name"		: ob->query("name"),
-			"title"		: ob->query("title"),			
-			"chip"		: 0,
-			"cards"		: allocate(MAX_CARD),
-		]);
-		_g["queue"] += ({ who });
-		msv("$N在桌边坐下。\n", who);
-		refresh_look();
-		ob->set_temp("block_msg/all", 1);
-		ob->move(_this);
-		ob->save();
-		ob->set_temp("block_msg/all", 0);
-		return 1;
-	}
-	return notify_ok("桌边已经坐满了。\n");
+	return send_req("join", info);
 }
 
+//加入完成
+void on_join(mapping info)
+{
+	object who = info_ob(info);
+
+	msv("$N在桌边坐下。\n", info);
+	refresh_look();
+	
+	if(who) {
+		who->set_temp("block_msg/all", 1);
+		who->move(_this);
+		who->set_temp("block_msg/all", 0);
+	}
+}
+
+//入场选手离开
+int do_leave(string arg)
+{
+	return send_req("join", this_player());
+}
 
 //入场选手离开
 int do_leave(string arg)
@@ -130,7 +163,7 @@ int do_leave(string arg)
 
 	CHK_FAIL_STARTED;
 
-	if(!who) notify_ok("你没加入游戏。\n");
+	if(!who) notify(MSG_NOT_JOIN);
 
 	//wait for
 
@@ -152,8 +185,8 @@ int do_ready(string arg)
 	mapping who = find_info(this_player(), _g["queue"]);
 	
 	CHK_FAIL_STARTED;
-	if(!who) return notify_ok("你没加入游戏。\n");
-	if(who["chip"] < MIN_CHIP) return notify_ok("你的筹码太少。\n");
+	if(!who) return notify(MSG_NOT_JOIN);
+	if(who["chip"] < MIN_CHIP) return notify(MSG_TOO_LESS, MIN_CHIP);
 
 	//wait for
 
@@ -179,7 +212,7 @@ int do_look(string arg)
 	if(arg == "dipai" || arg == "card") {
 		mapping who = this_info();
 
-		if(!who) return notify_ok("你没有底牌可看。\n");
+		if(!who) return notify(MSG_NO_HAND_CARD);
 		write("你偷偷看了一眼底牌：\n");
 		write(draw_cards(({ who["cards"][0] })));
 		return 1;
@@ -198,19 +231,24 @@ int do_say(string arg)
 //买筹码
 int do_buy(string arg)
 {
-	mapping who = find_info(this_player(), _g["queue"]);
-	int n = to_int(arg);
-		
-	if(n < 1) return notify_ok("你要买多少售筹码？\n");
-	CHK_FAIL_STARTED;
-	if(!who) return notify_ok("你没参与游戏。\n");
+	int n;
+	string id;
+	if(!arg || sscanf(arg, "%d %s", n, id) != 2 || id != "chip" || n < 1)
+		return notify_fail("购买筹码：buy <数量> chip。\n");
 
-	//wait for
-	
-	if(_localizer->exchange_chip(this_player(), n)) {
-		who["chip"] += n;
-		msv("$N向"DEALER_NAME"买了一千筹码。\n", who);
-		refresh_look();
+	{
+		mapping who = find_info(this_player(), _g["queue"]);
+
+		CHK_FAIL_STARTED;
+		if(!who) return notify(MSG_NOT_JOIN);
+
+		//wait for
+
+		if(_localizer->exchange_chip(this_player(), n)) {
+			who["chip"] += n;
+			msv("$N向"DEALER_NAME"买了一千筹码。\n", who);
+			refresh_look();
+		}
 	}
 	return 1;
 }
@@ -221,9 +259,9 @@ int do_sell(string arg)
 	mapping who = find_info(this_player(), _g["queue"]);
 	int n = to_int(arg);
 	
-	if(n < 1) return notify_ok("你要退多少售筹码？\n");
+	if(n < 1) return notify(MSG_HOW_MONEY);
 	CHK_FAIL_STARTED;
-	if(!who) return notify_ok("你没参与游戏。\n");
+	if(!who) return notify(MSG_NOT_JOIN);
 	CHK_OOC(who, n);
 
 	//wait for
@@ -256,7 +294,7 @@ int do_bet(string arg)
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);
 	
-	if(_g["bet"]) return notify_ok("已经有人投注，可跟(genzhu)或加码(jiazhu)。\n");
+	if(_g["bet"]) return notify(MSG_BETTED);
 
 	CHK_CHIP_TOO_LESS(n);
 	CHK_CHIP_TOO_MUCH(n);
@@ -278,7 +316,7 @@ int do_call(string arg)
 
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);	
-	if(!_g["bet"]) return notify_ok("请下注(xiazhu)。\n");
+	if(!_g["bet"]) return notify(MSG_PLS_BET);
 
 	n = _g["bet"] - who["bet"];
 
@@ -302,8 +340,8 @@ int do_raise(string arg)
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);
 
-	if(!_g["bet"]) return notify_ok("请下注(xiazhu)。\n");
-	if(who["bet"] > 0) return notify_ok("你只能选择跟注或弃牌。\n");
+	if(!_g["bet"]) return notify(MSG_PLS_BET);
+	if(who["bet"] > 0) return notify(MSG_CALL_OR_FOLD);
 	CHK_CHIP_TOO_LESS(add);
 	CHK_CHIP_TOO_MUCH(n);	
 	CHK_OOC(who, n);
@@ -322,7 +360,7 @@ int do_show(string arg)
 	if(arg == "hand") {
 		mapping who = this_info();
 		int n = _g["max_bet"];
-		if(_g["round"] < MAX_CARD - 1) return notify_ok("还不到最后时刻。\n");
+		if(_g["round"] < MAX_CARD - 1) return notify(MSG_NOT_LAST);
 
 		CHK_FAIL_NOT_START;
 		CHK_FAIL_NOT_YOU(who);
@@ -357,7 +395,7 @@ int do_fold(string arg)
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);
 
-	if(!_g["pot"]) return notify_ok("你不可弃牌。\n");
+	if(!_g["pot"]) return notify(MSG_NO_FOLD);
 
 	//wait for
 

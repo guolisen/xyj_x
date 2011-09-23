@@ -27,5 +27,7 @@ void init()
 //请求加入游戏
 int do_join(string arg)
 {
+	if(arg != "game")
+		return notify_fail("这里只可加入游戏(game)。\n");
 	return _game->do_join(0);
 }
