@@ -11,11 +11,29 @@ void set_notify(mapping msgs)
 	_notify_msgs = msgs;
 }
 
-///客户端获得通知信息
-varargs int on_notify(mapping info)
+///获得通知信息
+void on_notify(mapping info)
 {
 	string str = sprintf(_msgs[msg_id], arg1);
-	return notify_ok(str);
+	notify_ok(str);
+}
+
+//获得公开信息
+void on_message(mapping info)
+{
+	msv(_msgs[], info);	
+}
+
+//通用本地
+object_f _localizer;			//本地化对象
+object_f _stand;				//看台
+
+void init_c()
+{
+	_game_id	= path_file(__FILE__)[0] - '0';
+	_stand		= __DIR__"stand" + _game_id;
+
+	_localizer	= __DIR__"localizer";
 }
 
 
@@ -32,6 +50,28 @@ object info_ob(mapping info)
 		return find_player(info["id"]);
 	return 0;
 }
+
+//获取玩家数据
+varargs mixed data_of(object who, string prop)
+{
+	string root = _localizer->get("prop_root");
+	mapping m = who->query(root);
+	if(!mapp(m)) who->set(root, m = ([]));
+	return prop ? m[prop] : m;
+}
+
+//向现场和看台发布信息
+varargs int msv(string str, mapping who, mapping target)
+{
+	return msg_rooms(({_this, _stand}), str, who, target);
+}
+
+//某人说话
+varargs int say(mapping who, string str)
+{
+	msv(CYN + "$N说道：" + str + NOR, who);
+}
+
 
 
 //向服务器发送请求
