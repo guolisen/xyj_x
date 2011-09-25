@@ -51,6 +51,14 @@ object info_ob(mapping info)
 	return 0;
 }
 
+//获得玩家信息
+mapping this_info()
+{	
+	return find_info(_player, _g["players"]);
+}
+
+
+
 //获取玩家数据
 varargs mixed data_of(object who, string prop)
 {
@@ -75,15 +83,17 @@ varargs int say(mapping who, string str)
 
 
 //向服务器发送请求
-varargs int send_req(string verb, mixed arg, string req_msg)
+varargs int send_req(string verb, string arg)
 {
-	mapping info;
+	mapping info = ([
+		"mid"		: 0,
+		"id"		: getuid(_player),
+		"verb"		: verb,
+		"arg"		: arg,
+	]);
 
-	if(mapp(arg)) info = arg;
-	else if(userp(arg)) info = (["id" : getuid(arg)]);
-	else info = ([]);
-
-	if(req_msg) write(req_msg);
+	//"from:%s@%s,call
+	write("请求已发送。\n");
 	info["mid"] = MUD_ID;
 	//src//info["game"] = "fcs0";		//消息路由
 
@@ -103,6 +113,23 @@ varargs int recv_req(string verb, mapping info)
 
 	return 1;
 }
+
+
+//跨服说话		//todo:
+int do_say(string arg)
+{
+	if(!arg) arg = "．．．";
+	msv("$N说道：" + arg + "\n");
+	return 1;
+}
+
+
+//房间禁止清理
+int clean_up()
+{
+	return 0;
+}
+
 
 
 #endif

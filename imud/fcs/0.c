@@ -3,14 +3,20 @@
 inherit ROOM;
 
 #include "fcs.h"
-#include "score.c"
+#include "cards.c"
 #include "msg.h"
 #include "util_c.h"
 
 
 /********************************数据定义***********************************/
 
-mapping _dealer;				//发牌者
+mapping _g = ([
+	"queue"			: ({}),			//排队玩家信息
+	"players"		: ({}),			//玩家信息(mid, name, id, chip)
+	"pot"			: 0,				//池底筹码数	
+]);
+
+mapping _dealer;						//发牌者
 
 static mapping _msgs = ([
 
@@ -39,9 +45,6 @@ static mapping _msgs = ([
 ]);
 
 
-int next_one();
-void reward_winner(mapping who);
-int start();
 
 /********************************信息函数***********************************/
 
@@ -79,14 +82,9 @@ void create()
 	setup();
 }
 
-int clean_up()
-{
-	return 0;
-}
-
 void init()
 {
-	if(userp(this_player())) {
+	if(userp(_player)) {
 
 		add_action("do_join", "join");
 		add_action("do_look", "look");
@@ -104,16 +102,6 @@ void init()
 		add_action("do_fold",({"fold", "qipai"}));
 		add_action("do_show",({"show"}));
 	}
-}
-
-
-
-//跨服说话		//todo:
-int do_say(string arg)
-{
-	if(!arg) arg = "．．．";
-	msv("$N说道：" + arg + "\n");
-	return 1;
 }
 
 
@@ -138,13 +126,7 @@ int do_look(string arg)
 //加入游戏
 int do_join(string arg)
 {
-	object who = this_player();
-	mapping info = ([
-		"id"		: getuid(who),
-		"name"		: filter_color(who->query("name")),
-	]);
-
-	return send_req("join", info, "你准备加入游戏。\n");
+	return send_req("join", filter_color(who->query("name"));
 }
 
 //加入完成
@@ -165,7 +147,7 @@ void on_join(mapping info)
 //入场选手离开
 int do_leave(string arg)
 {
-	return send_req("join", this_player(), "你准备离开。\n");
+	return send_req("leave");
 }
 
 //离开确认
@@ -185,7 +167,7 @@ void on_leave(mapping info)
 //入场选手宣布就绪
 int do_ready(string arg)
 {
-	return send_req("ready", this_player(), "你已就绪。\n");
+	return send_req("ready");
 }
 
 //买筹码
@@ -195,9 +177,9 @@ int do_buy(string arg)
 	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
 		return notify_fail("买筹码：buy <数量> chip。\n");
 		
-	if(!_localizer->exchange_chip(this_player(), n)) return 1;	//先交款，失败退还
+	if(!_localizer->exchange_chip(_player, n)) return 1;	//先交款，失败退还
 	
-	return send_req("exchange", this_player(), "你准备买筹码。\n");
+	return send_req("exchange", n);
 }
 
 //卖筹码
@@ -206,7 +188,7 @@ int do_sell(string arg)
 	int n;
 	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
 		return notify_fail("退筹码：sell <数量> chip。\n");
-	return send_req("exchange", this_player(), "你准备退筹码。\n");
+	return send_req("exchange", -n);
 }
 
 //筹码交易
@@ -227,20 +209,32 @@ void on_exchange(mapping info)
 
 /********************************进行阶段***********************************/
 
+/*
+rpc表现出一种连续性，call remote->fun(a)
+1.发出请求
+2.计算请求，如果有返回结果，则会送给on_fun
+
+以上是1对1
+另一中是1对多，一个请求发出去，更新server数据，然后广播给所有客户端
+*/
+
+
 //下注
 int do_bet(string arg)
 {
 	int n = to_int(arg);
 	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	return send_req("bet", this_player(), "你准备下注。\n");
+	return send_req("bet", n);
 }
 
 //跟注
 int do_call(string arg)
 {
-	return send_req("call", this_player(), "你准备跟了。\n");
+	return send_req("call");
 }
+
+void on_bet(mapping info)
 
 //加注
 int do_raise(string arg)
@@ -248,14 +242,14 @@ int do_raise(string arg)
 	int n = to_int(arg);
 	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	return send_req("raise", this_player(), "你准备加码。\n");
+	return send_req("raise");
 }
 
 //显示底牌
 int do_show(string arg)
 {
 	if(arg == "hand") {
-		return send_req("call", this_player(), "你准备全压。\n");
+		return send_req("show_hand");
 	}
 	else if(arg == "down") {
 
@@ -264,9 +258,12 @@ int do_show(string arg)
 	return 0;
 }
 
-//下注
+//下注完成，显示下注信息，刷新玩家表
 void on_bet(mapping info)
 {
+	//池底
+	//"players"		: ({}),			//玩家信息(mid, name, id, chip)
+	object who = info_ob(info);
 	string* arr = ({
 		CYN"%s说道：%d！\n\n",
 		CYN"%s说道：跟了！\n\n",
@@ -283,7 +280,7 @@ void on_bet(mapping info)
 //弃牌
 int do_fold(string arg)
 {
-	return send_req("call", this_player(), "你准备弃牌。\n");
+	return send_req("fold");
 }
 
 void on_fold(mapping info)

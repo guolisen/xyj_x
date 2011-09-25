@@ -39,6 +39,8 @@ ice	通讯中间件，服务器间消息传递。应该有个中心，负责更新程序等等。
 */
 
 
+int sent(string mud, string service, 
+
 
 void send_gtell(string mud, string wiz_to, object source, string msg)
 {

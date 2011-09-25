@@ -141,7 +141,7 @@ int* s2c(string str)
 	return arr2;
 }
 
-mixed* test()
+mixed* score_test()
 {
 	int* sf_a3 = cards_score(s2c("K3,A3,Q3,J3,T3"));
 	int* sf_a0 = cards_score(s2c("A0,Q0,K0,J0,T0"));

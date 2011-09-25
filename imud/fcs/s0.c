@@ -3,6 +3,7 @@
 
 #include "msg.h"
 #include "util_s.h"
+#include "score.c"
 #include <imud-efun.h>
 #include <ansi.h>
 
@@ -33,6 +34,9 @@ int _game_id;					//当前游戏id
 /********************************函数定义***********************************/
 
 
+int next_one();
+void reward_winner(mapping who);
+int start();
 
 
 //初始化
@@ -265,11 +269,6 @@ mapping find_info(mapping info, mixed* arr)
 	return 0;
 }
 
-//获得玩家信息
-mapping this_info()
-{	
-	return find_info(this_player(), _g["players"]);
-}
 
 //显示一组牌
 void show_cards(int* cards);
