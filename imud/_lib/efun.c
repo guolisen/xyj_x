@@ -6,7 +6,8 @@
 #include <imud.h>
 #include <ansi.h>
 
-/********************************函数声明***********************************/
+/********************************本地化函数声明***********************************/
+//玩家名称+ID
 string name_id(mapping who);
 
 /********************************通用宏***********************************/
@@ -15,13 +16,13 @@ string name_id(mapping who);
 
 #define _this			this_object()
 
+#define _player			this_player()
+
 #define assert(_exp)	if(!(_exp)) error("assert: _exp\n")
 
 #define swap2(a, b)		{mixed t = a; a = b; b = t;}
 
 #define MUD_ID			"cn-xyj"
-
-
 
 /********************************数学函数***********************************/
 
@@ -49,6 +50,25 @@ mixed min3(mixed a, mixed b, mixed c)
 	return min2(min2(a, b), c);
 }
 
+//从数组中随机选择一个元素
+mixed random1(mixed* arr)
+{
+	return arr[random(sizeof(arr))];
+}
+
+//洗牌
+int* shuffle(int* arr)
+{
+	int size = sizeof(arr);
+	for(int i = 0; i < size; ++i) {
+		int j = random(size);
+		swap2(arr[i], arr[j]);
+	}
+	return arr;
+}
+
+/********************************数学逻辑函数***********************************/
+
 //如果a非空则a，否则b。
 mixed or2(mixed a, mixed b)
 {
@@ -59,12 +79,6 @@ mixed or2(mixed a, mixed b)
 mixed and2(mixed a, mixed b)
 {
 	return !a ? a : b;
-}
-
-//从数组中随机选择一个元素
-mixed random1(mixed* arr)
-{
-	return arr[random(sizeof(arr))];
 }
 
 /********************************字符串函数***********************************/
@@ -93,13 +107,20 @@ string path_dir(string path)
 	return path[0..i-1];
 }
 
-
-
 //反方向
 string neg_direction(string d)
 {
 	mapping m = (["east" : "west", "south": "north", "west" : "east", "north" : "south"]);
 	return m[d];
+}
+
+/********************************对象函数***********************************/
+
+
+//查找本地玩家
+object find_who(mapping who)
+{
+	return (who && who["mid"] == MUD_ID) ? find_player(who["id"]) : 0;
 }
 
 /********************************消息函数***********************************/
@@ -119,12 +140,6 @@ int notify_ok(string msg)
 {
 	write(msg);
 	return 1;
-}
-
-//查找本地玩家
-object find_who(mapping who)
-{
-	return (who && who["mid"] == MUD_ID) ? find_player(who["id"]) : 0;
 }
 
 //显示消息
@@ -165,19 +180,6 @@ varargs int msg_rooms(mixed* rooms, string str, mapping me, mapping target)
 	return 1;
 }
 
-
-/********************************数学函数定义***********************************/
-
-//洗牌
-int* shuffle(int* arr)
-{
-	int size = sizeof(arr);
-	for(int i = 0; i < size; ++i) {
-		int j = random(size);
-		swap2(arr[i], arr[j]);
-	}
-	return arr;
-}
 
 
 #endif

@@ -3,10 +3,20 @@
 inherit ROOM;
 
 #include "fcs.h"
-#include "score.c"
+#include "cards.c"
 #include "msg.h"
 #include "util_c.h"
 
+
+/********************************数据定义***********************************/
+
+mapping _g = ([
+	"queue"			: ({}),			//排队玩家信息
+	"players"		: ({}),			//玩家信息(mid, name, id, chip)
+	"pot"			: 0,				//池底筹码数	
+]);
+
+mapping _dealer;						//发牌者
 
 static mapping _msgs = ([
 
@@ -29,39 +39,15 @@ static mapping _msgs = ([
 	MSG_NOT_LAST		: "还不到最后时刻。\n",
 	MSG_NO_FOLD			: "你不可弃牌。\n",
 	MSG_NO_HAND_CARD	: "你没有底牌可看。\n",
+		
+	MSG_READY			: "$N点头示意已经准备就绪。\n",
 				
 ]);
 
 
 
-
-
-#define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify(MSG_STARTED)
-#define CHK_FAIL_NOT_START			if(!_g["round"]) return notify(MSG_NOT_START)
-#define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify(MSG_NOT_YOU);
-#define CHK_OOC(who, cn)			if(who["chip"] < (cn)) return notify(MSG_NOT_ENOUGH);
-
-#define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(MSG_AT_LEAST_1);
-#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(MSG_TOO_MUCH, _g["max_bet"]);
-
-
-int next_one();
-void reward_winner(mapping who);
-int start();
-
 /********************************信息函数***********************************/
 
-//向现场和看台发布信息
-varargs int msv(string str, mapping who, mapping target)
-{
-	return msg_rooms(({_this, _stand}), str, who, target);
-}
-
-//某人说话
-varargs int say(mapping who, string str)
-{
-	msv(CYN + "$N说道：" + str + NOR, who);
-}
 
 //发牌者说话
 varargs int dealer_say(string str, mapping who)
@@ -84,6 +70,9 @@ int refresh_look()
 
 void create()
 {
+
+	_dealer		= ([]) + _localizer->get("dealer");
+
 	fcs_init();
 	_localizer->set_safety(_this);
 	refresh_look();
@@ -93,14 +82,9 @@ void create()
 	setup();
 }
 
-int clean_up()
-{
-	return 0;
-}
-
 void init()
 {
-	if(userp(this_player())) {
+	if(userp(_player)) {
 
 		add_action("do_join", "join");
 		add_action("do_look", "look");
@@ -120,18 +104,29 @@ void init()
 	}
 }
 
-/********************************动作函数***********************************/
+
+//查看场景/底牌
+int do_look(string arg)
+{
+	if(!arg) return _localizer->deskside_look(_this);
+
+	if(arg == "dipai" || arg == "card") {
+		mapping who = this_info();
+
+		if(!who) return notify(MSG_NO_HAND_CARD);
+		write("你偷偷看了一眼底牌：\n");
+		write(draw_cards(({ who["cards"][0] })));
+		return 1;
+	}
+	return 0;
+}
+
+/********************************准备阶段***********************************/
 
 //加入游戏
 int do_join(string arg)
 {
-	object who = this_player();
-	mapping info = ([
-		"id"		: getuid(who),
-		"name"		: filter_color(who->query("name")),
-	]);
-
-	return send_req("join", info);
+	return send_req("join", filter_color(who->query("name"));
 }
 
 //加入完成
@@ -152,226 +147,109 @@ void on_join(mapping info)
 //入场选手离开
 int do_leave(string arg)
 {
-	return send_req("join", this_player());
+	return send_req("leave");
 }
 
-//入场选手离开
-int do_leave(string arg)
+//离开确认
+void on_leave(mapping info)
 {
-	object ob = this_player();
-	mapping who = find_info(ob, _g["queue"]);
-
-	CHK_FAIL_STARTED;
-
-	if(!who) notify(MSG_NOT_JOIN);
-
-	//wait for
-
-	if(who["chip"] > 0) {
-		_localizer->exchange_chip(this_player(), -who["chip"]);
-		msv("$N退掉了筹码。\n", who);
+	object who = info_ob(info);
+		
+	if(info["chip"] > 0) {
+		_localizer->exchange_chip(who, -info["chip"]);		
+		msv("$N退掉了筹码。\n", info);
 	}
-	_g["queue"] -= ({ who });
-	msv("$N起身离开了桌子。\n\n", who);
+	msv("$N起身离开了桌子。\n\n", info);
 	refresh_look();
-	ob->move(_stand);
-	ob->save();
-	return 1;
+	if(who) who->move(_stand);
 }
 
 //入场选手宣布就绪
 int do_ready(string arg)
 {
-	mapping who = find_info(this_player(), _g["queue"]);
-	
-	CHK_FAIL_STARTED;
-	if(!who) return notify(MSG_NOT_JOIN);
-	if(who["chip"] < MIN_CHIP) return notify(MSG_TOO_LESS, MIN_CHIP);
-
-	//wait for
-
-	who["ready"] = 1;
-	
-	msv("$N点头示意已经准备就绪。\n", who);
-
-	//判读可否开始
-	if(sizeof( _g["queue"]) < MIN_PLAYER) return 1;
-	foreach(mapping m in _g["queue"]) {
-		if(!m["ready"]) return 1;
-	}
-	
-	start();
-	return 1;
-}
-
-//查看场景/底牌
-int do_look(string arg)
-{
-	if(!arg) return _localizer->deskside_look(_this);
-
-	if(arg == "dipai" || arg == "card") {
-		mapping who = this_info();
-
-		if(!who) return notify(MSG_NO_HAND_CARD);
-		write("你偷偷看了一眼底牌：\n");
-		write(draw_cards(({ who["cards"][0] })));
-		return 1;
-	}
-	return 0;
-}
-
-//跨服说话		//todo:
-int do_say(string arg)
-{
-	if(!arg) arg = "．．．";
-	msv("$N说道：" + arg + "\n");
-	return 1;
+	return send_req("ready");
 }
 
 //买筹码
 int do_buy(string arg)
 {
 	int n;
-	string id;
-	if(!arg || sscanf(arg, "%d %s", n, id) != 2 || id != "chip" || n < 1)
-		return notify_fail("购买筹码：buy <数量> chip。\n");
-
-	{
-		mapping who = find_info(this_player(), _g["queue"]);
-
-		CHK_FAIL_STARTED;
-		if(!who) return notify(MSG_NOT_JOIN);
-
-		//wait for
-
-		if(_localizer->exchange_chip(this_player(), n)) {
-			who["chip"] += n;
-			msv("$N向"DEALER_NAME"买了一千筹码。\n", who);
-			refresh_look();
-		}
-	}
-	return 1;
+	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
+		return notify_fail("买筹码：buy <数量> chip。\n");
+		
+	if(!_localizer->exchange_chip(_player, n)) return 1;	//先交款，失败退还
+	
+	return send_req("exchange", n);
 }
 
 //卖筹码
 int do_sell(string arg)
 {
-	mapping who = find_info(this_player(), _g["queue"]);
-	int n = to_int(arg);
-	
-	if(n < 1) return notify(MSG_HOW_MONEY);
-	CHK_FAIL_STARTED;
-	if(!who) return notify(MSG_NOT_JOIN);
-	CHK_OOC(who, n);
+	int n;
+	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
+		return notify_fail("退筹码：sell <数量> chip。\n");
+	return send_req("exchange", -n);
+}
 
-	//wait for
+//筹码交易
+void on_exchange(mapping info)
+{
+	object who = info_ob(info);
+	int n = 0;
 	
-	if(_localizer->exchange_chip(this_player(), -n)) {
-		who["chip"] -= n;
-		msv("$N向"DEALER_NAME"退了一千筹码。\n", who);
+	if(?) {	//兑换失败，撤销
+		on_notify(info);
+		_localizer->exchange_chip(who, -n);
+	} else {
+		string str = (n > 0) ? "买了" + n : "退了" + (-n);
+		msv("$N向"DEALER_NAME + str + "筹码。\n", info);
 		refresh_look();
 	}
-	return 1;
 }
 
+/********************************进行阶段***********************************/
 
-//下注
-int sb_bet(mapping who, int n)
-{
-	who["chip"] -= n;
-	who["bet"] += n;
-	_g["pot"] += n;
-	if(n > _g["bet"]) _g["bet"] = n;
-	msv("$N拿出" + n + "个筹码扔在桌子中间。\n", who);
-}
+/*
+rpc表现出一种连续性，call remote->fun(a)
+1.发出请求
+2.计算请求，如果有返回结果，则会送给on_fun
+
+以上是1对1
+另一中是1对多，一个请求发出去，更新server数据，然后广播给所有客户端
+*/
+
 
 //下注
 int do_bet(string arg)
 {
-	mapping who = this_info();
 	int n = to_int(arg);
+	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	CHK_FAIL_NOT_START;
-	CHK_FAIL_NOT_YOU(who);
-	
-	if(_g["bet"]) return notify(MSG_BETTED);
-
-	CHK_CHIP_TOO_LESS(n);
-	CHK_CHIP_TOO_MUCH(n);
-	CHK_OOC(who, n);
-
-	//wait for
-
-	sb_bet(who, n);	
-	say(who, n + "!\n");
-
-	return next_one();
+	return send_req("bet", n);
 }
 
 //跟注
 int do_call(string arg)
 {
-	mapping who = this_info();
-	int n;
-
-	CHK_FAIL_NOT_START;
-	CHK_FAIL_NOT_YOU(who);	
-	if(!_g["bet"]) return notify(MSG_PLS_BET);
-
-	n = _g["bet"] - who["bet"];
-
-	CHK_OOC(who, n);
-
-	//wait for
-
-	sb_bet(who, n);
-	say(who, "跟了！\n\n");
-
-	return next_one();
+	return send_req("call");
 }
+
+void on_bet(mapping info)
 
 //加注
 int do_raise(string arg)
 {
-	mapping who = this_info();
-	int add = to_int(arg);
-	int n = _g["bet"] + add;
+	int n = to_int(arg);
+	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	CHK_FAIL_NOT_START;
-	CHK_FAIL_NOT_YOU(who);
-
-	if(!_g["bet"]) return notify(MSG_PLS_BET);
-	if(who["bet"] > 0) return notify(MSG_CALL_OR_FOLD);
-	CHK_CHIP_TOO_LESS(add);
-	CHK_CHIP_TOO_MUCH(n);	
-	CHK_OOC(who, n);
-
-	//wait for
-
-	sb_bet(who, n);
-	say(who, "加" + add + "！\n\n");
-
-	return next_one();
+	return send_req("raise");
 }
 
 //显示底牌
 int do_show(string arg)
 {
 	if(arg == "hand") {
-		mapping who = this_info();
-		int n = _g["max_bet"];
-		if(_g["round"] < MAX_CARD - 1) return notify(MSG_NOT_LAST);
-
-		CHK_FAIL_NOT_START;
-		CHK_FAIL_NOT_YOU(who);
-		CHK_OOC(who, n);
-
-		//wait for
-
-		sb_bet(who, n);
-		say(who, "全押！\n\n");
-
-		return next_one();
+		return send_req("show_hand");
 	}
 	else if(arg == "down") {
 
@@ -380,32 +258,38 @@ int do_show(string arg)
 	return 0;
 }
 
-//弃牌
-int fold(mapping who)
+//下注完成，显示下注信息，刷新玩家表
+void on_bet(mapping info)
 {
-	_g["queue"] += ({ who });
-	_g["players"] -= ({ who });
+	//池底
+	//"players"		: ({}),			//玩家信息(mid, name, id, chip)
+	object who = info_ob(info);
+	string* arr = ({
+		CYN"%s说道：%d！\n\n",
+		CYN"%s说道：跟了！\n\n",
+		CYN"%s说道：加%d！\n\n",
+		CYN"%s说道：全押！\n\n",
+	})
+	int k = 0;
+	int n = 0;
+	
+	msv("$N拿出%d个筹码扔在桌子中间。\n", who, n);
+	msv(arr[k], who, n);
 }
 
 //弃牌
 int do_fold(string arg)
 {
-	mapping who = this_info();
-	
-	CHK_FAIL_NOT_START;
-	CHK_FAIL_NOT_YOU(who);
-
-	if(!_g["pot"]) return notify(MSG_NO_FOLD);
-
-	//wait for
-
-	fold(who);
-
-	msv("$N合上牌，无奈的摇摇头。\n", who);
-	say(who, "放弃...\n\n");
-	
-	return next_one();
+	return send_req("fold");
 }
+
+void on_fold(mapping info)
+{
+	msv("$N合上牌，表示放弃。\n", who);
+	//更新显示
+}
+
+/********************************进行阶段***********************************/
 
 //显示某人的牌
 varargs void show_sb_cards(mapping who, int all)
@@ -419,142 +303,5 @@ varargs void show_sb_cards(mapping who, int all)
 	msv("\n$N的牌：\n", who);
 	msv(draw_cards(arr));
 }
-
-//展示发牌过程
-void dealing()
-{
-	int min_chip = _g["players"][0]["chip"];
-
-	_g["round"]++;
-	
-	dealer_say("开始发牌！\n");
-	for(int i = 0; i < players_number(); ++i) {
-		mapping who = _g["players"][i];
-		show_sb_cards(who);
-		//call_out("show_sb_cards", PULSE * (i + 1), _g["players"][i]);
-		
-		if(who["chip"] < min_chip) min_chip = who["chip"];
-	}
-
-	//限制下注
-	_g["max_bet"] = min_chip / (MAX_CARD  - _g["round"]);
-
-	//计算下注顺序
-	turn_init();
-	_g["bet"] = 0;
-
-	next_one();
-}
-
-//奖励胜利者
-void reward_winner(mapping who)
-{
-	msv("\n");
-	dealer_say("$N获胜！\n", who);
-	
-	who["chip"] += _g["pot"];
-	_g["pot"] = 0;
-
-	msv("$N把桌上的筹码搂到自己面前。\n", who);
-}
-
-//计算赢家
-void finish()
-{
-	mixed* players = _g["queue"] + _g["players"];
-
-	if(players_number() == 1) {
-		reward_winner(_g["players"][0]);
-	} else {
-		int* max_score = ({-1});
-		mapping winner;
-		foreach(mapping who in _g["players"]) {
-			int* score = cards_score(who["cards"]);
-			show_sb_cards(who, 1);
-			dealer_say(_score_name[score[0]] + "!\n");
-			if(cmp_score(score, max_score) > 0) {
-				max_score = score;
-				winner = who;
-			}
-		}
-		reward_winner(winner);
-	}	
-
-	fcs_init();	
-	_g["queue"] = players;
-
-	refresh_look();
-}
-
-//玩家超时
-void wait_timeout()
-{
-	mapping who = turn_who();
-
-	dealer_say("$N超过规定时间，算作弃牌。\n", who);
-	fold(who);
-	next_one();
-}
-
-
-//下一个玩家
-int next_one()
-{
-	mapping who;
-
-	refresh_look();
-
-	for(int i = 0; i < MAX_PLAYER; ++i) {
-		_g["turn"] = (_g["turn"] + 1) % MAX_PLAYER;
-		who = turn_who();
-		if(who) break;
-	}
-	remove_call_out("wait_timeout");	
-	if(players_number() == 1) {
-		finish();
-	} else if(!_g["bet"] || who["bet"] < _g["bet"]) {	//还未下注或需要跟别人的加注
-		
-		dealer_say("$N，请下注。\n", who);
-		call_out("wait_timeout", PLAYER_TIME);		//todo:
-	} 
-	else if(_g["round"] < MAX_CARD - 1) {
-		dealing();
-	} else {
-		finish();
-	}
-	return 1;
-}
-
-//游戏开始
-int start()
-{
-	foreach(mapping m in _g["queue"]) {
-		m["ready"] = 0;
-		m["bet"] = 0;
-	}
-	_g["players"] = _g["queue"];
-	_g["queue"] = ({});
-
-	//洗牌
-	for(int i = 0; i < sizeof(_g["cards"]); ++i) {
-		_g["cards"][i] = i;
-	}
-	shuffle(_g["cards"]);
-
-	//给玩家牌
-	for(int i = 0; i < players_number(); ++i) {
-		for(int j = 0; j < MAX_CARD; ++j)
-			_g["players"][i]["cards"][j] = _g["cards"][i*MAX_CARD + j];
-	}
-	dealing();
-	return 1;
-}
-
-//游戏结束
-int stop()
-{
-
-}
-
 
 

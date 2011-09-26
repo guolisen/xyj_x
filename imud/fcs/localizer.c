@@ -94,6 +94,7 @@ void setup_corridor(object room)
 int exchange_chip(object who, int amount)
 {
 	int n = amount * get("ROE");
+	if(!who) return 0;
 	if(who->query("balance") >= n) {
 		who->add("balance", -n);
 		who->save();

@@ -3,7 +3,14 @@
 // by firefox 04/16/2011
 // server util
 
+mapping _g;						//全局数据
 
+
+//获取游戏数据
+mixed g()
+{
+	return _g;
+}
 
 //服务器接受并分发请求
 varargs int recv_req(string verb, mapping info)

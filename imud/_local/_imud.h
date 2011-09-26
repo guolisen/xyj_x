@@ -1,9 +1,8 @@
 #ifndef IMUD_H_INCLUDED
 #define IMUD_H_INCLUDED
 
-
-#define iMUD_FOR_XYJ			1
-#define IMUD_DIR				"/d/xyj_x/imud/"
+#define iMUD_FOR_XYJ			1						//todo:定义游戏类型
+#define IMUD_DIR				"/d/xyj_x/imud/"		//todo:定义imud绝对路径
 
 #define F_RAND					IMUD_DIR"_lib/rand"
 #define F_RPC					IMUD_DIR"_lib/rpc"

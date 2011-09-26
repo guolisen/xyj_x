@@ -11,11 +11,29 @@ void set_notify(mapping msgs)
 	_notify_msgs = msgs;
 }
 
-///客户端获得通知信息
-varargs int on_notify(mapping info)
+///获得通知信息
+void on_notify(mapping info)
 {
 	string str = sprintf(_msgs[msg_id], arg1);
-	return notify_ok(str);
+	notify_ok(str);
+}
+
+//获得公开信息
+void on_message(mapping info)
+{
+	msv(_msgs[], info);	
+}
+
+//通用本地
+object_f _localizer;			//本地化对象
+object_f _stand;				//看台
+
+void init_c()
+{
+	_game_id	= path_file(__FILE__)[0] - '0';
+	_stand		= __DIR__"stand" + _game_id;
+
+	_localizer	= __DIR__"localizer";
 }
 
 
@@ -33,17 +51,49 @@ object info_ob(mapping info)
 	return 0;
 }
 
+//获得玩家信息
+mapping this_info()
+{	
+	return find_info(_player, _g["players"]);
+}
+
+
+
+//获取玩家数据
+varargs mixed data_of(object who, string prop)
+{
+	string root = _localizer->get("prop_root");
+	mapping m = who->query(root);
+	if(!mapp(m)) who->set(root, m = ([]));
+	return prop ? m[prop] : m;
+}
+
+//向现场和看台发布信息
+varargs int msv(string str, mapping who, mapping target)
+{
+	return msg_rooms(({_this, _stand}), str, who, target);
+}
+
+//某人说话
+varargs int say(mapping who, string str)
+{
+	msv(CYN + "$N说道：" + str + NOR, who);
+}
+
+
 
 //向服务器发送请求
-varargs int send_req(string verb, mixed arg, string req_msg)
+varargs int send_req(string verb, string arg)
 {
-	mapping info;
+	mapping info = ([
+		"mid"		: 0,
+		"id"		: getuid(_player),
+		"verb"		: verb,
+		"arg"		: arg,
+	]);
 
-	if(mapp(arg)) info = arg;
-	else if(userp(arg)) info = (["id" : getuid(arg)]);
-	else info = ([]);
-
-	if(req_msg) write(req_msg);
+	//"from:%s@%s,call
+	write("请求已发送。\n");
 	info["mid"] = MUD_ID;
 	//src//info["game"] = "fcs0";		//消息路由
 
@@ -63,6 +113,23 @@ varargs int recv_req(string verb, mapping info)
 
 	return 1;
 }
+
+
+//跨服说话		//todo:
+int do_say(string arg)
+{
+	if(!arg) arg = "．．．";
+	msv("$N说道：" + arg + "\n");
+	return 1;
+}
+
+
+//房间禁止清理
+int clean_up()
+{
+	return 0;
+}
+
 
 
 #endif
