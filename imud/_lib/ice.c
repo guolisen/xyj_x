@@ -3,6 +3,15 @@
 // by firefox 04/16/2011
 
 
+#include <net/dns.h>
+#include <net/macros.h>
+#include <net/daemons.h>
+
+inherit F_CLEAN_UP;
+inherit F_DBASE;
+
+
+
 /*
 
 ice	通讯中间件，服务器间消息传递。应该有个中心，负责更新程序等等。
@@ -39,36 +48,52 @@ ice	通讯中间件，服务器间消息传递。应该有个中心，负责更新程序等等。
 */
 
 
+mapping _mudlist = ([
+	"xyj-cn"		: ([
+		"name"			: "西游记联合站",
+		"ip"			: ({"221.238.143.29", "60.28.50.88"}),
+		"udpport"		: 2012,
+	]),
+	"xyj-tj"		: ([
+		"name"			: "西游记天津站",
+		"ip"			: ({"221.238.143.30", "60.28.50.54"}),
+		"udpport"		: 6670,
+	])
+]);
 
-void send_gtell(string mud, string wiz_to, object source, string msg)
+
+
+//发送消息
+int send_msg(string mud, string msg)
 {
-	mapping minfo;
+	mapping minfo = DNS_MASTER->query_mud_info(mud);
 
-	if(!ACCESS_CHECK(previous_object())
-	&&	base_name(previous_object()) != TELL_CMD) return;
-
-	mud = htonn( mud );
-
-	if(mud == mud_nname() || !geteuid(source)) return;
-
-	minfo = (mapping)DNS_MASTER->query_mud_info(mud);
-	if (!minfo) return ;
-
+	if(!minfo) return 0;		//服务器未联通
+	
 	msg = replace_string(msg, "|", "");
 	msg = replace_string(msg, "@@@", "");
+
 	DNS_MASTER->send_udp(minfo["HOSTADDRESS"], minfo["PORTUDP"],
-		"@@@" + DNS_GTELL +
+		"@@@" + "ICE" +
 		"||NAME:" + Mud_name() +
 		"||PORTUDP:" + udp_port() +
-		"||WIZTO:" + wiz_to +
-		"||WIZFROM:" + capitalize(geteuid(source)) +
-		"||CNAME:" + source->name(1) +
-		"||MSG:"+msg+"@@@\n");
+		"||MSG:" + msg + "@@@\n"
+	);
+	return 1;
 }
 
-// Someone on another mud has sent us a tell.
+
+//收到信息
 void incoming_request(mapping info)
 {
+	mapping minfo = DNS_MASTER->query_mud_info(info["NAME"]);
+
+
+	fcs/s0.join(火狐:firefox:xyj-cn) 
+	fcs/s0.bet(firefox@xyj-cn,n) 
+	fcs/c0.on_bet(火狐:firefox:xyj-cn:n,pot+火狐:firefox:xyj-cn:20+) 
+		,
+
 	mapping minfo, mudinfo;
 	object pl;
 	string reply;
@@ -77,8 +102,7 @@ void incoming_request(mapping info)
 		// dont want to tell to ourselves
 		if (info["NAME"] == Mud_name())	return;
 
-		// get our info about the sender, ping them if we don't have any
-		minfo = DNS_MASTER->query_mud_info(info["NAME"]);
+		// get our info about the sender, ping them if we don't have any		
 		if (!minfo || !DNS_MASTER->dns_mudp(info["NAME"]))
 			PING_Q->send_ping_q(info["HOSTADDRESS"], info["PORTUDP"]);
 
