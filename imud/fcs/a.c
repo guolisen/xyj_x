@@ -24,3 +24,9 @@ mixed test()
 	return "stand0.c"[-1..];
 
 }
+
+
+int t()
+{
+	return intp(10);
+}

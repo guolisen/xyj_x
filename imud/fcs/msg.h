@@ -28,5 +28,35 @@
 
 
 /********************************消息定义***********************************/
+
+
+#define N					3
+#define ARG1				4
+
+//字符串分解成数组，如果是元素可化为整数则转化成整数
+mixed* spilt_t(string str, string del)
+{
+
+}
+
+
+//字符串解析成数组
+mixed* to_arr(string str)
+{
+	mixed* arr;
+	if(rfind(str, '+') > -1) {
+		string* strs = explode(str, "+");
+		arr = alloc(sizeof(strs));
+		for(int i = 0; i < sizeof(strs); ++i) {
+			if(rfind(strs[i], ',') > -1) {
+				
+			}
+		}
+	} else {
+		arr[i] = explode(strs[i], ',
+	}
+}
+
+
 #endif
 

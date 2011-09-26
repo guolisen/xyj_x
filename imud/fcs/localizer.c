@@ -7,7 +7,7 @@ mapping _db = ([
 	"prop_root"		: "imud/fcs",				//属性根节点
 	"ROE"			: (500*10000/1000),			//汇率，玩家平均日收入换1K筹码
 	
-	"dealer"		: (["id" : "dealer", "name" : "发牌女郎", "title" : "侍者"]),
+	"dealer"		: (["发牌女郎", "dealer", "name" : , "title" : "侍者"]),
 	"desk_name"		: "桌边",
 	"desk_desc"		: "\n这是一张考究的桌子，光洁的桌面上泛着红木特有的幽暗光芒。四下几\n"
 					  "把大气的椅子，衬托出庄重的气氛。桌边有：\n\n",
@@ -42,10 +42,10 @@ int set_safety(object room)
 /********************************本地显示***********************************/
 
 //格式化选手信息，用于显示
-string format_player(mapping who)
+string format_player(mixed* who)
 {
-	string str = sprintf("  %s %s", who["title"], name_id(who));
-	if(who["chip"]) str += "<手边" + who["chip"] + "筹码>";
+	string str = name_id(who);
+	if(who[PSCORE]) str += "<手边" + who[PSCORE] + "筹码>";
 	return str + "\n";
 }
 

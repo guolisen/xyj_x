@@ -58,7 +58,6 @@ mapping this_info()
 }
 
 
-
 //获取玩家数据
 varargs mixed data_of(object who, string prop)
 {
@@ -79,7 +78,6 @@ varargs int say(mapping who, string str)
 {
 	msv(CYN + "$N说道：" + str + NOR, who);
 }
-
 
 
 //向服务器发送请求

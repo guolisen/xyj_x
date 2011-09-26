@@ -12,10 +12,17 @@
 
 #define	MIN_PLAYER				2					//最少玩家数
 #define	MAX_PLAYER				5					//最多玩家数
-#define	PLAYER_TIME				60					//玩家思考时间
+#define	PLAYER_TIME				120					//玩家思考时间
 #define BAN_TIME				600					//中途退场，禁止报名的时间
 #define PULSE					6					//脉搏
 #define MIN_CHIP				100					//玩家最少筹码数
+
+
+#define PREADY					4					//玩家是否就绪
+#define PBET					4					//玩家本轮投注额
+#define PNUM					5					//玩家序号
+#define PCARDS					6					//玩家的牌
+
 
 /********************************本地化常量***********************************/
 
@@ -35,8 +42,13 @@ int _game_id;					//当前游戏id
 
 
 int next_one();
-void reward_winner(mapping who);
+void reward_winner(mixed* who);
 int start();
+
+/********************************函数定义***********************************/
+
+
+
 
 
 //初始化
@@ -44,7 +56,7 @@ void fcs_init()
 {
 	_g = ([
 		"queue"			: ({}),				//排队玩家信息
-		"players"		: ({}),				//玩家信息(mid, name, id, chip, state, no., bet)
+		"players"		: ({}),				//玩家信息(name, id, mud, score, bet/ready, num, cards)
 
 		"round"			: 0,				//第几轮
 		"turn"			: -1,				//当前玩家序号
@@ -68,9 +80,8 @@ int players_number()
 //游戏开始
 int start()
 {
-	foreach(mapping m in _g["queue"]) {
-		m["ready"] = 0;
-		m["bet"] = 0;
+	foreach(mixed* u in _g["queue"]) {
+		u[UREADY] = 0;
 	}
 	_g["players"] = _g["queue"];
 	_g["queue"] = ({});
@@ -84,33 +95,38 @@ int start()
 	//给玩家牌
 	for(int i = 0; i < players_number(); ++i) {
 		for(int j = 0; j < MAX_CARD; ++j)
-			_g["players"][i]["cards"][j] = _g["cards"][i*MAX_CARD + j];
+			_g["players"][i][PCARDS][j] = _g["cards"][i*MAX_CARD + j];
 	}
 	dealing();
 	return 1;
 }
 
-//游戏结束
+//强制结束游戏
 int stop()
 {
-
+	//平分/退还筹码，离场
+	int n = _g["pot"] / sizeof(_g["players"]);
+	foreach(mixed* who in _g["players"]) {
+		who[USCORE] += n;
+		send_req("on_leave", who);
+	}
 }
 
 
 //展示发牌过程
 void dealing()
 {
-	int min_chip = _g["players"][0]["chip"];
+	int min_chip = _g["players"][0][PSCORE];
 
 	_g["round"]++;
 	
-	dealer_say("开始发牌！\n");
+	dealer_say("开始发牌！\n");													//todo
 	for(int i = 0; i < players_number(); ++i) {
-		mapping who = _g["players"][i];
+		mixed* who = _g["players"][i];
 		show_sb_cards(who);
 		//call_out("show_sb_cards", PULSE * (i + 1), _g["players"][i]);
 		
-		if(who["chip"] < min_chip) min_chip = who["chip"];
+		if(who[PSCORE] < min_chip) min_chip = who[PSCORE];
 	}
 
 	//限制下注
@@ -124,15 +140,12 @@ void dealing()
 }
 
 //奖励胜利者
-void reward_winner(mapping who)
+void reward_winner(mixed* who)
 {
-	msv("\n");
-	dealer_say("$N获胜！\n", who);
-	
-	who["chip"] += _g["pot"];
+	who[PSCORE] += _g["pot"];
 	_g["pot"] = 0;
 
-	msv("$N把桌上的筹码搂到自己面前。\n", who);
+	send_req("on_reward_winner");
 }
 
 //计算赢家
@@ -144,11 +157,13 @@ void finish()
 		reward_winner(_g["players"][0]);
 	} else {
 		int* max_score = ({-1});
-		mapping winner;
-		foreach(mapping who in _g["players"]) {
-			int* score = cards_score(who["cards"]);
-			show_sb_cards(who, 1);
+		mixed* winner;
+		foreach(mixed* who in _g["players"]) {
+			int* score = cards_score(who[PCARDS]);
+
+			show_sb_cards(who, 1);							//todo
 			dealer_say(_score_name[score[0]] + "!\n");
+			
 			if(cmp_score(score, max_score) > 0) {
 				max_score = score;
 				winner = who;
@@ -166,7 +181,7 @@ void finish()
 //玩家超时
 void wait_timeout()
 {
-	mapping who = turn_who();
+	mixed* who = turn_who();
 
 	dealer_say("$N超过规定时间，算作弃牌。\n", who);
 	fold(who);
@@ -177,7 +192,7 @@ void wait_timeout()
 //下一个玩家
 int next_one()
 {
-	mapping who;
+	mixed* who;
 
 	refresh_look();
 
@@ -189,7 +204,7 @@ int next_one()
 	remove_call_out("wait_timeout");	
 	if(players_number() == 1) {
 		finish();
-	} else if(!_g["bet"] || who["bet"] < _g["bet"]) {	//还未下注或需要跟别人的加注
+	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
 		
 		dealer_say("$N，请下注。\n", who);
 		call_out("wait_timeout", PLAYER_TIME);		//todo:
@@ -219,8 +234,8 @@ void calc_winner()
 mapping turn_who()
 {
 	int n = _g["turn"];
-	foreach(mapping who in _g["players"]) {
-		if(who["no."] == n) return who;
+	foreach(mixed* who in _g["players"]) {
+		if(who[PNUM] == n) return who;
 	}
 	return 0;
 }
@@ -229,7 +244,7 @@ mapping turn_who()
 int turn_cmp(int a, int b)
 {
 	int n = _g["round"];
-	return _g["players"][b]["cards"][n] - _g["players"][a]["cards"][n];
+	return _g["players"][b][PCARDS][n] - _g["players"][a][PCARDS][n];
 }
 
 //初始化新一轮，计算下注顺序
@@ -239,12 +254,12 @@ void turn_init()
 	int* arr = allocate(n);
 	
 	for(int i = 0; i < n; ++i) {
-		_g["players"][i]["bet"] = 0;
+		_g["players"][i][PBET] = 0;
 		arr[i] = i;
 	}
 	arr = sort_array(arr, (: turn_cmp :));
 	for(int i = 0; i < n; ++i) {
-		_g["players"][arr[i]]["no."] = i;
+		_g["players"][arr[i]][PNUM] = i;
 	}
 	_g["turn"] = -1;
 }
@@ -261,10 +276,10 @@ string gid(object who)
 }
 
 //查找玩家信息
-mapping find_info(mapping info, mixed* arr)
+mixed* find_info(mixed* info, mixed* arr)
 {
-	foreach(mapping m in arr) {
-		if(m["mid"] == info["mid"] && m["id"] == info["id"]) return m;
+	foreach(mixed* u in arr) {
+		if(u[PMUD] == info[PMUD] && u[PID] == info[PID]) return u;
 	}
 	return 0;
 }
@@ -277,44 +292,48 @@ void show_cards(int* cards);
 //显示信息
 varargs int msv1(string msg, mapping me, mapping target, mixed arg);
 
+
+/********************************状态检查***********************************/
+
 /********************************状态检查***********************************/
 
 #define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify(MSG_STARTED)
 #define CHK_FAIL_NOT_START			if(!_g["round"]) return notify(MSG_NOT_START)
 #define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify(MSG_NOT_YOU);
-#define CHK_OOC(who, cn)			if(who["chip"] < (cn)) return notify(MSG_NOT_ENOUGH);
+#define CHK_OOC(who, cn)			if(who[PSCORE] < (cn)) return notify(MSG_NOT_ENOUGH);
 
 #define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(MSG_AT_LEAST_1);
 #define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(MSG_TOO_MUCH, _g["max_bet"]);
 
 /********************************准备阶段***********************************/
-mapping join(mapping info)
-{	
+///玩家加入
+int join(mixed* info)
+{
 	CHK_FAIL_STARTED;
 	
-	if(sizeof(_g["queue"]) < MAX_PLAYER) {
-		
-		mapping who = find_info(info, _g["queue"]);
-		if(who) return notify(MSG_JOINED);
-		
-		who = ([
-			"mid"		: info["mid"],
-			"id"		: info["id"],
-			"name"		: info["name"],
-			"chip"		: 0,
-			"cards"		: allocate(MAX_CARD),
-		]);
+	if(sizeof(_g["queue"]) < MAX_PLAYER) {		
+		mixed* who = find_info(info, _g["queue"]);
+		if(who) return notify(MSG_JOINED);		
+		who = ({
+			info[PNAME],
+			info[PID],
+			info[PMUD],
+			info[PSCORE],
+			0,					//PREADY
+			0,					//PNUM
+			allocate(MAX_CARD)
+		});
 		_g["queue"] += ({ who });
 
-		return 1;
+		return refresh_all(info);
 	}
-	return notify(MSG_FULL);
+	return notify(info, MSG_FULL);
 }
 
 //入场选手离开
-mapping leave(mapping info)
+mapping leave(mixed* info)
 {
-	mapping who = find_info(info, _g["queue"]);
+	mixed* who = find_info(info, _g["queue"]);
 
 	CHK_FAIL_STARTED;
 
@@ -322,7 +341,7 @@ mapping leave(mapping info)
 
 	_g["queue"] -= ({ who });
 	
-	return who["chip"];
+	return who[PSCORE];
 }
 
 //是否可以开始
@@ -337,13 +356,13 @@ private int can_start()
 }
 
 //入场选手宣布就绪
-mapping ready(mapping info)
+mapping ready(mixed* info)
 {
-	mapping who = find_info(info, _g["queue"]);
+	mixed* who = find_info(info, _g["queue"]);
 	
 	CHK_FAIL_STARTED;
 	if(!who) return notify(MSG_NOT_JOIN);
-	if(who["chip"] < MIN_CHIP) return notify(MSG_TOO_LESS, MIN_CHIP);
+	if(who[PSCORE] < MIN_CHIP) return notify(MSG_TOO_LESS, MIN_CHIP);
 
 	who["ready"] = 1;
 	
@@ -352,16 +371,16 @@ mapping ready(mapping info)
 }
 
 //买筹码
-mapping exchange(mapping info)
+mapping exchange(mixed* info)
 {
-	mapping who = find_info(info, _g["queue"]);
+	mixed* who = find_info(info, _g["queue"]);
 	int n;
 	
 	CHK_FAIL_STARTED;
 	if(!who) return notify(MSG_NOT_JOIN);
 	CHK_OOC(who, n);
 
-	who["chip"] += n;
+	who[PSCORE] += n;
 
 	return n;
 }
@@ -370,18 +389,18 @@ mapping exchange(mapping info)
 /********************************进行阶段***********************************/
 
 //下注
-private int sb_bet(mapping who, int n)
+private int sb_bet(mixed* who, int n)
 {
-	who["chip"] -= n;
-	who["bet"] += n;
+	who[PSCORE] -= n;
+	who[PBET] += n;
 	_g["pot"] += n;
 	if(n > _g["bet"]) _g["bet"] = n;
 }
 
 //下注
-mapping bet(mapping info)
+mapping bet(mixed* info)
 {
-	mapping who = find_info(info, _g["players"]);
+	mixed* who = find_info(info, _g["players"]);
 
 	int n = to_int(arg);
 	
@@ -399,15 +418,15 @@ mapping bet(mapping info)
 }
 
 //跟注
-mapping call(mapping info)
+mapping call(mixed* info)
 {
-	mapping who = find_info(info, _g["players"]);
+	mixed* who = find_info(info, _g["players"]);
 	int n;
 
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);	
 	if(!_g["bet"]) return notify(MSG_PLS_BET);
-	n = _g["bet"] - who["bet"];
+	n = _g["bet"] - who[PBET];
 	CHK_OOC(who, n);
 
 	sb_bet(who, n);
@@ -417,9 +436,9 @@ mapping call(mapping info)
 }
 
 //加注
-mapping raise(mapping info)
+mapping raise(mixed* info)
 {
-	mapping who = find_info(info, _g["players"]);
+	mixed* who = find_info(info, _g["players"]);
 	int add = to_int(arg);
 	int n = _g["bet"] + add;
 	
@@ -427,7 +446,7 @@ mapping raise(mapping info)
 	CHK_FAIL_NOT_YOU(who);
 
 	if(!_g["bet"]) return notify(MSG_PLS_BET);
-	if(who["bet"] > 0) return notify(MSG_CALL_OR_FOLD);
+	if(who[PBET] > 0) return notify(MSG_CALL_OR_FOLD);
 	CHK_CHIP_TOO_LESS(add);
 	CHK_CHIP_TOO_MUCH(n);	
 	CHK_OOC(who, n);
@@ -439,9 +458,9 @@ mapping raise(mapping info)
 }
 
 //弃牌
-mapping fold(mapping info)
+mapping fold(mixed* info)
 {
-	mapping who = find_info(info, _g["players"]);
+	mixed* who = find_info(info, _g["players"]);
 		
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);

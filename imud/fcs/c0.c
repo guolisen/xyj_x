@@ -44,10 +44,26 @@ static mapping _msgs = ([
 				
 ]);
 
+void update_scene(string scene)
+{
+	mixed* args = explode(scene, ",");
 
+}
+
+//调用方法
+void invoke(string fun)
+{
+	string who, list;
+	mixed* info;
+
+	if(sscanf(fun, "%s(%s)[%s]", fun, who, scene) != 3) return;
+	update_scene(scene);
+	info = explode(who, ":");
+
+	evaluate(fun, info, info_ob(info));
+}
 
 /********************************信息函数***********************************/
-
 
 //发牌者说话
 varargs int dealer_say(string str, mapping who)
@@ -130,7 +146,7 @@ int do_join(string arg)
 }
 
 //加入完成
-void on_join(mapping info)
+void on_join(mixed* args)
 {
 	object who = info_ob(info);
 
@@ -234,8 +250,6 @@ int do_call(string arg)
 	return send_req("call");
 }
 
-void on_bet(mapping info)
-
 //加注
 int do_raise(string arg)
 {
@@ -304,4 +318,83 @@ varargs void show_sb_cards(mapping who, int all)
 	msv(draw_cards(arr));
 }
 
+
+//展示发牌过程
+void on_dealing()
+{
+	int min_chip = _g["players"][0][PSCORE];
+
+	_g["round"]++;
+	
+	dealer_say("开始发牌！\n");													//todo
+	for(int i = 0; i < players_number(); ++i) {
+		mixed* who = _g["players"][i];
+		show_sb_cards(who);
+		//call_out("show_sb_cards", PULSE * (i + 1), _g["players"][i]);
+		
+		if(who[PSCORE] < min_chip) min_chip = who[PSCORE];
+	}
+
+	//限制下注
+	_g["max_bet"] = min_chip / (MAX_CARD  - _g["round"]);
+
+	//计算下注顺序
+	turn_init();
+	_g["bet"] = 0;
+
+	next_one();
+}
+
+//奖励胜利者
+void on_reward_winner(mapping who)
+{
+	msv("\n");
+	dealer_say("$N获胜！\n", who);
+	
+	who[PSCORE] += _g["pot"];
+	_g["pot"] = 0;
+
+	msv("$N把桌上的筹码搂到自己面前。\n", who);
+}
+
+
+
+//玩家超时
+void on_wait_timeout()
+{
+	mapping who = turn_who();
+
+	dealer_say("$N超过规定时间，算作弃牌。\n", who);
+	fold(who);
+	next_one();
+}
+
+
+//下一个玩家
+int on_next_one()
+{
+	mapping who;
+
+	refresh_look();
+
+	for(int i = 0; i < MAX_PLAYER; ++i) {
+		_g["turn"] = (_g["turn"] + 1) % MAX_PLAYER;
+		who = turn_who();
+		if(who) break;
+	}
+	remove_call_out("wait_timeout");	
+	if(players_number() == 1) {
+		finish();
+	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
+		
+		dealer_say("$N，请下注。\n", who);
+		call_out("wait_timeout", PLAYER_TIME);		//todo:
+	} 
+	else if(_g["round"] < MAX_CARD - 1) {
+		dealing();
+	} else {
+		finish();
+	}
+	return 1;
+}
 

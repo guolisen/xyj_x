@@ -5,6 +5,7 @@
 //Ãû³ÆID±íÊ¾
 string name_id(mapping who)
 {
-	return who["name"] + "(" + capitalize(who["id"]) + ")";
+	if(who[PMUD]) return sprintf("%s(%s@%s)", who[PNAME], capitalize(who[PID]), who[PMUD]);
+	return sprintf("%s(%s)", who[PNAME], capitalize(who[PID]));
 }
 
