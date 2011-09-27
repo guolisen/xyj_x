@@ -1,5 +1,5 @@
 
-#include "imud-efun.h"
+/*#include "imud-efun.h"
 
 
 mixed test()
@@ -19,14 +19,22 @@ mixed test()
 		load_object(__DIR__"stand0"),
 	});
 
-	msg_rooms(rooms, "$N捅了$n一刀。\n", m1, 0);
+//	msg_rooms(rooms, "$N捅了$n一刀。\n", m1, 0);
 
 	return "stand0.c"[-1..];
 
 }
-
-
-int t()
+*/
+/*
+//单一文件名，不含路径
+string file_leaf(object ob)
 {
-	return intp(10);
+	return path_file(base_name(ob));
+}*/
+
+string* t()
+{
+	
+	return explode("", ":");
+
 }

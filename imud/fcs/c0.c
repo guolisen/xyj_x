@@ -8,6 +8,9 @@ inherit ROOM;
 #include "util_c.h"
 
 
+#define ROE						(200*10000/1000)	//汇率，日收入换1K筹码
+#define DEALER_NAME				"发牌女郎"			//
+
 /********************************数据定义***********************************/
 
 mapping _g = ([
@@ -53,14 +56,13 @@ void update_scene(string scene)
 //调用方法
 void invoke(string fun)
 {
-	string who, list;
-	mixed* info;
+	string arg, scene;
+	if(sscanf(fun, "%s(%s)[%s]", fun, arg, scene) == 3) {	//附带场景数据
+		update_scene(scene);
+	}
+	else if(sscanf(fun, "%s(%s)", fun, arg) != 2) return;
 
-	if(sscanf(fun, "%s(%s)[%s]", fun, who, scene) != 3) return;
-	update_scene(scene);
-	info = explode(who, ":");
-
-	evaluate(fun, info, info_ob(info));
+	evaluate(fun, explode(arg, ":"));
 }
 
 /********************************信息函数***********************************/
@@ -86,7 +88,6 @@ int refresh_look()
 
 void create()
 {
-
 	_dealer		= ([]) + _localizer->get("dealer");
 
 	fcs_init();
@@ -306,7 +307,7 @@ void on_fold(mapping info)
 /********************************进行阶段***********************************/
 
 //显示某人的牌
-varargs void show_sb_cards(mapping who, int all)
+private varargs void show_sb_cards(mapping who, int all)
 {
 	int* arr = allocate(_g["round"] + 1);	
 
@@ -320,81 +321,38 @@ varargs void show_sb_cards(mapping who, int all)
 
 
 //展示发牌过程
-void on_dealing()
-{
-	int min_chip = _g["players"][0][PSCORE];
-
-	_g["round"]++;
-	
+void on_dealing(mixed* info)
+{	
 	dealer_say("开始发牌！\n");													//todo
 	for(int i = 0; i < players_number(); ++i) {
-		mixed* who = _g["players"][i];
 		show_sb_cards(who);
-		//call_out("show_sb_cards", PULSE * (i + 1), _g["players"][i]);
-		
-		if(who[PSCORE] < min_chip) min_chip = who[PSCORE];
 	}
-
-	//限制下注
-	_g["max_bet"] = min_chip / (MAX_CARD  - _g["round"]);
-
-	//计算下注顺序
-	turn_init();
-	_g["bet"] = 0;
-
-	next_one();
 }
 
 //奖励胜利者
-void on_reward_winner(mapping who)
+void on_reward_winner(mixed* who)
 {
 	msv("\n");
-	dealer_say("$N获胜！\n", who);
-	
-	who[PSCORE] += _g["pot"];
-	_g["pot"] = 0;
-
+	dealer_say("$N获胜！\n", who);	
 	msv("$N把桌上的筹码搂到自己面前。\n", who);
 }
 
-
-
 //玩家超时
-void on_wait_timeout()
+void on_timeout(mixed* who)
 {
-	mapping who = turn_who();
-
 	dealer_say("$N超过规定时间，算作弃牌。\n", who);
-	fold(who);
-	next_one();
 }
 
 
 //下一个玩家
-int on_next_one()
+int on_next_one(mixed* who)
 {
-	mapping who;
-
-	refresh_look();
-
-	for(int i = 0; i < MAX_PLAYER; ++i) {
-		_g["turn"] = (_g["turn"] + 1) % MAX_PLAYER;
-		who = turn_who();
-		if(who) break;
-	}
-	remove_call_out("wait_timeout");	
-	if(players_number() == 1) {
-		finish();
-	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
-		
-		dealer_say("$N，请下注。\n", who);
-		call_out("wait_timeout", PLAYER_TIME);		//todo:
-	} 
-	else if(_g["round"] < MAX_CARD - 1) {
-		dealing();
-	} else {
-		finish();
-	}
-	return 1;
+	dealer_say("$N，请下注。\n", who);
+	//call_out("wait_timeout", PLAYER_TIME);		//todo:
 }
 
+//查看底牌
+int on_look_card(mixed* who)
+{
+
+}

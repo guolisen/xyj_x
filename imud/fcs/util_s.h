@@ -17,12 +17,12 @@ mixed g()
 }
 
 ///初始化服务器
-void server_init(mapping g, string name)
+void server_create()
 {
-	_g = g;
+	string* arr = explode(base_name(_this));
+
+	_client = arr[>2] + "/c" + arr[>1][1..]
 	_listeners = ([]);
-	_client = name + "/" + 
-	_game_id	= path_file(__FILE__)[0] - '0';
 }
 
 ///向客户端发送通知信息
@@ -40,7 +40,7 @@ int listen(mixed* info)
 }
 
 ///所有监听MUD发送刷新消息
-int refresh_all(mixed* info, string verb)
+int refresh_all(string verb, mixed* info)
 {
 	int	thr = time() - 5*60;
 	string msg = implode(info, ":");
