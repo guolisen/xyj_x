@@ -32,9 +32,9 @@ string file_leaf(object ob)
 	return path_file(base_name(ob));
 }*/
 
-string* t()
+mixed t()
 {
-	
+	//mixed* arr = ({});
 	return explode("", ":");
 
 }

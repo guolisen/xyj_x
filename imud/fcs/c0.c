@@ -329,9 +329,20 @@ void on_dealing(mixed* info)
 	}
 }
 
-//奖励胜利者
-void on_reward_winner(mixed* who)
+//提示下一个玩家下注
+void on_next_one(mixed* info)
+{	
+	dealer_say("$N，请下注。\n", who);
+}
+
+//游戏结束，奖励胜利者
+void on_finish(mixed* who)
 {
+
+					show_sb_cards(who, 1);							//todo
+			dealer_say(_score_name[score[0]] + "!\n");
+
+
 	msv("\n");
 	dealer_say("$N获胜！\n", who);	
 	msv("$N把桌上的筹码搂到自己面前。\n", who);

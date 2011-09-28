@@ -11,30 +11,23 @@
 
 
 #define	MIN_PLAYER				2					//最少玩家数
-#define	MAX_PLAYER				5					//最多玩家数
+#define	MAX_PLAYER				4					//最多玩家数
 #define	PLAYER_TIME				120					//玩家思考时间
 #define BAN_TIME				600					//中途退场，禁止报名的时间
 #define PULSE					6					//脉搏
 #define MIN_CHIP				100					//玩家最少筹码数
 
 
-#define PREADY					4					//玩家是否就绪
-#define PBET					4					//玩家本轮投注额
-#define PNUM					5					//玩家序号
-#define PCARDS					6					//玩家的牌
-
 
 /********************************函数定义***********************************/
 
+//int next_one();
+//int start();
 
-int next_one();
-void reward_winner(mixed* who);
-int start();
-
-/********************************函数定义***********************************/
+/********************************对象创建***********************************/
 
 //游戏复位
-void date_reset()
+void data_reset()
 {
 	_g = ([
 		"queue"			: ({}),				//排队玩家信息
@@ -46,6 +39,7 @@ void date_reset()
 		"bet"			: 0,				//当前赌注
 		"max_bet"		: 0,				//本轮下注上限
 		"cards"			: allocate(7*4),	//牌
+		"show_hand"		: 0,				//是否亮出底牌
 	]);
 }
 
@@ -53,10 +47,19 @@ void date_reset()
 void create()
 {
 	server_create();
-	date_reset();
+	data_reset();
 }
 
 /********************************流程控制***********************************/
+
+//从数组中查找玩家信息
+private mixed* find_info(mixed* info, mixed* arr)
+{
+	foreach(mixed* u in arr) {
+		if(u[PMUD] == info[PMUD] && u[PID] == info[PID]) return u;
+	}
+	return 0;
+}
 
 //玩家数
 private int players_number()
@@ -64,9 +67,39 @@ private int players_number()
 	return sizeof(_g["players"]);
 }
 
-//序列化玩家数据
-private string player_serial(mixed* u, int flag)
+//玩家数据序列化成字符串
+string player_str(mixed* u)
 {
+	int* cards = allocate(_g["round"] + 1);
+
+	for(int i = 0; i < sizeof(cards); ++i) {
+		cards[i] = u[PCARD][i];
+	}
+	if(!_g["show_hand"]) cards[0] = 29;
+	return sprintf("%s:%s:%s:%d:%d:%d:%s",
+		u[PNAME],
+		u[PID],
+		u[PMUD],
+		u[PSCORE],
+		u[PBET],
+		u[PNUM],
+		to_base64(cards)
+	);
+}
+
+//场景数据序列化成字符串
+string scene_str()
+{
+	string s1 = sprintf("%d;%d",_g["pot"], players_number());
+	string s2 = "";
+	string s3 = "";
+	foreach(mixed* u in _g["players"]) {
+		s2 += ";" + player_str(u);
+	}
+	foreach(mixed* u in _g["queue"]) {
+		s3 += ";" + player_str(u);
+	}
+	return s1 + s2 + s3;
 }
 
 //游戏开始
@@ -100,8 +133,9 @@ int stop()
 	int n = _g["pot"] / players_number();
 	foreach(mixed* who in _g["players"]) {
 		who[USCORE] += n;
-		send_req("on_leave", who);
+		refresh_all("on_leave", who);
 	}
+	data_reset();
 }
 
 //发牌过程
@@ -123,14 +157,14 @@ void dealing()
 	//初始化新一轮
 	turn_init();
 
-	refresh_all("on_dealing", );
+	refresh_all("on_dealing");
 	next_one();
 }
 
 //完成游戏，产生赢家
 void finish()
 {
-	mixed* players = _g["queue"] + _g["players"];
+	mixed* all = _g["queue"] + _g["players"];
 	mixed* winner;
 
 	if(players_number() == 1) {
@@ -139,38 +173,31 @@ void finish()
 		int* max_score = ({-1});
 
 		foreach(mixed* who in _g["players"]) {
-			int* score = cards_score(who[PCARDS]);
-
-			show_sb_cards(who, 1);							//todo
-			dealer_say(_score_name[score[0]] + "!\n");
-			
+			int* score = cards_score(who[PCARDS]);			
 			if(cmp_score(score, max_score) > 0) {
 				max_score = score;
 				winner = who;
 			}
 		}
+		_g["show_hand"] = 1;		//亮牌
 	}
-
+	//奖励胜者
 	winner[PSCORE] += _g["pot"];
 	_g["pot"] = 0;
-	date_reset();	
-	_g["queue"] = players;
+	//重置
+	data_reset();	
+	_g["queue"] = all;
 
 	refresh_all("on_finish", who);
-
-	refresh_look();
 }
 
 //玩家超时
 void wait_timeout()
 {
 	mixed* who = turn_who();
-
-	dealer_say("$N超过规定时间，算作弃牌。\n", who);
 	fold(who);
 	next_one();
 }
-
 
 //下一个玩家
 int next_one()
@@ -188,9 +215,9 @@ int next_one()
 	if(players_number() == 1) {
 		finish();
 	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
-		
-		dealer_say("$N，请下注。\n", who);
-		call_out("wait_timeout", PLAYER_TIME);		//todo:
+		//refresh_all("on_next_one", who);
+		call_out("refresh_all", 3, "on_next_one", ({}) + who);	//提醒下家下注
+		call_out("wait_timeout", PLAYER_TIME);
 	} 
 	else if(_g["round"] < MAX_CARD - 1) {
 		dealing();
@@ -202,7 +229,7 @@ int next_one()
 
 /********************************下注顺序***********************************/
 
-//轮到当前
+//当前轮到的玩家
 mapping turn_who()
 {
 	int n = _g["turn"];
@@ -219,7 +246,7 @@ int turn_cmp(int a, int b)
 	return _g["players"][b][PCARDS][n] - _g["players"][a][PCARDS][n];
 }
 
-//初始化新一轮，计算下注顺序
+//初始化新一轮，	计算下注顺序
 void turn_init()
 {
 	int n = players_number();
@@ -236,33 +263,6 @@ void turn_init()
 	_g["turn"] = -1;
 	_g["bet"] = 0;
 }
-/********************************函数定义***********************************/
-
-//获取该玩家带服务器信息的ID
-string gid(object who)
-{
-	return getuid(who) + "@" + MUD_ID;
-}
-
-//从数组中查找玩家信息
-mixed* find_info(mixed* info, mixed* arr)
-{
-	foreach(mixed* u in arr) {
-		if(u[PMUD] == info[PMUD] && u[PID] == info[PID]) return u;
-	}
-	return 0;
-}
-
-
-//显示一组牌
-void show_cards(int* cards);
-
-
-//显示信息
-varargs int msv1(string msg, mapping me, mapping target, mixed arg);
-
-
-/********************************状态检查***********************************/
 
 /********************************状态检查***********************************/
 

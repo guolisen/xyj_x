@@ -70,7 +70,7 @@ string draw_cards(int* cards)
 	for(int y = 0; y < sizeof(_flower[0]); ++y) {
 		foreach(int card in cards) {
 			int v = card / 4;
-			int f = (card < 0) ? 4 : card % 4;
+			int f = (card > 28) ? 4 : card % 4;
 			canvas += sprintf(_flower[f][y], str[v*2..v*2+1]);
 		}
 		canvas += "\n";

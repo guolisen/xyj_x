@@ -1,5 +1,3 @@
-#ifndef IMUD_UTIL_S_H_INCLUDED
-#define IMUD_UTIL_S_H_INCLUDED
 // by firefox 04/16/2011
 // server util
 
@@ -40,10 +38,10 @@ int listen(mixed* info)
 }
 
 ///所有监听MUD发送刷新消息
-int refresh_all(string verb, mixed* info)
+varargs int refresh_all(string verb, mixed* info)
 {
 	int	thr = time() - 5*60;
-	string msg = implode(info, ":");
+	string str = implode(or2(info, ({})), ":");
 
 	string msg = sprintf("%s->%s(%s)[%s]", _client, verb, implode(info, ":"), scene_str());
 
