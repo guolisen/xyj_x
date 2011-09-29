@@ -184,6 +184,8 @@ void on_leave(mapping info)
 //入场选手宣布就绪
 int do_ready(string arg)
 {
+	if(_localizer->exchange_chip(_player, 0) < 0) 
+		notify_fail("你现在是负资产了，请退掉些筹码。\n");
 	return send_req("ready");
 }
 
@@ -191,37 +193,33 @@ int do_ready(string arg)
 int do_buy(string arg)
 {
 	int n;
-	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
+	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1 || n > 1000000)
 		return notify_fail("买筹码：buy <数量> chip。\n");
-		
-	if(!_localizer->exchange_chip(_player, n)) return 1;	//先交款，失败退还
-	
-	return send_req("exchange", n);
+	return send_req("exchange", n + "");
 }
 
 //卖筹码
 int do_sell(string arg)
 {
 	int n;
-	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1)
+	if(!arg || sscanf(arg, "%d chip", n) != 1 || n < 1 || n > 1000000)
 		return notify_fail("退筹码：sell <数量> chip。\n");
-	return send_req("exchange", -n);
+	return send_req("exchange", -n + "");
 }
 
 //筹码交易
-void on_exchange(mapping info)
+void on_exchange(mapping info, string arg)
 {
-	object who = info_ob(info);
-	int n = 0;
+	object who = player_object(info);
+	int n = to_int(arg);
 	
-	if(?) {	//兑换失败，撤销
-		on_notify(info);
-		_localizer->exchange_chip(who, -n);
-	} else {
+	_localizer->exchange_chip(_player, n);
+	
+g	if(ok) {
 		string str = (n > 0) ? "买了" + n : "退了" + (-n);
 		msv("$N向"DEALER_NAME + str + "筹码。\n", info);
 		refresh_look();
-	}
+	} 
 }
 
 /********************************进行阶段***********************************/
@@ -242,7 +240,7 @@ int do_bet(string arg)
 	int n = to_int(arg);
 	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	return send_req("bet", n);
+	return send_req("bet", arg);
 }
 
 //跟注
@@ -257,7 +255,7 @@ int do_raise(string arg)
 	int n = to_int(arg);
 	if(n < 1) return notify_fail("请输入合适的筹码数量。\n");
 	
-	return send_req("raise");
+	return send_req("raise"， arg);
 }
 
 //显示底牌
@@ -338,10 +336,8 @@ void on_next_one(mixed* info)
 //游戏结束，奖励胜利者
 void on_finish(mixed* who)
 {
-
-					show_sb_cards(who, 1);							//todo
-			dealer_say(_score_name[score[0]] + "!\n");
-
+	show_sb_cards(who, 1);							//todo
+	dealer_say(_score_name[score[0]] + "!\n");
 
 	msv("\n");
 	dealer_say("$N获胜！\n", who);	
@@ -359,7 +355,6 @@ void on_timeout(mixed* who)
 int on_next_one(mixed* who)
 {
 	dealer_say("$N，请下注。\n", who);
-	//call_out("wait_timeout", PLAYER_TIME);		//todo:
 }
 
 //查看底牌

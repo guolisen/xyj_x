@@ -90,17 +90,14 @@ void setup_corridor(object room)
 
 /********************************³ïÂë¶Ò»»***********************************/
 
-//»»³ïÂë
+//»»³ïÂë£¬·µ»ØÊ£Óà×Ê²ú
 int exchange_chip(object who, int amount)
 {
 	int n = amount * get("ROE");
 	if(!who) return 0;
-	if(who->query("balance") >= n) {
-		who->add("balance", -n);
-		who->save();
-		return 1;
-	}
-	write("ÒøĞĞ´æ¿î²»×ã¡£\n");
-	return 0;
+
+	n = who->add("balance", -n);
+	who->save();
+	return n;
 }
 
