@@ -1,6 +1,7 @@
 // by firefox 04/16/2011
 // iMUD local simul_efun
 
+#include <imud-efun.h>
 
 //Ãû³ÆID±íÊ¾
 string name_id(mapping who)

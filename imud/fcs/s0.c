@@ -1,28 +1,29 @@
 // by firefox 04/16/2011
 // 
 
-#include "msg.h"
-#include "util_s.h"
-#include "score.c"
 #include <imud-efun.h>
-#include <ansi.h>
+
+inherit F_iSERVER;
+inherit __DIR__"score";
+
+#include "fcs.h"
 
 /********************************常量定义***********************************/
 
-
-#define	MIN_PLAYER				2					//最少玩家数
-#define	MAX_PLAYER				4					//最多玩家数
-#define	PLAYER_TIME				120					//玩家思考时间
-#define BAN_TIME				600					//中途退场，禁止报名的时间
-#define PULSE					6					//脉搏
-#define MIN_CHIP				100					//玩家最少筹码数
-
-
+#define MAX_CARD				5		//最多牌数
+#define	MIN_PLAYER				2		//最少玩家数
+#define	MAX_PLAYER				4		//最多玩家数
+#define	PLAYER_TIME				120		//玩家思考时间
+#define MIN_CHIP				100		//玩家最少筹码数
 
 /********************************函数定义***********************************/
 
-//int next_one();
+int next_one();
 //int start();
+void dealing();
+void turn_init();
+mixed* turn_who();
+int fold(mixed* info);
 
 /********************************对象创建***********************************/
 
@@ -73,16 +74,14 @@ string player_str(mixed* u)
 	int* cards = allocate(_g["round"] + 1);
 
 	for(int i = 0; i < sizeof(cards); ++i) {
-		cards[i] = u[PCARD][i];
+		cards[i] = u[PCARDS][i];
 	}
 	if(!_g["show_hand"]) cards[0] = 29;
-	return sprintf("%s:%s:%s:%d:%d:%d:%s",
+	return sprintf("%s:%s:%s:%d:%s",
 		u[PNAME],
 		u[PID],
 		u[PMUD],
 		u[PSCORE],
-		u[PBET],
-		u[PNUM],
 		to_base64(cards)
 	);
 }
@@ -106,7 +105,7 @@ string scene_str()
 int start()
 {
 	foreach(mixed* u in _g["queue"]) {
-		u[UREADY] = 0;
+		u[PREADY] = 0;
 	}
 	_g["players"] = _g["queue"];
 	_g["queue"] = ({});
@@ -132,7 +131,7 @@ int stop()
 	//平分/退还筹码，离场
 	int n = _g["pot"] / players_number();
 	foreach(mixed* who in _g["players"]) {
-		who[USCORE] += n;
+		who[PSCORE] += n;
 		refresh_all("on_leave", who);
 	}
 	data_reset();
@@ -142,15 +141,11 @@ int stop()
 void dealing()
 {
 	int min_chip = _g["players"][0][PSCORE];
-	mixed* arr = allocate(players_number());
 
-	_g["round"]++;
-		
+	_g["round"]++;		
 	for(int i = 0; i < players_number(); ++i) {
 		mixed* u = _g["players"][i];
 		if(u[PSCORE] < min_chip) min_chip = u[PSCORE];		//每轮赌注上限
-
-		arr[i] = f(u)		
 	}
 	_g["max_bet"] = min_chip / (MAX_CARD  - _g["round"]);
 
@@ -188,7 +183,7 @@ void finish()
 	data_reset();	
 	_g["queue"] = all;
 
-	refresh_all("on_finish", who);
+	refresh_all("on_finish", winner);
 }
 
 //玩家超时
@@ -204,8 +199,6 @@ int next_one()
 {
 	mixed* who;
 
-	refresh_look();
-
 	for(int i = 0; i < MAX_PLAYER; ++i) {
 		_g["turn"] = (_g["turn"] + 1) % MAX_PLAYER;
 		who = turn_who();
@@ -216,7 +209,7 @@ int next_one()
 		finish();
 	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
 		//refresh_all("on_next_one", who);
-		call_out("refresh_all", 3, "on_next_one", ({}) + who);	//提醒下家下注
+		call_out("refresh_all", VERB_INERVAL, "on_next_one");	//提醒下家下注
 		call_out("wait_timeout", PLAYER_TIME);
 	} 
 	else if(_g["round"] < MAX_CARD - 1) {
@@ -230,7 +223,7 @@ int next_one()
 /********************************下注顺序***********************************/
 
 //当前轮到的玩家
-mapping turn_who()
+mixed* turn_who()
 {
 	int n = _g["turn"];
 	foreach(mixed* who in _g["players"]) {
@@ -266,13 +259,13 @@ void turn_init()
 
 /********************************状态检查***********************************/
 
-#define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify(MSG_STARTED)
-#define CHK_FAIL_NOT_START			if(!_g["round"]) return notify(MSG_NOT_START)
-#define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify(MSG_NOT_YOU);
-#define CHK_OOC(who, cn)			if(who[PSCORE] < (cn)) return notify(MSG_NOT_ENOUGH);
+#define CHK_FAIL_STARTED			if(_g["round"] > 0) return notify(info, MSG_STARTED)
+#define CHK_FAIL_NOT_START			if(!_g["round"]) return notify(info, MSG_NOT_START)
+#define CHK_FAIL_NOT_YOU(who)		if(turn_who() != (who)) return notify(info, MSG_NOT_YOU);
+#define CHK_OOC(who, cn)			if(who[PSCORE] < (cn)) return notify(info, MSG_NOT_ENOUGH);
 
-#define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(MSG_AT_LEAST_1);
-#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(MSG_TOO_MUCH, _g["max_bet"]);
+#define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(info, MSG_AT_LEAST_1);
+#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(info, MSG_TOO_MUCH, "" + _g["max_bet"]);
 
 /********************************准备阶段***********************************/
 ///玩家加入
@@ -282,7 +275,7 @@ int join(mixed* info)
 	
 	if(sizeof(_g["queue"]) < MAX_PLAYER) {		
 		mixed* who = find_info(info, _g["queue"]);
-		if(who) return notify(MSG_JOINED);		
+		if(who) return notify(info, MSG_JOINED);		
 		who = ({
 			info[PNAME],
 			info[PID],
@@ -294,23 +287,23 @@ int join(mixed* info)
 		});
 		_g["queue"] += ({ who });
 
-		return refresh_all(info);
+		return refresh_all("on_join", info);
 	}
 	return notify(info, MSG_FULL);
 }
 
 //入场选手离开
-mapping leave(mixed* info)
+int leave(mixed* info)
 {
 	mixed* who = find_info(info, _g["queue"]);
 
 	CHK_FAIL_STARTED;
 
-	if(!who) notify(MSG_NOT_JOIN);
+	if(!who) notify(info, MSG_NOT_JOIN);
 
 	_g["queue"] -= ({ who });
 	
-	return who[PSCORE];
+	return refresh_all("on_leave", info);
 }
 
 //是否可以开始
@@ -319,39 +312,40 @@ private int can_start()
 	//判读可否开始
 	if(sizeof( _g["queue"]) < MIN_PLAYER) return 0;
 	foreach(mapping m in _g["queue"]) {
-		if(!m["ready"]) return 0;
+		if(!m[PREADY]) return 0;
 	}
 	return 1;
 }
 
 //入场选手宣布就绪
-mapping ready(mixed* info)
+int ready(mixed* info)
 {
 	mixed* who = find_info(info, _g["queue"]);
 	
 	CHK_FAIL_STARTED;
-	if(!who) return notify(MSG_NOT_JOIN);
-	if(who[PSCORE] < MIN_CHIP) return notify(MSG_TOO_LESS, MIN_CHIP);
+	if(!who) return notify(info, MSG_NOT_JOIN);
+	if(who[PSCORE] < MIN_CHIP) return notify(info, MSG_TOO_LESS, "" + MIN_CHIP);
 
-	who["ready"] = 1;
+	who[PREADY] = 1;
 	
+	refresh_all("on_ready", info);
 	if(can_start())	start();
-	return msgv(MSG_READY);
+	return 1;
 }
 
 //买筹码
-mapping exchange(mixed* info)
+int exchange(mixed* info, string arg)
 {
 	mixed* who = find_info(info, _g["queue"]);
-	int n;
+	int n = to_int(arg);
 	
 	CHK_FAIL_STARTED;
-	if(!who) return notify(MSG_NOT_JOIN);
-	CHK_OOC(who, n);
+	if(!who) return notify(info, MSG_NOT_JOIN);
+	CHK_OOC(who, -n);
 
 	who[PSCORE] += n;
 
-	return n;
+	return refresh_all("on_exchange", info, "" + n);
 }
 
 
@@ -367,45 +361,46 @@ private int sb_bet(mixed* who, int n)
 }
 
 //下注
-mapping bet(mixed* info)
+int bet(mixed* info, string arg)
 {
 	mixed* who = find_info(info, _g["players"]);
-
 	int n = to_int(arg);
-	
+		
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);	
-	if(_g["bet"]) return notify(MSG_BETTED);
+	if(_g["bet"]) return notify(info, MSG_BETTED);
 	CHK_CHIP_TOO_LESS(n);
 	CHK_CHIP_TOO_MUCH(n);
 	CHK_OOC(who, n);
 
 	sb_bet(who, n);	
-	say(who, n + "!\n");
+
+	refresh_all("on_bet", info, "" + n);
 
 	return next_one();
 }
 
 //跟注
-mapping call(mixed* info)
+int call(mixed* info)
 {
 	mixed* who = find_info(info, _g["players"]);
 	int n;
 
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);	
-	if(!_g["bet"]) return notify(MSG_PLS_BET);
+	if(!_g["bet"]) return notify(info, MSG_PLS_BET);
 	n = _g["bet"] - who[PBET];
 	CHK_OOC(who, n);
 
 	sb_bet(who, n);
-	say(who, "跟了！\n\n");
+
+	refresh_all("on_call", info, "" + n);
 
 	return next_one();
 }
 
 //加注
-mapping raise(mixed* info)
+int raise(mixed* info, string arg)
 {
 	mixed* who = find_info(info, _g["players"]);
 	int add = to_int(arg);
@@ -414,30 +409,33 @@ mapping raise(mixed* info)
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);
 
-	if(!_g["bet"]) return notify(MSG_PLS_BET);
-	if(who[PBET] > 0) return notify(MSG_CALL_OR_FOLD);
+	if(!_g["bet"]) return notify(info, MSG_PLS_BET);
+	if(who[PBET] > 0) return notify(info, MSG_CALL_OR_FOLD);
 	CHK_CHIP_TOO_LESS(add);
 	CHK_CHIP_TOO_MUCH(n);	
 	CHK_OOC(who, n);
 
 	sb_bet(who, n);
-	say(who, "加" + add + "！\n\n");
+
+	refresh_all("on_raise", info, "" + n);
 
 	return next_one();
 }
 
 //弃牌
-mapping fold(mixed* info)
+int fold(mixed* info)
 {
 	mixed* who = find_info(info, _g["players"]);
 		
 	CHK_FAIL_NOT_START;
 	CHK_FAIL_NOT_YOU(who);
 
-	if(!_g["pot"]) return notify(MSG_NO_FOLD);
+	if(!_g["pot"]) return notify(info, MSG_NO_FOLD);
 
 	_g["queue"] += ({ who });
 	_g["players"] -= ({ who });
+
+	refresh_all("on_raise", info);
 	
 	return next_one();
 }

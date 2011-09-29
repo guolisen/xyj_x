@@ -32,9 +32,20 @@ string file_leaf(object ob)
 	return path_file(base_name(ob));
 }*/
 
-mixed t()
+int fun(int b, int a)
 {
-	//mixed* arr = ({});
-	return explode("", ":");
+	return b + a;
+}
+
+#include <net/daemons.h>
+
+mixed f()
+{
+	string* arr = ({"a", "b"});
+	
+	tell_object(find_player("firefox"), );
+
+	return call_other(this_object(), "fun", "1");
+
 
 }

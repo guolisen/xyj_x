@@ -1,2 +1,2 @@
 
-#include "/d/xyj_x/imud/_local/_imud-efun.h"
+#include "/d/xyj_x/imud/_lib/_efun.h"

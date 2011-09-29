@@ -1,6 +1,8 @@
 // by firefox 04/16/2011
 // FCS牌面记分规则
 
+#include <imud-efun.h>
+
 /*
 规则：
     (1)同花顺：拥有五张连续性同花色的顺子。以A为首的同花顺最大。
@@ -40,6 +42,11 @@ static string* _score_name = ({
 	"单张", "对子", "双对", "三条", "顺子", "同花", "满堂彩", "铁支", "同花顺"
 });
 
+//获取牌名称
+string score_name(int n)
+{
+	return _score_name[n];
+}
 
 //顺子
 int is_straight(int* values)

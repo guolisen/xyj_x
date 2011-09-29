@@ -78,10 +78,10 @@ string draw_cards(int* cards)
 	return canvas;
 }
 
-void test1()
+void cards_test()
 {
-	write(draw_cards(({-1, 27, 22, 17, 12})));
-	write(draw_cards(({-1, 11, 6, 2, 1})));
+	write(draw_cards(({29, 27, 22, 17, 12})));
+	write(draw_cards(({29, 11, 6, 2, 1})));
 
 }
 

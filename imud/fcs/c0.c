@@ -32,8 +32,8 @@ static mapping _msgs = ([
 
 	MSG_NOT_ENOUGH		: "你没有足够的筹码。\n",
 	MSG_AT_LEAST_1		: "至少要一个筹码。\n",
-	MSG_TOO_LESS		: "至少要有%d筹码。\n",
-	MSG_TOO_MUCH		: "至多可下注%d个筹码。\n",
+	MSG_TOO_LESS		: "至少要有%s个筹码。\n",
+	MSG_TOO_MUCH		: "至多可下注%s个筹码。\n",
 	MSG_HOW_MONEY		: "多少个售筹码？\n",	
 	
 	MSG_BETTED			: "已有人投注，可跟(genzhu)，加码(jiazhu|raise)或弃牌(qipai|fold)。\n",

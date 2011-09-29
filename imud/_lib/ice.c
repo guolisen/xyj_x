@@ -22,7 +22,17 @@ mapping _mudlist = ([
 	])
 ]);
 
+///查询本MUD ID
+string mud_id()
+{
+	return DNS_MASTER->query_mud_name();
+}
 
+///查询本服务器ID
+string server_id()
+{
+	return "";			//todo
+}
 /*
  + 
 

@@ -1,28 +1,10 @@
-#ifndef IMUD_LIB_EFUN_H_INCLUDED
-#define IMUD_LIB_EFUN_H_INCLUDED
+// firefox 04/16/2011
+// iMUD-simul_efun实现
 
-// iMUD simul_efun
-
-#include <imud.h>
+#include <imud-efun.h>
 #include <ansi.h>
 
-/********************************本地化函数声明***********************************/
-//玩家名称+ID
-string name_id(mapping who);
-
-/********************************通用宏***********************************/
-
-#define object_f		string							//文件对象，区别于普通字符串
-
-#define _this			this_object()
-
-#define _player			this_player()
-
-#define assert(_exp)	if(!(_exp)) error("assert: _exp\n")
-
-#define swap2(a, b)		{mixed t = a; a = b; b = t;}
-
-#define MUD_ID			"cn-xyj"
+inherit F_iEFUN_LOCAL;		//继承本地化函数的实现
 
 /********************************数学函数***********************************/
 
@@ -67,7 +49,7 @@ int* shuffle(int* arr)
 	return arr;
 }
 
-/********************************数学逻辑函数***********************************/
+/********************************逻辑函数***********************************/
 
 ///如果a非空则a，否则b。
 mixed or2(mixed a, mixed b)
@@ -113,19 +95,6 @@ string path_dir(string path)
 	return path[0..i-1];
 }
 
-///目标的文件名，不含路径，
-string file_leaf(object ob)
-{
-	return path_file(base_name(or2(ob, _this)));
-}
-
-///目标所在目录，不含文件名
-string file_dir(object ob)
-{
-	return path_dir(base_name(or2(ob, _this)));
-}
-
-
 ///反方向
 string neg_direction(string d)
 {
@@ -161,11 +130,43 @@ int* from_base64(string str)
 
 /********************************对象函数***********************************/
 
-
 ///查找本地玩家
-object find_who(mapping who)
+object player_object(mixed* who)
 {
-	return (who && who["mid"] == MUD_ID) ? find_player(who["id"]) : 0;
+	return (who && who[PMUD] == MUD_ID) ? find_player(who[PID]) : 0;
+}
+
+///从玩家信息产生全局ID
+string player_gid(mixed* who)
+{
+	if(!who) who = NOBODY;
+	return sprintf("%s:%s:%s", who[PNAME], who[PID], who[PMUD]);
+}
+
+///从全局ID产生玩家信息
+mixed* gid_player(string gid)
+{
+	mixed* who = NOBODY;
+	string name, id, mud;
+	if(gid && sscanf(gid, "%s:%s:%s", name, id, mud) == 3) {
+		who[PNAME] = name;
+		who[PID] = id;
+		who[PMUD] = mud;
+	}
+	return who;
+}
+
+
+///目标的文件名，不含路径，缺省为当前对象
+varargs string file_leaf(object ob)
+{
+	return path_file(base_name(or2(ob, _this)));
+}
+
+///目标所在目录，不含文件名，缺省为当前对象
+string file_dir(object ob)
+{
+	return path_dir(base_name(or2(ob, _this)));
 }
 
 /********************************消息函数***********************************/
@@ -187,20 +188,11 @@ int notify_ok(string msg)
 	return 1;
 }
 
-///显示消息
-varargs int msv11(string str, mapping who, object stand)
-{
-	if(who)	str = replace_string(str, "$N", name_id(who));
-	//todo
-	write(str);
-}
-
-
 ///显示信息，包括看台
-varargs int msg_rooms(mixed* rooms, string str, mapping me, mapping target)
+varargs int msg_rooms(mixed* rooms, string str, mixed* me, mixed* target)
 {
-	object ob1 = find_who(me);
-	object ob2 = find_who(target);
+	object ob1 = player_object(me);
+	object ob2 = player_object(target);
 	object* exclude = ({ ob1, ob2 });
 	string msg = str;
 
@@ -224,6 +216,4 @@ varargs int msg_rooms(mixed* rooms, string str, mapping me, mapping target)
 	}
 	return 1;
 }
-
-#endif
 
