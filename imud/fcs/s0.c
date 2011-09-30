@@ -1,5 +1,5 @@
 // by firefox 04/16/2011
-// 
+// fcs server
 
 #include <imud-efun.h>
 
@@ -19,11 +19,11 @@ inherit __DIR__"score";
 /********************************函数定义***********************************/
 
 int next_one();
-//int start();
 void dealing();
 void turn_init();
 mixed* turn_who();
 int fold(mixed* info);
+int notify_update_scene();
 
 /********************************对象创建***********************************/
 
@@ -68,38 +68,6 @@ private int players_number()
 	return sizeof(_g["players"]);
 }
 
-//玩家数据序列化成字符串
-string player_str(mixed* u)
-{
-	int* cards = allocate(_g["round"] + 1);
-
-	for(int i = 0; i < sizeof(cards); ++i) {
-		cards[i] = u[PCARDS][i];
-	}
-	if(!_g["show_hand"]) cards[0] = 29;
-	return sprintf("%s:%s:%s:%d:%s",
-		u[PNAME],
-		u[PID],
-		u[PMUD],
-		u[PSCORE],
-		to_base64(cards)
-	);
-}
-
-//场景数据序列化成字符串
-string scene_str()
-{
-	string s1 = sprintf("%d;%d",_g["pot"], players_number());
-	string s2 = "";
-	string s3 = "";
-	foreach(mixed* u in _g["players"]) {
-		s2 += ";" + player_str(u);
-	}
-	foreach(mixed* u in _g["queue"]) {
-		s3 += ";" + player_str(u);
-	}
-	return s1 + s2 + s3;
-}
 
 //游戏开始
 int start()
@@ -132,7 +100,7 @@ int stop()
 	int n = _g["pot"] / players_number();
 	foreach(mixed* who in _g["players"]) {
 		who[PSCORE] += n;
-		refresh_all("on_leave", who);
+		notify_all("on_leave", who);
 	}
 	data_reset();
 }
@@ -152,7 +120,7 @@ void dealing()
 	//初始化新一轮
 	turn_init();
 
-	refresh_all("on_dealing");
+	notify_all("on_dealing");
 	next_one();
 }
 
@@ -160,20 +128,24 @@ void dealing()
 void finish()
 {
 	mixed* all = _g["queue"] + _g["players"];
-	mixed* winner;
+	mixed* winner, arg;
 
 	if(players_number() == 1) {
 		winner = _g["players"][0];
 	} else {
 		int* max_score = ({-1});
+		string* arr = allocate(players_number());
 
-		foreach(mixed* who in _g["players"]) {
-			int* score = cards_score(who[PCARDS]);			
+		for(int i = 0; i < players_number(); ++i) {
+			mixed* who = _g["players"][i];
+			int* score = cards_score(who[PCARDS]);
+			arr[i] = score_name(score[0]);
 			if(cmp_score(score, max_score) > 0) {
 				max_score = score;
 				winner = who;
 			}
 		}
+		arg = implode(arr, ":");	//获取所有牌的名称
 		_g["show_hand"] = 1;		//亮牌
 	}
 	//奖励胜者
@@ -183,7 +155,7 @@ void finish()
 	data_reset();	
 	_g["queue"] = all;
 
-	refresh_all("on_finish", winner);
+	notify_all("on_finish", winner, arg);
 }
 
 //玩家超时
@@ -191,14 +163,14 @@ void wait_timeout()
 {
 	mixed* who = turn_who();
 	fold(who);
-	next_one();
+	//next_one();						//????????????????
 }
 
 //下一个玩家
 int next_one()
 {
-	mixed* who;
-
+	mixed* who;	
+	
 	for(int i = 0; i < MAX_PLAYER; ++i) {
 		_g["turn"] = (_g["turn"] + 1) % MAX_PLAYER;
 		who = turn_who();
@@ -208,8 +180,7 @@ int next_one()
 	if(players_number() == 1) {
 		finish();
 	} else if(!_g["bet"] || who[PBET] < _g["bet"]) {	//还未下注或需要跟别人的加注
-		//refresh_all("on_next_one", who);
-		call_out("refresh_all", VERB_INERVAL, "on_next_one");	//提醒下家下注
+		notify_all("on_next_one", who);
 		call_out("wait_timeout", PLAYER_TIME);
 	} 
 	else if(_g["round"] < MAX_CARD - 1) {
@@ -217,6 +188,8 @@ int next_one()
 	} else {
 		finish();
 	}
+	notify_update_scene();
+	ICE_D->flush();
 	return 1;
 }
 
@@ -265,7 +238,7 @@ void turn_init()
 #define CHK_OOC(who, cn)			if(who[PSCORE] < (cn)) return notify(info, MSG_NOT_ENOUGH);
 
 #define CHK_CHIP_TOO_LESS(n)		if((n) < 1) return notify(info, MSG_AT_LEAST_1);
-#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(info, MSG_TOO_MUCH, "" + _g["max_bet"]);
+#define CHK_CHIP_TOO_MUCH(n)		if((n) > _g["max_bet"]) return notify(info, MSG_TOO_MUCH, _g["max_bet"]);
 
 /********************************准备阶段***********************************/
 ///玩家加入
@@ -280,14 +253,15 @@ int join(mixed* info)
 			info[PNAME],
 			info[PID],
 			info[PMUD],
-			info[PSCORE],
+			0,					//PSCORE
 			0,					//PREADY
 			0,					//PNUM
 			allocate(MAX_CARD)
 		});
 		_g["queue"] += ({ who });
-
-		return refresh_all("on_join", info);
+		
+		notify_update_scene();
+		return notify_all("on_join", info);
 	}
 	return notify(info, MSG_FULL);
 }
@@ -303,7 +277,8 @@ int leave(mixed* info)
 
 	_g["queue"] -= ({ who });
 	
-	return refresh_all("on_leave", info);
+	notify_update_scene();
+	return notify_all("on_leave", info, who[PSCORE]);
 }
 
 //是否可以开始
@@ -324,12 +299,13 @@ int ready(mixed* info)
 	
 	CHK_FAIL_STARTED;
 	if(!who) return notify(info, MSG_NOT_JOIN);
-	if(who[PSCORE] < MIN_CHIP) return notify(info, MSG_TOO_LESS, "" + MIN_CHIP);
+	if(who[PSCORE] < MIN_CHIP) return notify(info, MSG_TOO_LESS, MIN_CHIP);
 
 	who[PREADY] = 1;
 	
-	refresh_all("on_ready", info);
+	notify_all("on_ready", info);
 	if(can_start())	start();
+	else notify_update_scene();
 	return 1;
 }
 
@@ -345,9 +321,9 @@ int exchange(mixed* info, string arg)
 
 	who[PSCORE] += n;
 
-	return refresh_all("on_exchange", info, "" + n);
+	notify_update_scene();
+	return notify_all("on_exchange", info, n);
 }
-
 
 /********************************进行阶段***********************************/
 
@@ -375,7 +351,7 @@ int bet(mixed* info, string arg)
 
 	sb_bet(who, n);	
 
-	refresh_all("on_bet", info, "" + n);
+	notify_all("on_bet", info, n);
 
 	return next_one();
 }
@@ -394,7 +370,7 @@ int call(mixed* info)
 
 	sb_bet(who, n);
 
-	refresh_all("on_call", info, "" + n);
+	notify_all("on_call", info, n);
 
 	return next_one();
 }
@@ -417,7 +393,7 @@ int raise(mixed* info, string arg)
 
 	sb_bet(who, n);
 
-	refresh_all("on_raise", info, "" + n);
+	notify_all("on_raise", info, n);
 
 	return next_one();
 }
@@ -435,8 +411,60 @@ int fold(mixed* info)
 	_g["queue"] += ({ who });
 	_g["players"] -= ({ who });
 
-	refresh_all("on_raise", info);
+	notify_all("on_raise", info);
 	
 	return next_one();
 }
 
+//查看自己的底牌
+int hand_card(mixed* info)
+{
+	mixed* who = find_info(info, _g["players"]);
+
+	CHK_FAIL_NOT_START;
+
+	if(!who) return notify(info, MSG_NO_HAND_CARD);
+	
+	return reply(_client, "on_hand_card", info, who[PCARDS][0]);
+}
+
+/********************************场景更新***********************************/
+
+//玩家数据序列化成字符串
+string code_player(mixed* u)
+{
+	int* cards = allocate(_g["round"] + 1);
+
+	for(int i = 0; i < sizeof(cards); ++i) {
+		cards[i] = u[PCARDS][i];
+	}
+	if(!_g["show_hand"]) cards[0] = 29;
+	return sprintf("%s:%s:%s:%d:%s",
+		u[PNAME],
+		u[PID],
+		u[PMUD],
+		u[PSCORE],
+		to_base64(cards)
+	);
+}
+
+//场景数据序列化成字符串
+string code_scene()
+{
+	string s1 = sprintf("%d;%d",_g["pot"], players_number());
+	string s2 = "";
+	string s3 = "";
+	foreach(mixed* u in _g["players"]) {
+		s2 += ";" + code_player(u);
+	}
+	foreach(mixed* u in _g["queue"]) {
+		s3 += ";" + code_player(u);
+	}
+	return s1 + s2 + s3;
+}
+
+//请求更新场景
+int notify_update_scene()
+{
+	notify_all("on_update_scene", 0, code_scene());
+}

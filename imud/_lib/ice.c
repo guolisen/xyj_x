@@ -22,6 +22,8 @@ mapping _mudlist = ([
 	])
 ]);
 
+mapping _send_queue = ([]);		//发送队列
+
 ///查询本MUD ID
 string mud_id()
 {
@@ -59,6 +61,12 @@ int send_msg(string mud, string msg)
 		"||MSG:" + msg + "@@@\n"
 	);
 	return 1;
+}
+
+//刷新缓冲区
+void flush()
+{
+
 }
 
 

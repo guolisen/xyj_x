@@ -87,7 +87,10 @@ varargs int msg_rooms(mixed* rooms, string str, mixed* me, mixed* target);
 /********************************本地化函数***********************************/
 //玩家名称+ID
 string name_id(mixed* who);
-
+//玩家名字
+string player_name(object who);
+//获得玩家信息，缺省为当前玩家
+varargs mixed* player_info(object who);
 
 #endif
 

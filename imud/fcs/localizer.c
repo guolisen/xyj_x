@@ -7,16 +7,13 @@ mapping _db = ([
 	"prop_root"		: "imud/fcs",				//属性根节点
 	"ROE"			: (500*10000/1000),			//汇率，玩家平均日收入换1K筹码
 	
-	"dealer"		: (["发牌女郎", "dealer", "name" : , "title" : "侍者"]),
+	"dealer"		: ({"发牌女郎", "dealer", 0}),
 	"desk_name"		: "桌边",
 	"desk_desc"		: "\n这是一张考究的桌子，光洁的桌面上泛着红木特有的幽暗光芒。四下几\n"
 					  "把大气的椅子，衬托出庄重的气氛。桌边有：\n\n",
 	"stand_name"	: "大厅",
 	"stand_desc"	: "\n宽敞明亮的大厅，装饰得金碧辉煌。四周则是一排排椅子，场中间一张\n"
 					  "气派的紫檀木大桌。桌边有：\n\n",
-	"corridor_name"	: "二楼",
-	"corridor_desc"	: "\n楼上显得格外热闹，走廊里人来人往，几间屋子里人声嘈杂，钱币落盘\n"
-					  "的声音不绝。看样子，客人们赌得正欢呢。\n\n",
 	"exits"			: ([
 			"down"		: "/d/qujing/chechi/jiuguan",
 	]),
@@ -50,15 +47,15 @@ string format_player(mixed* who)
 }
 
 //刷新玩家看到的场景，包括游戏室和看台
-int refresh_look(mapping dealer, mapping g, mixed deskside, mixed stand)
+int refresh_look(mixed dealer, mapping g, mixed deskside, mixed stand)
 {
 	string desc = format_player(dealer);
 	
-	foreach(mapping who in g["players"]) {
+	foreach(mixed* who in g["players"]) {
 		desc += format_player(who);
 	}
 	desc += "  ----------------------------------\n";
-	foreach(mapping who in g["queue"]) {
+	foreach(mixed* who in g["queue"]) {
 		desc += format_player(who);
 	}
 	desc +="\n";
@@ -79,25 +76,15 @@ int deskside_look(object room)
 	return 1;
 }
 
-//初始化走廊，设置好与外界的出入口
-void setup_corridor(object room)
-{
-	room->set("short", get("corridor_name"));
-	room->set("long", get("corridor_desc"));
-	room->set("exits", get("exits"));
-	set_safety(room);
-}
-
 /********************************筹码兑换***********************************/
 
-//换筹码，返回剩余资产
-int exchange_chip(object who, int amount)
+//增加玩家存款，返回余额
+int add_balance(object who, int amount)
 {
 	int n = amount * get("ROE");
 	if(!who) return 0;
 
-	n = who->add("balance", -n);
+	n = who->add("balance", n);
 	who->save();
 	return n;
 }
-

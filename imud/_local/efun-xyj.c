@@ -10,3 +10,16 @@ string name_id(mapping who)
 	return sprintf("%s(%s)", who[PNAME], capitalize(who[PID]));
 }
 
+//玩家名字
+string player_name(object who)
+{
+	return filter_color(who->query("name"));
+}
+
+//获得玩家信息，缺省为当前玩家
+varargs mixed* player_info(object who)
+{
+	if(!who) who = this_player();
+	if(who) return ({ player_name(who), getuid(who), MUD_ID });
+	return 0;
+}

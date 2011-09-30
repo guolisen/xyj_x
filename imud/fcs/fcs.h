@@ -32,6 +32,7 @@
 
 #define MSG_NO_HAND_CARD		31
 
+#define MSG_READY				41
 
 
 

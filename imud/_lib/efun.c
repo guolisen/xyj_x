@@ -156,7 +156,6 @@ mixed* gid_player(string gid)
 	return who;
 }
 
-
 ///目标的文件名，不含路径，缺省为当前对象
 varargs string file_leaf(object ob)
 {

@@ -2,13 +2,14 @@
 #include <imud-efun.h>
 
 inherit ROOM;
+inherit F_iEFUN;
 
 object_f _game;
 object_f _localizer = __DIR__"localizer";
 
 void create()
 {
-	_game = __DIR__ + path_file(__FILE__)[5..];
+	_game = __DIR__"c" + path_file(__FILE__)[5..];
 	_localizer->set_safety(_this);
 	trace(_game);	
 	_game->refresh_look();

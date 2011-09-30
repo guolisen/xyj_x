@@ -4,10 +4,11 @@
 #ifndef IMUD_LIB_IMUD_H
 #define IMUD_LIB_IMUD_H
 
-#define iMUD_NET_D				"/adm/daemons/network/services/ice"
+#define ICE_D				"/adm/daemons/network/services/ice"
 
 #define F_iEFUN_LOCAL			iMUD_DIR"_local/efun-"iMUD_LIB
 #define F_iEFUN					iMUD_DIR"_lib/efun"
+#define F_iNODE					iMUD_DIR"_lib/node"
 #define F_iSERVER				iMUD_DIR"_lib/server"
 #define F_iCLIENT				iMUD_DIR"_lib/client"
 
