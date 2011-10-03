@@ -22,7 +22,7 @@ mapping _mudlist = ([
 	])
 ]);
 
-mapping _send_queue = ([]);		//发送队列
+mapping _msg_queue = ([]);		//发送队列
 
 ///查询本MUD ID
 string mud_id()
@@ -33,57 +33,68 @@ string mud_id()
 ///查询本服务器ID
 string server_id()
 {
-	return "";			//todo
+	return "XYJ-CN";			//todo
 }
-/*
- + 
-
-	fcs/s0->join(火狐:firefox:xyj-cn:0) 
-	fcs/s0->bet(火狐:firefox:xyj-cn:n) 
-	fcs/c0->on_bet(火狐:firefox:xyj-cn:n)[pot,players,火狐:firefox:xyj-cn:20] '
-	*/
-
-
-//发送消息
+	
+///发送消息，格式：fcs/c0->on_bet(火狐:firefox:xyj-cn,n)
 int send_msg(string mud, string msg)
 {
-	mapping minfo = DNS_MASTER->query_mud_info(mud);
+	if(_msg_queue[mud]) _msg_queue[mud] += ({ msg });
+	else _msg_queue[mud] = ({ msg });
+	trace("send_msg " + mud + " " + msg);
+}
 
-	if(!minfo) return 0;		//服务器未联通
-	
-	msg = replace_string(msg, "|", "");
-	msg = replace_string(msg, "@@@", "");
+///发送消息(立即)
+int send_now(string mud, string msg)
+{
+	if(mud != mud_id()) {
+		mapping minfo = DNS_MASTER->query_mud_info(mud);
 
-	DNS_MASTER->send_udp(minfo["HOSTADDRESS"], minfo["PORTUDP"],
-		"@@@" + "ICE" +
-		"||NAME:" + Mud_name() +
-		"||PORTUDP:" + udp_port() +
-		"||MSG:" + msg + "@@@\n"
-	);
+		if(!minfo) return 0;		//服务器未联通
+		
+		msg = replace_string(msg, "|", "");
+		msg = replace_string(msg, "@@@", "");
+
+		DNS_MASTER->send_udp(minfo["HOSTADDRESS"], minfo["PORTUDP"],
+			"@@@" + "ICE" +
+			"||NAME:" + Mud_name() +
+			"||PORTUDP:" + udp_port() +
+			"||MSG:" + msg + "@@@\n"
+		);
+	} else {	//本地消息不经过网络
+		mapping info = (["NAME" : mud, "MSG" : msg]);
+		call_out("incoming_request", 1, info);
+	}
 	return 1;
 }
 
-//刷新缓冲区
-void flush()
+///刷新缓冲区，消息集中发送是为避免udp的乱序
+int flush()
 {
-
+	foreach(string mud, string* arr in _msg_queue) {		
+		string str = implode(arr, "#");
+		send_now(mud, str);
+		_msg_queue[mud] = ({});
+	}
+	trace("ice flush OK!\n");
+	return 1;
 }
 
 
-//收到信息
+///收到信息
 void incoming_request(mapping info)
 {
 	mapping minfo = DNS_MASTER->query_mud_info(info["NAME"]);
-	string file, fun;
+	string* arr = explode(info["MSG"], "#");
 	
-	if(sscanf(info["MSG"], "%s->%s", file, fun) != 2) return;
+	foreach(string msg in arr) {
+		string file, fun;
+		trace("incoming " + msg);
+		if(sscanf(msg, "%s->%s", file, fun) != 2) error("incoming_request: invalid msg.\n");
 
-	if(file_size(IMUD_DIR + file + ".c") > 0)
-		(IMUD_DIR + file)->invoke(fun);
+		if(file_size(iMUD_DIR + file + ".c") > 0)
+			(iMUD_DIR + file)->invoke(fun);
+	}
 }
 
 
-
-
-
-#endif

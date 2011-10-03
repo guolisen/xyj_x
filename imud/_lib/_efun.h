@@ -25,8 +25,10 @@
 #define _player			this_player()
 #define assert(_exp)	if(!(_exp)) error("assert: _exp\n")
 #define swap2(a, b)		{mixed t = a; a = b; b = t;}
-#define MUD_ID			(iMUD_NET_D->mud_id())
-#define SERVER_ID		(iMUD_NET_D->server_id())
+#define to_s(arg)		(undefinedp(arg) ? "" : "" + (arg))
+
+#define MUD_ID			(ICE_D->mud_id())
+#define SERVER_ID		(ICE_D->server_id())
 
 /********************************数学函数***********************************/
 ///较大值
@@ -74,7 +76,9 @@ mixed* gid_player(string gid);
 ///目标的文件名，不含路径，缺省为当前对象
 varargs string file_leaf(object ob);
 ///目标所在目录，不含文件名
-string file_dir(object ob);
+varargs string file_dir(object ob);
+///技能开始冷却，返回：0-技能冷却中；非0-技能已冷却，并进入新冷却期
+int cd_start(object who, string prop, int duration);
 
 /********************************消息函数***********************************/
 ///向wiz报告测试数据

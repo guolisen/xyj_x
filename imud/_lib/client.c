@@ -11,33 +11,39 @@ static object_f _stand;								//看台
 static string _server;								//对应的服务器对象路径
 static mapping _msgs;								//通知消息表
 
-void client_create()
+void client_create(mapping msgs)
 {
+	string dir = file_dir();
 	string* arr = explode(base_name(_this), "/");
 	string num = arr[<1][1..];
 	_server = arr[<2] + "/s" + num;
 
-	_stand		= __DIR__"stand" + num;
-	_localizer	= __DIR__"localizer";
+	_stand		= dir + "/stand" + num;
+	_localizer	= dir + "/localizer";
+	
+	_msgs = msgs;
 }
 
-//向现场和看台发布信息
-varargs int msv(string str, mixed* who, mixed* target)
+//向现场和看台发布信息 - 单人
+varargs int msv(string str, mixed* who, mixed arg1, mixed arg2)
 {
+	str = sprintf(str, arg1, arg2);
+	return msg_rooms(({_this, _stand}), str, who);
+}
+
+//向现场和看台发布信息 - 单人
+varargs int msv2(string str, mixed* who, mixed* target, mixed arg1, mixed arg2)
+{
+	str = sprintf(str, arg1, arg2);
 	return msg_rooms(({_this, _stand}), str, who, target);
 }
 
 //某人说话
-varargs int say(mixed* who, string str, mixed* target)
+varargs int say(mixed* who, string str)
 {
-	msv(CYN + "$N说道：" + str + NOR, who, target);
+	msv(CYN + "$N说道：" + str + NOR, who);
 }
 
-///设置通知消息表
-void set_notify(mapping msgs)
-{
-	_msgs = msgs;
-}
 
 ///收到通知信息
 void on_notify(mixed* info, string arg)
@@ -68,18 +74,21 @@ varargs mixed data_of(object who, string prop)
 }
 
 //向服务器发送请求
-varargs int send_req(string verb, string arg)
-{	
-	string req = sprintf("%s->%s(%s,%s)",
-		_server,
-		verb,
-		player_gid(player_info()),
-		or2(arg, "")
-	);
+varargs int send_req(string verb, mixed arg)
+{
+	if(!cd_start(_player, "cmd", 5)) return notify_ok("请勿连续发送命令。\n");
+	else {
+		string req = sprintf("%s->%s(%s,%s)",
+			_server,
+			verb,
+			player_gid(player_info()),
+			to_s(arg)
+		);
 
-	iMUD_NET_D->send_msg(SERVER_ID, req);
-	write("请求已发送。\n");
-
+		ICE_D->send_msg(SERVER_ID, req);
+		ICE_D->flush();
+		write("请求已发送。\n");
+	}
 	return 1;
 }
 

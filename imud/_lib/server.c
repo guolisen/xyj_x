@@ -29,11 +29,11 @@ varargs int notify_all(string fun, mixed* who, mixed arg)
 		_client,
 		fun,
 		player_gid(who),
-		(undefinedp(arg) ? "" : "" + arg),
+		to_s(arg)
 	);
 
 	foreach(string mud, int time in _listeners) {
-		if(time > thr) iMUD_NET_D->send_msg(mud, req);
+		if(time > thr) ICE_D->send_msg(mud, req);
 	}
 	return 1;
 }
@@ -41,7 +41,9 @@ varargs int notify_all(string fun, mixed* who, mixed arg)
 ///向客户端发送通知信息
 varargs int notify(mixed* who, int msg_id, mixed arg)
 {
-	string str = sprintf("%d:%s", msg_id, (undefinedp(arg) ? "" : "" + arg));
+	string str = sprintf("%d:%s", msg_id, to_s(arg));
 	
-	return reply("on_notify", who, arg);	
+	reply(_client, "on_notify", who, str);	
+	ICE_D->flush();
+	return 1;
 }

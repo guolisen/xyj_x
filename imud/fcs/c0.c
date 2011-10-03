@@ -5,7 +5,9 @@
 #include "fcs.h"
 
 inherit ROOM;
+inherit F_iEFUN;
 inherit F_iCLIENT;
+
 
 #include "cards.c"
 
@@ -47,20 +49,21 @@ void refresh_look();
 //发牌者说话
 varargs int dealer_say(string str, mixed* who)
 {
-	msv(CYN + _dealer[PNAME] + "说道：" + str + NOR, who);
+	if(who) str = sprintf(str, name_id(who));
+	
+	msv(CYN + _dealer[PNAME] + "说道：" + str + NOR);
 }
 
 /********************************房间函数***********************************/
 
 void create()
 {
+	client_create(_msgs);
+	
 	_dealer = _localizer->get("dealer") + ({ 0 });
-
 	_localizer->set_safety(_this);
-
+	
 	refresh_look();
-
-	set_notify(_msgs);
 
 	setup();
 }
@@ -91,7 +94,7 @@ int do_look(string arg)
 {
 	if(!arg) return _localizer->deskside_look(_this);
 
-	if(arg == "dipai" || arg == "card")	return send_req("hand_card");
+	if(arg == "dipai" || arg == "card") return send_req("hand_card");
 	return 0;
 }
 
@@ -107,7 +110,7 @@ int do_join(string arg)
 void on_join(mixed* info)
 {
 	object who = player_object(info);
-
+	trace("on_join");
 	msv("$N在桌边坐下。\n", info);
 	if(who) who->move(_this, 1);
 }
@@ -136,7 +139,7 @@ void on_leave(mixed* info, string arg)
 int do_ready(string arg)
 {
 	if(_localizer->add_balance(_player, 0) < 0)
-		notify_fail("你现在是负资产了，请退掉些筹码。\n");
+		return notify_fail("你现在是负资产了，请退掉些筹码。\n");
 	return send_req("ready");
 }
 
@@ -228,7 +231,7 @@ int do_raise(string arg)
 //加注确认
 void on_raise(mixed* info, string arg)
 {
-	bet("加%d！\n\n", info, arg);
+	bet("加%s！\n\n", info, arg);
 }
 
 //显示底牌
@@ -282,7 +285,7 @@ void on_dealing(mixed* info)
 //提示下一个玩家下注
 void on_next_one(mixed* info)
 {	
-	dealer_say("$N，请下注。\n", info);
+	dealer_say("%s，请下注。\n", info);
 }
 
 //游戏结束，奖励胜利者
@@ -290,28 +293,23 @@ void on_finish(mixed* who, string arg)
 {
 	string* arr = explode(arg, ":");
 
-	for(int i = 0; i < sizeof(arr); ++i)
-		show_sb_cards(_g[""]who);
-		dealer_say(name + "!\n");
+	for(int i = 0; i < sizeof(arr); ++i) {
+		mixed* u = _g["players"][i];	
+		show_sb_cards(u);
+		dealer_say(arr[i] + "!\n");
 	}
 
 	msv("\n");
-	dealer_say("$N获胜！\n", who);	
+	dealer_say("%s获胜！\n", who);	
 	msv("$N把桌上的筹码搂到自己面前。\n", who);
 }
 
 //玩家超时
 void on_timeout(mixed* who)
 {
-	dealer_say("$N超过规定时间，算作弃牌。\n", who);
+	dealer_say("%s超过规定时间，算作弃牌。\n", who);
 }
 
-
-//下一个玩家
-int on_next_one(mixed* who)
-{
-	dealer_say("$N，请下注。\n", who);
-}
 
 //查看底牌
 void on_look_card(mixed* info, string arg)
@@ -325,53 +323,20 @@ void on_look_card(mixed* info, string arg)
 
 /********************************更新场景***********************************/
 
-/*
-string player_str(mixed* u)
-{
-	int* cards = allocate(_g["round"] + 1);
-
-	for(int i = 0; i < sizeof(cards); ++i) {
-		cards[i] = u[PCARDS][i];
-	}
-	if(!_g["show_hand"]) cards[0] = 29;
-	return sprintf("%s:%s:%s:%d:%s",
-		u[PNAME],
-		u[PID],
-		u[PMUD],
-		u[PSCORE],
-		to_base64(cards)
-	);
-}
-
-//场景数据序列化成字符串
-string scene_str()
-{
-	string s1 = sprintf("%d;%d",_g["pot"], players_number());
-	string s2 = "";
-	string s3 = "";
-	foreach(mixed* u in _g["players"]) {
-		s2 += ";" + player_str(u);
-	}
-	foreach(mixed* u in _g["queue"]) {
-		s3 += ";" + player_str(u);
-	}
-	return s1 + s2 + s3;
-}
-*/
 //字符串反序列化成玩家数据
 mixed* dec_player(string str)
 {
 	mixed* u = allocate(PCARDS + 1);
-	string str;
+	string cards_str;
 
 	sscanf(str, "%s:%s:%s:%d:%s",
 		u[PNAME],
 		u[PID],
 		u[PMUD],
 		u[PSCORE],
-		str
+		cards_str
 	);
-	u[PCARDS] = from_base64(str);
+	u[PCARDS] = from_base64(cards_str);
 	return u;
 }
 
@@ -382,9 +347,9 @@ mapping dec_scene(string scene_str)
 	int players_size = to_int(arr[1]);
 	int queue_size = sizeof(arr) - 2 - players_size;
 	mapping g = ([
-		"pot"		: to_int(arg[0]), 
+		"pot"		: to_int(arr[0]), 
 		"players"	: allocate(players_size),
-		"queue"		: allocate(queue_size);
+		"queue"		: allocate(queue_size)
 	]);
 	
 	for(int i = 0; i < players_size; ++i) {
@@ -405,8 +370,9 @@ void on_update_scene(mixed* info, string arg)
 }
 
 //刷新房间描述
-int refresh_look()
+void refresh_look()
 {
 	_dealer[PSCORE] = _g["pot"];
 	_localizer->refresh_look(_dealer, _g, _this, _stand);
 }
+

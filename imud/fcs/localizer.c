@@ -3,6 +3,8 @@
 
 #include <imud-efun.h>
 
+inherit F_iEFUN;
+
 mapping _db = ([
 	"prop_root"		: "imud/fcs",				//属性根节点
 	"ROE"			: (500*10000/1000),			//汇率，玩家平均日收入换1K筹码
@@ -49,14 +51,14 @@ string format_player(mixed* who)
 //刷新玩家看到的场景，包括游戏室和看台
 int refresh_look(mixed dealer, mapping g, mixed deskside, mixed stand)
 {
-	string desc = format_player(dealer);
+	string desc = "    " + format_player(dealer);
 	
 	foreach(mixed* who in g["players"]) {
-		desc += format_player(who);
+		desc += "    " + format_player(who);
 	}
-	desc += "  ----------------------------------\n";
+	desc += "    ----------------------------------\n";
 	foreach(mixed* who in g["queue"]) {
-		desc += format_player(who);
+		desc += "    " + format_player(who);
 	}
 	desc +="\n";
 

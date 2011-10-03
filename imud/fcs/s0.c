@@ -4,6 +4,7 @@
 #include <imud-efun.h>
 
 inherit F_iSERVER;
+inherit F_iEFUN;
 inherit __DIR__"score";
 
 #include "fcs.h"
@@ -103,6 +104,7 @@ int stop()
 		notify_all("on_leave", who);
 	}
 	data_reset();
+	ICE_D->flush();
 }
 
 //发牌过程
@@ -120,6 +122,7 @@ void dealing()
 	//初始化新一轮
 	turn_init();
 
+	notify_update_scene();
 	notify_all("on_dealing");
 	next_one();
 }
@@ -144,9 +147,11 @@ void finish()
 				max_score = score;
 				winner = who;
 			}
+			who[PREADY] = 0;
 		}
 		arg = implode(arr, ":");	//获取所有牌的名称
 		_g["show_hand"] = 1;		//亮牌
+		notify_update_scene();
 	}
 	//奖励胜者
 	winner[PSCORE] += _g["pot"];
@@ -184,7 +189,7 @@ int next_one()
 		call_out("wait_timeout", PLAYER_TIME);
 	} 
 	else if(_g["round"] < MAX_CARD - 1) {
-		dealing();
+		dealing();	//可能next_one->dealing->next_one
 	} else {
 		finish();
 	}
@@ -261,7 +266,8 @@ int join(mixed* info)
 		_g["queue"] += ({ who });
 		
 		notify_update_scene();
-		return notify_all("on_join", info);
+		notify_all("on_join", info);
+		return ICE_D->flush();
 	}
 	return notify(info, MSG_FULL);
 }
@@ -278,7 +284,8 @@ int leave(mixed* info)
 	_g["queue"] -= ({ who });
 	
 	notify_update_scene();
-	return notify_all("on_leave", info, who[PSCORE]);
+	notify_all("on_leave", info, who[PSCORE]);
+	return ICE_D->flush();
 }
 
 //是否可以开始
@@ -304,8 +311,11 @@ int ready(mixed* info)
 	who[PREADY] = 1;
 	
 	notify_all("on_ready", info);
-	if(can_start())	start();
-	else notify_update_scene();
+	if(can_start()) start();
+	else {
+		notify_update_scene();
+		return ICE_D->flush();
+	}
 	return 1;
 }
 
@@ -322,7 +332,8 @@ int exchange(mixed* info, string arg)
 	who[PSCORE] += n;
 
 	notify_update_scene();
-	return notify_all("on_exchange", info, n);
+	notify_all("on_exchange", info, n);
+	return ICE_D->flush();
 }
 
 /********************************进行阶段***********************************/
@@ -393,10 +404,30 @@ int raise(mixed* info, string arg)
 
 	sb_bet(who, n);
 
-	notify_all("on_raise", info, n);
+	notify_all("on_raise", info, n + ":" + add);
 
 	return next_one();
 }
+
+//显示底牌
+int show_hand(mixed* info, string arg)
+{
+	mixed* who = find_info(info, _g["players"]);
+	int n = _g["max_bet"];
+	
+	if(_g["round"] < MAX_CARD - 1) return notify(info, MSG_NOT_LAST);
+
+	CHK_FAIL_NOT_START;
+	CHK_FAIL_NOT_YOU(who);
+	CHK_OOC(who, n);
+
+	sb_bet(who, n);
+	notify_all("on_show_hand", info, n);
+
+	return next_one();
+
+}
+
 
 //弃牌
 int fold(mixed* info)
@@ -417,7 +448,7 @@ int fold(mixed* info)
 }
 
 //查看自己的底牌
-int hand_card(mixed* info)
+int look_card(mixed* info)
 {
 	mixed* who = find_info(info, _g["players"]);
 
@@ -425,7 +456,8 @@ int hand_card(mixed* info)
 
 	if(!who) return notify(info, MSG_NO_HAND_CARD);
 	
-	return reply(_client, "on_hand_card", info, who[PCARDS][0]);
+	reply(_client, "on_hand_card", info, who[PCARDS][0]);
+	return ICE_D->flush();
 }
 
 /********************************场景更新***********************************/

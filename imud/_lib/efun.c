@@ -163,9 +163,19 @@ varargs string file_leaf(object ob)
 }
 
 ///目标所在目录，不含文件名，缺省为当前对象
-string file_dir(object ob)
+varargs string file_dir(object ob)
 {
 	return path_dir(base_name(or2(ob, _this)));
+}
+
+///技能开始冷却，返回：0-技能冷却中；非0-技能已冷却，并进入新冷却期
+int cd_start(object who, string prop, int duration)
+{
+	string str = "cds/" + prop;
+	int t = time();
+
+	if(t < who->query(str)) return 0;
+	return who->set(str, t + duration);
 }
 
 /********************************消息函数***********************************/
