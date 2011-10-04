@@ -167,8 +167,12 @@ void finish()
 void wait_timeout()
 {
 	mixed* who = turn_who();
-	fold(who);
-	//next_one();						//????????????????
+	
+	_g["queue"] += ({ who });
+	_g["players"] -= ({ who });
+
+	notify_all("on_timeout", who);
+	next_one();
 }
 
 //下一个玩家
@@ -442,7 +446,7 @@ int fold(mixed* info)
 	_g["queue"] += ({ who });
 	_g["players"] -= ({ who });
 
-	notify_all("on_raise", info);
+	notify_all("on_fold", info);
 	
 	return next_one();
 }
@@ -456,7 +460,7 @@ int look_card(mixed* info)
 
 	if(!who) return notify(info, MSG_NO_HAND_CARD);
 	
-	reply(_client, "on_hand_card", info, who[PCARDS][0]);
+	reply(_client, "on_look_card", info, who[PCARDS][0]);
 	return ICE_D->flush();
 }
 

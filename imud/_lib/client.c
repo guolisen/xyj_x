@@ -4,6 +4,8 @@
 #include <ansi.h>
 #include <imud-efun.h>
 
+#define CHECK_PLAYER_INTERVAL			120			//检查本地玩家间隔
+
 inherit F_iNODE;
 
 static object_f _localizer;							//本地化对象
@@ -11,6 +13,7 @@ static object_f _stand;								//看台
 static string _server;								//对应的服务器对象路径
 static mapping _msgs;								//通知消息表
 
+///初始化客户端
 void client_create(mapping msgs)
 {
 	string dir = file_dir();
@@ -74,20 +77,20 @@ varargs mixed data_of(object who, string prop)
 }
 
 //向服务器发送请求
-varargs int send_req(string verb, mixed arg)
+varargs int send_req(string verb, mixed arg, object who, int silence)
 {
 	if(!cd_start(_player, "cmd", 5)) return notify_ok("请勿连续发送命令。\n");
 	else {
 		string req = sprintf("%s->%s(%s,%s)",
 			_server,
 			verb,
-			player_gid(player_info()),
+			player_gid(player_info(who)),
 			to_s(arg)
 		);
 
 		ICE_D->send_msg(SERVER_ID, req);
 		ICE_D->flush();
-		write("请求已发送。\n");
+		if(!silence) write("请求已发送。\n");
 	}
 	return 1;
 }
@@ -101,3 +104,32 @@ int do_say(string arg)
 	return 1;
 }
 */
+
+//找到参与/观看游戏的活人
+private object find_iob()
+{
+	foreach(object ob in all_inventory()) {
+		if(interactive(ob)) return ob;
+	}
+	foreach(object ob in all_inventory(load_object(_stand))) {
+		if(interactive(ob)) return ob;
+	}
+	return 0;
+}
+
+static int _check_time = 0;
+
+//检查是否有玩家关注该游戏，以便向服务器订阅消息
+int check_players()
+{
+	int now = time();
+	object ob = find_iob();
+	
+	if(ob && now > _check_time) {
+		send_req("add_listener", 0, ob, 1);
+		_check_time = now + CHECK_PLAYER_INTERVAL - 10;
+		remove_call_out("check_players");
+		call_out("check_players", CHECK_PLAYER_INTERVAL);
+	}
+}
+

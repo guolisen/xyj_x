@@ -86,6 +86,8 @@ void init()
 		add_action("do_raise", ({"raise", "jiazhu"}));
 		add_action("do_fold", ({"fold", "qipai"}));
 		add_action("do_show", ({"show"}));
+		
+		check_players();
 	}
 }
 
@@ -94,7 +96,7 @@ int do_look(string arg)
 {
 	if(!arg) return _localizer->deskside_look(_this);
 
-	if(arg == "dipai" || arg == "card") return send_req("hand_card");
+	if(arg == "dipai" || arg == "card") return send_req("look_card");
 	return 0;
 }
 
@@ -174,7 +176,7 @@ void on_exchange(mixed* info, string arg)
 	int n = to_int(arg);
 	string str = (n > 0) ? "买了" + n : "退了" + (-n);
 	
-	_localizer->add_balance(_player, -n);
+	_localizer->add_balance(who, -n);
 	msv("$N" + str + "筹码。\n", info);
 }
 
@@ -250,7 +252,7 @@ int do_show(string arg)
 //全押确认
 void on_show_hand(mixed* info, string arg)
 {
-	bet("全押！\n\n", info, arg);
+	bet("亮底牌！\n\n", info, arg);
 }
 
 //弃牌
@@ -305,11 +307,10 @@ void on_finish(mixed* who, string arg)
 }
 
 //玩家超时
-void on_timeout(mixed* who)
+void on_timeout(mixed* info)
 {
-	dealer_say("%s超过规定时间，算作弃牌。\n", who);
+	dealer_say("%s超过规定时间，自动弃牌。\n", info);
 }
-
 
 //查看底牌
 void on_look_card(mixed* info, string arg)

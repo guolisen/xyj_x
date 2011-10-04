@@ -1,11 +1,12 @@
 // ICE(iMUD Communication Environment)  firefox 04/16/2011
 
-#include <imud.h>
+#include <imud-efun.h>
 
 #include <net/dns.h>
 #include <net/macros.h>
 #include <net/daemons.h>
 
+inherit F_iEFUN;
 inherit F_CLEAN_UP;
 inherit F_DBASE;
 
@@ -56,14 +57,14 @@ int send_now(string mud, string msg)
 		msg = replace_string(msg, "@@@", "");
 
 		DNS_MASTER->send_udp(minfo["HOSTADDRESS"], minfo["PORTUDP"],
-			"@@@" + "ICE" +
+			"@@@" + "ice" +
 			"||NAME:" + Mud_name() +
 			"||PORTUDP:" + udp_port() +
 			"||MSG:" + msg + "@@@\n"
 		);
 	} else {	//本地消息不经过网络
 		mapping info = (["NAME" : mud, "MSG" : msg]);
-		call_out("incoming_request", 1, info);
+		call_out("incoming_request", 0, info);
 	}
 	return 1;
 }

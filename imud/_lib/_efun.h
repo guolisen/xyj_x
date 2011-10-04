@@ -51,6 +51,8 @@ mixed or2(mixed a, mixed b);
 mixed and2(mixed a, mixed b);
 
 /********************************字符串函数***********************************/
+///过滤颜色
+string filter_color(string str);
 ///分配定长字符串
 string allocate_str(int n);
 ///反向搜索指定字符位置

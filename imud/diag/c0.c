@@ -10,7 +10,7 @@ inherit F_CLEAN_UP;
 
 void create()
 {
-	client_create();
+	client_create(([]));
 }
 
 int ping(string arg)

@@ -7,10 +7,10 @@
 mapping _listeners = ([]);
 
 
-///监听远程对象
-void listen(string mud)
+///添加远程监听者
+void add_listener(mixed* info)
 {
-	_listeners[mud] = time();	
+	_listeners[info[PMUD]] = time();	
 }
 
 ///分派调用
@@ -22,7 +22,7 @@ void invoke(string fun_str)
 	if(sscanf(fun_str, "%s(%s,%s)", fun, gid, arg) != 3) error("invoke invalid arg.\n");
 	info = gid_player(gid);	
 	
-	listen(info[PMUD]);
+	add_listener(info);
 	call_other(_this, fun, info, arg);
 
 }

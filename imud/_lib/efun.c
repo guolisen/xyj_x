@@ -65,6 +65,22 @@ mixed and2(mixed a, mixed b)
 
 /********************************字符串函数***********************************/
 
+///过滤颜色
+string filter_color(string str)
+{
+	mapping tab = ([
+		"BLK" : BLK, "RED" : RED, "GRN" : GRN, "YEL" : YEL, 
+		"BLU" : BLU, "MAG" : MAG, "CYN" : CYN, "WHT" : WHT,
+		"HIR" : HIR, "HIG" : HIG, "HIY" : HIY, "HIB" : HIB,
+		"HIM" : HIM, "HIC" : HIC, "HIW" : HIW, "NOR" : NOR,
+	]);
+
+	foreach(string k, string v in tab) {
+		str = replace_string(str, v, "");
+	}
+	return str;
+}
+
 ///分配定长字符串
 string allocate_str(int n)
 {
