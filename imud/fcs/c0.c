@@ -49,7 +49,7 @@ void refresh_look();
 //发牌者说话
 varargs int dealer_say(string str, mixed* who)
 {
-	if(who) str = sprintf(str, name_id(who));
+	if(who) str = sprintf(str, HIG + name_id(who) + NOR + CYN);
 	
 	msv(CYN + _dealer[PNAME] + "说道：" + str + NOR);
 }
@@ -190,7 +190,7 @@ private void bet(string msg, mixed* who, string arg)
 		s1 = arg;
 		s2 = s1;
 	}	
-	msv("$N拿出%s个筹码扔在桌子中间。\n", who, s1);
+	msv(CYN"$N拿出%s个筹码扔在桌子中间。\n"NOR, who, HIG + s1 + NOR + CYN);
 	say(who, sprintf(msg, s2));
 }
 

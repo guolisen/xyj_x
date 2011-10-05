@@ -3,6 +3,7 @@
 
 void setup()
 {
-	set("exits", (["west" : __DIR__"standx"]));	
+	set("short", "¶«Ìü");
+	set("exits", (["west" : iFCS_MAP_DIR "fcs"]));	
 	::setup();
 }

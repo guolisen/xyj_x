@@ -269,7 +269,7 @@ int join(mixed* info)
 		});
 		_g["queue"] += ({ who });
 		
-		call_out("ready_timeout", PLAYER_TIME, who);
+		call_out("ready_timeout", 60, who);
 		
 		notify_update_scene();
 		notify_all("on_join", info);

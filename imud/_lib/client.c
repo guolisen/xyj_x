@@ -5,7 +5,6 @@
 #include <imud-efun.h>
 
 inherit F_iNODE;
-inherit F_CLEAN_UP;
 
 static object_f _localizer;							//本地化对象
 static object_f _stand;								//看台

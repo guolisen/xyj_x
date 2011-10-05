@@ -12,6 +12,8 @@
 #define F_iSERVER				iMUD_DIR"_lib/server"
 #define F_iCLIENT				iMUD_DIR"_lib/client"
 
+#define iFCS_MAP_DIR			iMUD_DIR"_d/"
+
 #define iFCS_DIR				iMUD_DIR"fcs/"
 #define iFCS					iFCS_DIR"fcs"
 

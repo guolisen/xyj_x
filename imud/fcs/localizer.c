@@ -65,7 +65,6 @@ int refresh_look(mixed dealer, mapping g, mixed deskside, mixed stand)
 	deskside->set("short", get("desk_name"));
 	deskside->set("long", get("desk_desc") + desc);
 	if(stand) {
-		stand->set("short", get("stand_name"));
 		stand->set("long", get("stand_desc") + desc);
 	}
 }
