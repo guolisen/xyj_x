@@ -269,6 +269,8 @@ int join(mixed* info)
 		});
 		_g["queue"] += ({ who });
 		
+		call_out("ready_timeout", PLAYER_TIME, who);
+		
 		notify_update_scene();
 		notify_all("on_join", info);
 		return ICE_D->flush();
@@ -290,6 +292,13 @@ int leave(mixed* info)
 	notify_update_scene();
 	notify_all("on_leave", info, who[PSCORE]);
 	return ICE_D->flush();
+}
+
+//玩家join后未能及时ready
+void ready_timeout(mixed* info)
+{
+	mixed* who = find_info(info, _g["queue"]);
+	if(who) leave(who);
 }
 
 //是否可以开始

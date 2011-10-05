@@ -4,9 +4,8 @@
 #include <ansi.h>
 #include <imud-efun.h>
 
-#define CHECK_PLAYER_INTERVAL			120			//检查本地玩家间隔
-
 inherit F_iNODE;
+inherit F_CLEAN_UP;
 
 static object_f _localizer;							//本地化对象
 static object_f _stand;								//看台
@@ -79,7 +78,7 @@ varargs mixed data_of(object who, string prop)
 //向服务器发送请求
 varargs int send_req(string verb, mixed arg, object who, int silence)
 {
-	if(!cd_start(_player, "cmd", 5)) return notify_ok("请勿连续发送命令。\n");
+	if(!silence && !cd_start(_player, "cmd", 3)) return notify_ok("请勿连续发送命令。\n");
 	else {
 		string req = sprintf("%s->%s(%s,%s)",
 			_server,
@@ -127,9 +126,9 @@ int check_players()
 	
 	if(ob && now > _check_time) {
 		send_req("add_listener", 0, ob, 1);
-		_check_time = now + CHECK_PLAYER_INTERVAL - 10;
+		_check_time = now + ALIVE_INERVAL - 10;
 		remove_call_out("check_players");
-		call_out("check_players", CHECK_PLAYER_INTERVAL);
+		call_out("check_players", ALIVE_INERVAL);
 	}
 }
 

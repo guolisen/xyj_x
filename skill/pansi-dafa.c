@@ -29,6 +29,6 @@ void random_level_up(object who)
 	//你求学之心不专，无法更深入的理解
 	if(who->query("betray/count")) return;
 
-	if(!random(lvl * 5)) who->improve_skill("pansi-dafa", 1);
+	if(!random(lvl * 2)) who->improve_skill("pansi-dafa", 1);
 }
 

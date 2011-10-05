@@ -25,6 +25,8 @@ mapping _mudlist = ([
 
 mapping _msg_queue = ([]);		//发送队列
 
+void incoming_request(mapping info);
+
 ///查询本MUD ID
 string mud_id()
 {
@@ -65,6 +67,7 @@ int send_now(string mud, string msg)
 	} else {	//本地消息不经过网络
 		mapping info = (["NAME" : mud, "MSG" : msg]);
 		call_out("incoming_request", 0, info);
+		//incoming_request(info);
 	}
 	return 1;
 }
