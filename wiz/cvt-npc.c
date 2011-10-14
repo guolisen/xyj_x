@@ -45,7 +45,7 @@ int do_exchange(string arg)
 {
 	mapping rewards = ([PEXP : 25000]);
 
-	if(total_exp(_player) < 35*K) return notify_fail("你的武学道行太低！\n");
+	if(total_exp(_player) < 40*K) return notify_fail("你的武学道行太低！\n");
 
 	if(TASK_EXC->do_reward(_player, name(), "兑换", rewards, NORM_RATIO)) {
 		_player->add(PEXP, rewards[PEXP]);

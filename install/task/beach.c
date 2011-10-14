@@ -77,13 +77,13 @@ int do_fill(string arg)
 	int phase = NATURE_D->query_current_day_phase();
 
 	if(!arg && arg!="hai" && arg!="sea") 
-		return notify_ok("你要填什么？\n");
+		return notify_fail("你要填什么？\n");
 
 	if(me->is_fighting() || me->is_busy())
-		return notify_ok("你正忙着呢。\n");
+		return notify_fail("你正忙着呢。\n");
 	
 	if(!stone || !stone->query_amount())
-		return notify_ok("你拿什么来填海啊？\n");
+		return notify_fail("你拿什么来填海啊？\n");
 
 	if (phase < 6) 
 		return notify_fail("白天天气太热了，晚上再来吧。”\n");

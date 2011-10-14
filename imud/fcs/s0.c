@@ -147,7 +147,6 @@ void finish()
 				max_score = score;
 				winner = who;
 			}
-			who[PREADY] = 0;
 		}
 		arg = implode(arr, ":");	//获取所有牌的名称
 		_g["show_hand"] = 1;		//亮牌
@@ -157,9 +156,12 @@ void finish()
 	winner[PSCORE] += _g["pot"];
 	_g["pot"] = 0;
 	//重置
-	data_reset();	
+	data_reset();
 	_g["queue"] = all;
-
+	foreach(mixed* who in _g["queue"]) {
+		who[PREADY] = 0;
+		call_out("ready_timeout", 60, who);
+	}
 	notify_all("on_finish", winner, arg);
 }
 
