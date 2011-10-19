@@ -55,6 +55,7 @@ mapping _maps = ([
 
 	"gaolao"		: "/d/gao/gate",
 	"jiangzhou"		: "/d/jz/center",
+	"bibotan"		: "/d/qujing/bibotan/gudu",
 
 ]);
 
@@ -174,6 +175,7 @@ tianzhu         ->天竺国                 maoying       ->毛颖山
 lingshan        ->灵山                   
 
 gaolao          ->高老庄                 jiangzhou     ->江州城 
+bibotan         ->碧波潭
 
 HELP
         );
