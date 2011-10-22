@@ -162,7 +162,7 @@ void heart_beat()
 		object user = arr[WHO];
 		if(user) {
 			//条指过多/忙/晕倒，本轮被跳过
-			int thr = arr[CMDS] * (interactive(user) ? 3 : SPC);	//离线计划执行慢
+			int thr = arr[CMDS] * (interactive(user) ? 2 : SPC);	//离线计划执行慢
 
 			if((thr < now - arr[START_TIME]) && !user->is_busy() && living(user)) {
 				if(bad_state(user))

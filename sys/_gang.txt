@@ -1,6 +1,8 @@
+增加指令enter，存有所有可enter地点列表。
 
+修改fly命令，增加地点列表call_other
 
-
+增加answer 指令，查找环境的temp/question，有超时限制
 
 
 289023
