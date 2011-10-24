@@ -52,4 +52,4 @@
 
 #define DEAD_RECOVER			2000	//死亡回复的内力法力
 
-
+#define MAX_LIST				50		//列表中玩家的上限

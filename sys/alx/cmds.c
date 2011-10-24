@@ -23,9 +23,11 @@ string* list_score(object* users, int history)
 		"   门派   玩家                击杀 误杀 死亡 突袭 击退 战功(年)\n"
 		LINE1
 	});
-	string* lines = allocate(sizeof(users));	
+	int n = min2(MAX_LIST, sizeof(users));
+	int m = sizeof(users) - n;
+	string* lines = allocate(n);
 
-	for(int i = 0; i < sizeof(users); ++i) {
+	for(int i = 0; i < n; ++i) {
 		string color = _camps[camp_id(users[i])]["color"];
 		string family = FAMILY->short(users[i]);		//门派简称
 		mapping score = score_entire(users[i], history);
@@ -41,7 +43,7 @@ string* list_score(object* users, int history)
 			score["exp"] / 1000
 		);
 	}
-	return title + lines + ({ LINE1 });
+	return title + lines + ({ LINE1, "此处略去" + m + "个玩家...\n" });
 }
 
 //列出战场成绩

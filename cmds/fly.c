@@ -58,6 +58,8 @@ mapping _maps = ([
 	"bibotan"		: "/d/qujing/bibotan/gudu",
 	"emei"			: "/d/southern/emei/shanlu4",
 
+	//"bang"			: (: call_other, soldier, "perform_action", "stick", "qiankun" :),
+
 ]);
 
 int MIN_DX = RANK_D->grade_dx(BLU "初领妙道" NOR);
@@ -121,16 +123,9 @@ int main(object me, string arg)
 		if(intp(dst[1])) {									//2.随机落点
 			loc[strlen(loc) - 3] += random(dst[1]);
 		} else {
-			object map = present(dst[1], me);
-			/*if(!map && !wizardp(me)) {						//3.需要地图
-				write("你在天上转了半天也不知该往那边飞。。。\n");
-				message_vision("\n$N失望地从云上跳了下来！\n", me);
-				return 1;		
-			}*/
+
 		}
 	}
-	//if(MISC_D->random_capture(me , 0, 1)) return 1;
-
 	if(ridee) {
 		ridemsg = ridee->query("ride/msg")+"着"+ridee->name();
 		ridee->move(loc);
