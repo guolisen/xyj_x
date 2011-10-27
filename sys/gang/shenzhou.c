@@ -34,24 +34,24 @@ void create()
 			"npc1"		: _guard,
 			"npc2"		: _guard,
 		]),
-
+		
 		"street"	: ([
-			"short"		: HIW"冰崖顶"NOR,
-			"long"		: "\n在白雪皑皑的崖顶竟然有一丝暖风，北面冰雪已经渐渐消融，一条\n小路蜿蜒通向一处山寨。\n\n",
+			"short"		: "秘道",
+			"long"		: "\n这是一条直通三花堂和长安郊外的秘道。北面就是出口，隐约有条\n小路，蜿蜒通向一处山寨。\n\n",
 		]),
 
 		"leave"		: ([
-			"dst"	: "/d/xueshan/wroad11",
-			"verb"	: "down",
-			"msg1"	: "$N脚下一滑，如同落石般滚下冰崖。",
-			"msg2"	: "随着一声惨叫，$N从崖顶上滚了下来，在雪地上砸出一个坑。",
+			"dst"	: "/d/city/sanhua-mishi",
+			"verb"	: "out",
+			"msg1"	: "$N推动暗门，向外爬去。",
+			"msg2"	: "墙角出现一道暗门，$N爬了出来，随即暗门也消失了。",
 		]),
 
 		"arrive"		: ([
-			"dst"	: "/d/xueshan/wroad11",
-			"verb"	: "climb",
-			"msg1"	: "$N攀着冰隙，战战兢兢向冰崖上爬去。",
-			"msg2"	: "$N从冰崖下爬了上来，一身霜雪。",
+			"dst"	: "/d/city/sanhua-mishi",
+			"verb"	: "enter",
+			"msg1"	: "$N按动机关，钻进一道暗门，随即暗门也消失了。",
+			"msg2"	: "$N从暗门外钻了进来。",
 		]),
 	]);
 

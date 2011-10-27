@@ -9,7 +9,7 @@ void create()
 		"id"		: "ftb",
 		"name"		: "斧头帮",
 		"color"		: HIW,
-		"location"	: "城西饮马峪",
+		"location"	: "饮马峪",
 		"slogan"	: "山贼，有前途的职业！",
 		
 		"npc"		: ([
