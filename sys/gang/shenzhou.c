@@ -17,6 +17,7 @@ void create()
 		"id"		: "shenzhou",
 		"name"		: "神州",
 		"color"		: HIR,
+		"from"		: "北京站",
 		"location"	: "长安城",
 		"slogan"	: "神州大地，遍插红旗。",
 		

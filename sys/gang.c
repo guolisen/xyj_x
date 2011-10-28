@@ -4,7 +4,7 @@
 #include <xyj_x.h>
 #include <ansi.h>
 
-string* _elems = ({"ftb", "lushan", "buduo", "shenzhou", "taishan", "szcg", "dongxing"});
+string* _elems = ({"ftb", "shenzhou", "taishan", "buduo", "lushan", "szcg", "cangyue", "dongxing"});
 
 void create()
 {
@@ -67,15 +67,14 @@ int same(object ob1, object ob2)
 int list()
 {
 	printf(LINE1);
-	printf("帮会              位置        实力  战力  主旨\n");
+	printf("帮会              位置        来自        主旨\n");
 	printf(LINE1);
 	foreach(string g in elems()) {
-		printf("%s%-18s%-12s%-6d%-6d%-20s\n"NOR,
+		printf("%s%-18s%-12s%-12s%-20s\n"NOR,
 			g->query("color"),
 			name_id(g),
 			g->query("location"),
-			0,
-			0,
+			g->query("from"),
 			g->query("slogan"),
 		);
 	}

@@ -11,6 +11,7 @@ void create()
 	set_name("½âÃÜÈ¡Ïû", ({ "cancel" }) );
 
 	set("env/invisibility", 1);
+	set("no_get", 1);
 
 	if( clonep() )
 		set_default_object(__FILE__);

@@ -9,6 +9,7 @@ void create()
 		"id"		: "ftb",
 		"name"		: "斧头帮",
 		"color"		: HIW,
+		"from"		: "大话西游",
 		"location"	: "饮马峪",
 		"slogan"	: "山贼，有前途的职业！",
 		

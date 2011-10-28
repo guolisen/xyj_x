@@ -17,6 +17,7 @@ void create()
 		"id"		: "taishan",
 		"name"		: "泰山",
 		"color"		: HIG,
+		"from"		: "北京站",
 		"location"	: "开封城",
 		"slogan"	: "会当凌绝顶，一览众山小。",
 		

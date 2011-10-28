@@ -17,6 +17,7 @@ void create()
 		"id"		: "buduo",
 		"name"		: "不堕轮回教",
 		"color"		: HIY,
+		"from"		: "上海站",
 		"location"	: "火焰山",
 		"slogan"	: "天上地下，唯我独尊！",
 		

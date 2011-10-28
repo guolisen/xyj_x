@@ -6,43 +6,43 @@ inherit __DIR__"_base";
 void create()
 {
 	_props = ([
-		"id"		: "dongxing",
-		"name"		: "东星",
-		"color"		: HIM,
-		"from"		: "-",
-		"location"	: "宝象山湾",
-		"slogan"	: "聊天打诨，赌博梭哈！",
+		"id"		: "cangyue",
+		"name"		: "苍月",
+		"color"		: HIC,
+		"from"		: "小雨西游",
+		"location"	: "清凉谷",
+		"slogan"	: "逍遥自在，聊天打诨！",
 		
 		"npc"		: ([
 			"guard"		: ([
-				"ids"		: ({"xiao hunhun", "hunhun", "guard"}),
-				"name"		: "小混混",
-				"family"	: "将军府",
-				"weapon"	: "/d/gao/obj/blade",				
+				"ids"		: ({"yin shi", "guard"}),
+				"name"		: "隐士",
+				"title"		: "小雨流浪汉",
+				"family"	: "阎罗地府",
+				"weapon"	: "/d/qujing/qinglong/obj/stick",		
 				"props"		: ([]),
 			]),
 			"keeper"	: ([
-				"ids"		: ({"hei zai", "keeper"}),
-				"name"		: "黑仔",
-				"title"		: "非洲虎",
+				"ids"		: ({"xiaoyao shu", "keeper"}),
+				"name"		: "逍遥鼠",
+				"title"		: "小雨管家",
 				"props"		: ([
+					"age"		: 47,
 					"per"		: 5,
 				]),
-			]),
+			]),			
 			"npc1"		: ([
-				"ids"		: ({"ya lang", "guard"}),
-				"name"		: "亚郎",
-				"title"		: "风雷虎",
+				"ids"		: ({"bai qi", "guard"}),
+				"name"		: "绝世白起",
+				"title"		: "小雨杀人狂",
 				"props"		: ([
-					"per"		: 7,
 				]),
 			]),
 			"npc2"		: ([
-				"ids"		: ({"dong weiping", "guard"}),
-				"name"		: "董伟平",
-				"title"		: "深山虎",
+				"ids"		: ({"hua bianque", "guard"}),
+				"name"		: "华扁鹊",
+				"title"		: "小雨郎中",
 				"props"		: ([
-					"age"		: 30,
 				]),				
 			]),
 		]),
@@ -53,14 +53,14 @@ void create()
 		]),
 
 		"leave"		: ([
-			"dst"	: "/d/qujing/baoxiang/shanwan1",
+			"dst"	: "/d/southern/wutai/qinglianggu",
 			"verb"	: "down",
 			"msg1"	: "$N不顾一切地纵身跳下悬崖。",
 			"msg2"	: "随着一声惨叫，$N从山顶上滚了下来，如同一滩鼻涕甩在地面。",
 		]),
 
 		"arrive"		: ([
-			"dst"	: "/d/qujing/baoxiang/shanwan1",
+			"dst"	: "/d/southern/wutai/qinglianggu",
 			"verb"	: "climb",
 			"msg1"	: "$N攀着藤条，向山崖上爬去。",
 			"msg2"	: "$N从崖下爬了上来，灰头土脸，满山草屑。",

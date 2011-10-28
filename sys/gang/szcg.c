@@ -24,6 +24,7 @@ void create()
 		"id"		: "szcg",
 		"name"		: "苏州城管",
 		"color"		: HIR,
+		"from"		: "苏州站",
 		"location"	: "背阴山",
 		"slogan"	: "抢必狠，打必烂，砸完再罚款！",
 		

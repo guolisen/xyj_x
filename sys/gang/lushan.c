@@ -17,6 +17,7 @@ void create()
 		"id"		: "lushan",
 		"name"		: "庐山",
 		"color"		: HIC,
+		"from"		: "上海站",
 		"location"	: "雪山之巅",
 		"slogan"	: "不堕不死，奋斗不止！",
 		
