@@ -1,5 +1,7 @@
 // by firefox 11/21/2009
 
+//特技，冲锋，一枪将某某挑于马下
+
 
 #include <ansi.h>
 

@@ -39,18 +39,18 @@ void flyaway()
 	int phase = NATURE_D->query_current_day_phase();
 	object me = this_object();
 
-	call_out("flyaway",10 + random(10));
+	call_out("flyaway",5 + random(5));
 	if (!living(me)) return;
 	if (!environment()) return;
 	all=all_inventory(environment(me));
 	if (environment()->query("short")=="东海之滨") {
-		if (random(2)) {
-			message_vision("$N从地上叼起一些石块。\n",me);
+		if (random(10)) {
+			if(!random(5)) message_vision("$N从地上叼起一些石块。\n",me);
 			return;
 		}
 		dest = beach + random(8);
 	} else if (environment()->query("short")=="东海海滩") {
-		if (random(2)) {
+		if (!random(5)) {
 			message_vision("$N将嘴里衔着的石块投入海中。\n",me);
 			return;
 		}
