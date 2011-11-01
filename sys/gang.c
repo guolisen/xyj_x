@@ -4,7 +4,10 @@
 #include <xyj_x.h>
 #include <ansi.h>
 
-string* _elems = ({"ftb", "shenzhou", "taishan", "buduo", "lushan", "szcg", "cangyue", "dongxing"});
+string* _elems = ({
+	"ftb", "shenzhou", "taishan", "buduo", "lushan", "szcg", "cangyue",
+	"dongxing", "xiaoyao"
+});
 
 void create()
 {
