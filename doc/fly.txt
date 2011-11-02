@@ -1,0 +1,13 @@
+fly changan sky	飞到长安上空
+fly sky		飞到当前上空
+fly sb.		飞向某人
+fly around	空中盘旋，遍历室外街道的上空
+fly down	落地
+fly around sb.	空中盘旋搜索某人
+
+look around	举目向四周了望
+
+room init 物品或不能飞的人被扔下去
+
+
+坐标系统
