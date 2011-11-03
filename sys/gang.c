@@ -6,7 +6,7 @@
 
 string* _elems = ({
 	"ftb", "shenzhou", "taishan", "buduo", "lushan", "szcg", "cangyue",
-	"dongxing", "xiaoyao"
+	"dongxing", "huisuo", "xiaoyao"
 });
 
 void create()
