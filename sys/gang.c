@@ -5,7 +5,7 @@
 #include <ansi.h>
 
 string* _elems = ({
-	"ftb", "shenzhou", "taishan", "buduo", "lushan", "szcg", "cangyue",
+	"ftb", "shenzhou", "taishan", "haili", "buduo", "lushan", "szcg", "cangyue",
 	"dongxing", "huisuo", "xiaoyao"
 });
 
