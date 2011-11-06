@@ -1,5 +1,3 @@
-//Cracked by Roath
-// combatd.c
 
 //#pragma optimize
 
@@ -20,48 +18,46 @@ int check_family(string fam);
 
 //this mapping indicates whether this family class is
 //xian or yao.
-mapping family=([
-	"方寸山三星洞":1,
-	"南海普陀山":1,
-	"将军府":1,
-	"五庄观":1,
-	"阎罗地府":0,
-	"月宫":0,
-	"东海龙宫":0,
-	"龙宫":0,
-	"大雪山":-1,
-	"翠云山芭蕉洞":-1,
-	"陷空山无底洞":-1,
-	"乱石山碧波潭":-1, 
-	"火云洞":-1,
-	"盘丝洞":-1,
+mapping family = ([
+	"方寸山三星洞"		: 1,
+		"南海普陀山"			: 1,
+		"五庄观"				: 1,
+		"月宫"				: 1,
+		"阎罗地府"			: 0,
+		"将军府"				: 0,
+		"东海龙宫"			: 0,
+		"龙宫"				: 0,
+		"大雪山"				: -1,
+		"陷空山无底洞"		: -1,
+		"火云洞"				: -1,
+		"盘丝洞"				: -1,
 ]);
 
 string *guard_msg = ({
 	CYN "$N注视着$n的行动，企图寻找机会出手。\n" NOR,
-	CYN "$N正盯着$n的一举一动，随时准备发动攻势。\n" NOR,
-	CYN "$N缓缓地移动脚步，想要找出$n的破绽。\n" NOR,
-	CYN "$N目不转睛地盯着$n的动作，寻找进攻的最佳时机。\n" NOR,
-	CYN "$N慢慢地移动着脚步，伺机出手。\n" NOR,
+		CYN "$N正盯着$n的一举一动，随时准备发动攻势。\n" NOR,
+		CYN "$N缓缓地移动脚步，想要找出$n的破绽。\n" NOR,
+		CYN "$N目不转睛地盯着$n的动作，寻找进攻的最佳时机。\n" NOR,
+		CYN "$N慢慢地移动着脚步，伺机出手。\n" NOR,
 });
 
 string *catch_hunt_msg = ({
 	HIW "$N和$n仇人相见份外眼红，立刻打了起来！\n" NOR,
-	HIW "$N对着$n大喝：「可恶，又是你！」\n" NOR,
-	HIW "$N和$n一碰面，二话不说就打了起来！\n" NOR,
-	HIW "$N一眼瞥见$n，「哼」的一声冲了过来！\n" NOR,
-	HIW "$N一见到$n，愣了一愣，大叫：「我宰了你！」\n" NOR,
-	HIW "$N喝道：「$n，我们的帐还没算完，看招！」\n" NOR,
-	HIW "$N喝道：「$n，看招！」\n" NOR,
+		HIW "$N对着$n大喝：「可恶，又是你！」\n" NOR,
+		HIW "$N和$n一碰面，二话不说就打了起来！\n" NOR,
+		HIW "$N一眼瞥见$n，「哼」的一声冲了过来！\n" NOR,
+		HIW "$N一见到$n，愣了一愣，大叫：「我宰了你！」\n" NOR,
+		HIW "$N喝道：「$n，我们的帐还没算完，看招！」\n" NOR,
+		HIW "$N喝道：「$n，看招！」\n" NOR,
 });
 
 string *winner_msg = ({
 	CYN "\n$N哈哈大笑，说道：承让了！\n\n" NOR,
-	CYN "\n$N双手一拱，笑着说道：承让！\n\n" NOR,
-	CYN "\n$N胜了这招，向后跃开三尺，笑道：承让！\n\n" NOR,
-	CYN "\n$n脸色微变，说道：佩服，佩服！\n\n" NOR,
-	CYN "\n$n向后退了几步，说道：这场比试算我输了，佩服，佩服！\n\n" NOR,
-	CYN "\n$n向后一纵，躬身做揖说道：阁下武艺不凡，果然高明！\n\n" NOR,
+		CYN "\n$N双手一拱，笑着说道：承让！\n\n" NOR,
+		CYN "\n$N胜了这招，向后跃开三尺，笑道：承让！\n\n" NOR,
+		CYN "\n$n脸色微变，说道：佩服，佩服！\n\n" NOR,
+		CYN "\n$n向后退了几步，说道：这场比试算我输了，佩服，佩服！\n\n" NOR,
+		CYN "\n$n向后一纵，躬身做揖说道：阁下武艺不凡，果然高明！\n\n" NOR,
 });
 
 void create()
@@ -229,12 +225,10 @@ varargs void report_status(object ob, int effective)
 
 varargs void report_sen_status(object ob, int effective)
 {
-
 	message_vision( "( $N" + sen_status_msg(
 		(int)ob->query("sen") * 100 /(1+(int)ob->query("max_sen")) ) 
 		+ " )\n", ob);
 }
-
 
 mapping _usage_tab = ([
 	SKILL_USAGE_ATTACK	: "apply/attack",
@@ -246,9 +240,9 @@ mapping _usage_tab = ([
 varargs int skill_power(object ob, string skill, int usage)
 {
 	int max_sen = ob->query("max_sen");
-	int level = ob->query_skill(skill) + ob->query_skill(skill, 1)/4;
+	int level = ob->query_skill(skill) + ob->query_skill(skill, 1) / 2;
 	int exp = ob->query("combat_exp");
-	
+
 	if(!living(ob)) return 0;
 	if(exp < 0) exp = 0;	
 
@@ -300,12 +294,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	//
 	// (2) Prepare AP, DP for checking if hit.
 	//
-	if( objectp(weapon) )	{
-		if( weapon->query("use_apply_skill") )
-			attack_skill = weapon->query("apply/skill_type");
-		else
-			attack_skill = weapon->query("skill_type");
-	}
+	if( objectp(weapon) ) attack_skill = weapon->query("skill_type");
 	else attack_skill = "unarmed";
 
 	limbs = victim->query("limbs");
@@ -316,10 +305,9 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 
 	dp = skill_power(victim, "dodge", SKILL_USAGE_DEFENSE);
 	// mon 8/3/98
-	if(living(victim)) 
-		dodge_skill = victim->query_skill_mapped("dodge");
-	else
-		dodge_skill = 0;
+	if(living(victim)) dodge_skill = victim->query_skill_mapped("dodge");
+	else dodge_skill = 0;
+	
 	mod_val = 0;
 	if( dodge_skill )  {
 		victim_action = SKILL_D(dodge_skill)->query_action();
@@ -331,8 +319,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	if( dp < 0 ) dp = 0;
 
 	// mon 8/10/99
-	if( dodge_skill && action["dodge"] )  
-		mod_val += action["dodge"];
+	if( dodge_skill && action["dodge"] )  mod_val += action["dodge"];
 
 	mod_val = (100 + mod_val) * dp / 100;
 	if( mod_val < 0 ) mod_val = 0;
@@ -348,8 +335,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 		if( !dodge_skill ) {
 			dodge_skill = "dodge"; 
 			result += SKILL_D(dodge_skill)->query_dodge_msg(limb);
-		}
-		else   {
+		} else {
 			if( victim_action && victim_action["dodge_action"] )
 				result += victim_action["dodge_action"];
 			else
@@ -376,11 +362,9 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 		//
 		if( victim->query_temp("weapon") ) {
 			pp = skill_power(victim, "parry", SKILL_USAGE_DEFENSE);
-			if( !weapon ) pp *= 2;
 			parry_skill = victim->query_skill_mapped("parry");
 		} else {
-			if( weapon ) pp = 0;
-			else pp = skill_power(victim, "unarmed", SKILL_USAGE_DEFENSE);
+			pp = skill_power(victim, "unarmed", SKILL_USAGE_DEFENSE);
 			parry_skill = victim->query_skill_mapped("unarmed");
 		}
 
@@ -401,13 +385,11 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			// because of number of local variable limit, here use
 			// dodge_skill
 			dodge_skill = SKILL_D(parry_skill)->query_parry_msg(weapon);
-			if( dodge_skill )		result += dodge_skill;
-			else
-				result += SKILL_D("parry")->query_parry_msg(weapon);
+			if( dodge_skill ) result += dodge_skill;
+			else result += SKILL_D("parry")->query_parry_msg(weapon);
 
 			if( pp < ap && (!userp(victim) || !userp(me)) 
-				&&  	random(sizeof(victim->query_enemy())) < 4
-				&&	random(your["sen"]*100/your["max_sen"] + your["int"]*your["cps"]) > 150 ) {
+				&& random(your["sen"]*100/your["max_sen"] + your["int"]*your["cps"]) > 150 ) {
 					your["combat_exp"] += 1;
 					victim->improve_skill("parry", 1);
 			}
@@ -419,8 +401,12 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			//	(5) We hit the victim and the victim failed to parry
 			//
 
+			object weapon2 = me->query_temp("secondary_weapon");
+
 			damage = me->query_temp("apply/damage");
-			damage = (damage + random(damage)) / 2;
+			if(weapon2 && weapon2->query("skill_type") != attack_skill)		//firefox 2011.11 
+				damage -= weapon2->query("weapon_prop/damage");
+
 			if( action["damage"] )
 				damage += action["damage"] * damage / 100;
 
@@ -455,24 +441,23 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 				else if(intp(foo) ) damage_bonus += foo * 3 / 4;
 			}
 
-			if( damage_bonus > 0 )
-				damage += (damage_bonus + random(damage_bonus))/2;
-			if( damage < 0 ) damage = 0;
+			damage_bonus -= damage_bonus / 2;										//firefox 2011.11
+			damage += damage_bonus;	
+			damage = (damage + random(damage)) / 2;
 
-			// Let combat exp take effect? NO!
-			damage -= damage / 6;
-			
+			if( damage < 0 ) damage = 0;
+			if(me->query("betray/count") || !me->query("family/family_name"))		//firefox 2011.11
+				damage -= damage / 3;
+
 			//
 			//	(6) Inflict the damage.
 			//
 
 			damage = victim->receive_damage("kee", damage, me );
 
-			if( (me->is_killing(victim) || weapon)
+			if( (me->is_killing(victim->query("id")) || weapon)
 				&& random(damage) > (int)victim->query_temp("apply/armor") ) {
-					// We are sure that damage is greater than victim's armor here.
-					victim->receive_wound("kee",
-						damage - (int)victim->query_temp("apply/armor"), me);
+					victim->receive_wound("kee", damage - (int)victim->query_temp("apply/armor"), me);
 					wounded = 1;
 			}
 
@@ -548,32 +533,19 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	if( functionp(action["post_action"]) )
 		evaluate( action["post_action"], me, victim, weapon, damage);
 
-	if( damage > 0 && attack_type != TYPE_QUICK &&
-		me->query_temp("perf_quick") && me->is_fighting(victim) )   {
-			if( me->query_temp("weapon") &&
-				me->query_temp("perf_quick/"+me->query_temp("weapon")->query("skill_type")) )  {
-					if( me->query_temp("perf_quick/msg") )
-						message_vision(CYN + me->query_temp("perf_quick/msg") +NOR, me, victim);
-					else
-						message_vision(CYN + "$N得势不饶人，对$n展开连续攻击。"+NOR, me, victim);
-					do_attack(me, victim, me->query_temp("weapon"), TYPE_QUICK);
-					return 1;
-			}
-	}
-
 	// See if the victim can make a riposte.
-	if( attack_type==TYPE_REGULAR
-		&&	damage < 1
-		&&	victim->query_temp("guarding") ) {
-			victim->set_temp("guarding", 0);
-			if( random(my["cps"]) < 5 ) {
-				message_vision("$N一击不中，露出了破绽！\n", me);
-				do_attack(victim, me, victim->query_temp("weapon"), TYPE_QUICK);
-			} else {
-				message_vision("$N见$n攻击失误，趁机发动攻击！\n", victim, me);
-				do_attack(victim, me, victim->query_temp("weapon"), TYPE_RIPOSTE);
-			}
+	if( attack_type == TYPE_REGULAR && damage < 1 && victim->query_temp("guarding") ) {
+		victim->set_temp("guarding", 0);
+		if( random(my["cps"]) < 5 ) {
+			message_vision("$N一击不中，露出了破绽！\n", me);
+			do_attack(victim, me, victim->query_temp("weapon"), TYPE_QUICK);
+		} else {
+			message_vision("$N见$n攻击失误，趁机发动攻击！\n", victim, me);
+			do_attack(victim, me, victim->query_temp("weapon"), TYPE_RIPOSTE);
+		}
+		return -3;																//firefox 2011.11
 	}
+	return damage;
 }
 
 //	fight()
@@ -745,7 +717,6 @@ void winner_reward(object killer, object victim)
 
 void killer_reward(object killer, object victim)
 {
-	int bls;
 	string vmark,killmsg,rkmsg;
 	int gain,gain1,lose;
 	string str,killerid;
@@ -760,350 +731,68 @@ void killer_reward(object killer, object victim)
 		int no_pk;
 
 		killer->add("PKS", 1);
-
-		killerid=killer->query("id");
-
-		// mon 8/4/98
-		// to see whether the killer has init the kill on me.
-		// if yes, then this is PK. (init_killer!=-1)
-		// if no, (means the victim init the kill and got killed),
-		// then treat this as normal death. (init_killer==-1)
-		my_killer_list=victim->query_temp("my_killer_list");
+		killerid = killer->query("id");
+		my_killer_list = victim->query_temp("my_killer_list");
 		victim->delete_temp("my_killer_list");
 
-		if(!my_killer_list) init_killer=-1;
-		else init_killer=member_array(killerid, my_killer_list);
+		if(!my_killer_list) init_killer = -1;
+		else init_killer = member_array(killerid, my_killer_list);
 
-		no_pk=killer->query_condition("no_pk_time");
+		no_pk = killer->query_condition("no_pk_time");
 		if(no_pk>10) init_killer=1; // killed by a player who
 		// has PK record, then this is PK.
-		// regardless who init it.
+		// regardless who init it.		
 
-		///////////////////////////////////////////////////////////////////////
-		killmsg=killer->query_temp("kill_msg");
-		if(killmsg)
-		{
-			switch (killmsg)
-			{
-			case "slash":
-				{	rkmsg="斩";	}
-				break;
-			case "slice":
-				{	rkmsg="砍";	}
-				break;
-			case "chop":
-				{	rkmsg="劈";	}
-				break;
-			case "hack":
-				{	rkmsg="劈";	}
-				break;
-			case "thruse":
-				{	rkmsg="刺";	}
-				break;
-			case "pierce":
-				{	rkmsg="刺";	}
-				break;
-			case "wave":
-				{	rkmsg="鞭";	}
-				break;
-			case "whip":
-				{	rkmsg="抽";	}
-				break;
-			case "impale":
-				{	rkmsg="戳";	}
-				break;
-			case "rake":
-				{	rkmsg="筑";	}
-				break;
-			case "bash":
-				{	rkmsg="砸";	}
-				break;
-			case "crush":
-				{	rkmsg="砸";	}
-				break;
-			case "slam":
-				{	rkmsg="挫";	}
-				break;
-			case "throw":
-				{	rkmsg="射";	}
-				break;
-			case "shoot":
-				{	rkmsg="射";	}
-				break;
-				//now start cast :
-				//		case "cast_qiankun":	//非攻击性 transfer , chuqiao, qiankun, yinshen
-				//		{	rkmsg="";	}
-				//		break;
-			case "cast_zhenhuo":
-				{	rkmsg="太乙真火";		}
-				break;
-			case "cast_baxian":
-				{	rkmsg="八仙大阵";		}
-				break;
-			case "cast_bighammer":
-				{	rkmsg="大力降魔杵";		}
-				break;
-			case "cast_jingang":
-				{	rkmsg="召唤金刚";		}
-				break;
-			case "cast_jinguzhou":
-				{	rkmsg="紧箍咒";		}
-				break;
-			case "cast_thunder":
-				{	rkmsg="五雷咒";		}
-				break;
-			case "cast_invocation":
-				{	rkmsg="召唤天将";		}
-				break;
-			case "cast_fenshen":
-				{	rkmsg="分身术";		}
-				break;
-			case "cast_dingshen":
-				{	rkmsg="定身法";		}
-				break;
-			case "cast_light":
-				{	rkmsg="苍灵箭";		}
-				break;
-			case "cast_jieti"://escape, tudun, suliao, huanying
-				{	rkmsg="天魔解体大法";		}
-				break;
-			case "cast_sanmei":
-				{	rkmsg="三味真火";		}
-				break;
-			case "cast_zhuang":
-				{	rkmsg="平天大法";		}
-				break;
-			case "cast_arrow":
-				{	rkmsg="落日神箭";		}
-				break;
-			case "cast_shiyue":// mihun huimeng
-				{	rkmsg="蚀月咒";		}
-				break;
-			case "cast_hufa":
-				{	rkmsg="召唤护法";		}
-				break;
-			case "cast_freez":
-				{	rkmsg="雪舞风灵";		}
-				break;
-			case "cast_gouhun"://miwu
-				{	rkmsg="勾魂术";		}
-				break;
-			case "cast_animate":
-				{	rkmsg="复活鬼魂";		}
-				break;
-				/*		case "cast_":
-				{	rkmsg="";		}
-				break;
-				*/
-				// now start perform msg
-			case "perform_sanban":
-				{	rkmsg="无敌三板斧";		}
-				break;
-			case "perform_qiangjian":
-				{	rkmsg="枪里加锏";		}
-				break;
-			case "perform_storm":
-				{	rkmsg="暴风骤雨";		}
-				break;
-			case "perform_diyu":
-				{	rkmsg="我入地狱";		}
-				break;
-			case "perform_pili":
-				{	rkmsg="霹雳三打";		}
-				break;
-			case "perform_qiankun":
-				{	rkmsg="乾坤一棒";		}
-				break;
-			case "perform_pozhan":
-				{	rkmsg="破绽百出";		}
-				break;
-			case "perform_zhangxinlei":
-				{	rkmsg="掌心雷";		}
-				break;
-			case "perform_flower":
-				{	rkmsg="天女散花";	}
-				break;
-			case "perform_diezhang":
-				{	rkmsg="叠掌";		}
-				break;
-			case "perform_huifeng":
-				{	rkmsg="风回";		}
-				break;
-			case "perform_wuxue":
-				{	rkmsg="舞雪";		}
-				break;
-			case "perform_sheshen":
-				{	rkmsg="舍身技";		}
-				break;
-			case "perform_three":
-				{	rkmsg="神·人·鬼";	}
-				break;
-			case "perform_chaofeng":
-				{	rkmsg="百鸟朝凤";	}
-				break;
-				/*		case "perform_":
-				{	rkmsg="";		}
-				break;
-				*/
-
-				//now start exert .........// 非攻击性 recover refresh transfer regenerate heal lifeheal
-			case "exert_sheqi":
-				{	rkmsg="摄气";		}
-				break;
-			case "exert_roar":
-				{	rkmsg="龙吟";		}
-				break;
-
-			case "special_msg"://特殊的攻击
-				{	rkmsg=killer->query_temp("special_msg");	
-				killer->delete_temp("special_msg");
-				}
-				break;
-			}
-		}//if(killmsg)
-
-
-
-
-		if(userp(killer) && init_killer!=-1) { // killer is user.
-			//           if(userp(killer))  // killer is user.
-			killer->apply_condition("no_pk_time",240+no_pk);
-			//limit on how many one can pk in a row.
-			lose=victim_lose(killer,victim,killerid);
-			gain=lose*8/10;
-			if(gain<0) gain=0;
+		if(userp(killer) && init_killer != -1) { // killer is user.
+			killer->apply_condition("no_pk_time", 240 * 2 + no_pk);
+			lose = victim_lose(killer, victim, killerid);
+			gain = lose * 8 / 10;
+			if(gain < 0) gain = 0;
 			victim->delete_temp("last_fainted_from");
-			/*
-			if(killerid==victim->query("kill/last_killer")) {
-			//discourage repeated killing same player.
-			gain1=victim->query("kill/last_lose")/2;
-			if(gain>gain1) {
-			gain=gain1;
-			}
-			}
-			*/
-			if(lose>100)
-				killer->delete("kill/last_killer");
-			//any one can kill this killer to
-			//get maximum dx benefit.
-			//including the one who last killed 
-			//this killer.
-			//here check lose>100, so one can't
-			//pk a newbie to erase the last_killer flag.
-			killer->add("kill/pkgain",gain);
-			killer->add("daoxing",gain);
 
-			victim->set("kill/last_killer",killerid);
-			//the victim is protected for repeated
-			//killing by the same killer.
-			victim->set("kill/last_lose",gain);
-			//actually last_lose is what the killer gains,
-			//not really the victim lose.
-			//victim loss is in /death/combat_exp_loss
-			//	     victim->add("kill/pklose",lose);
-			//	     victim->add("daoxing",-lose);
+			if(lose > 100)
+				killer->delete("kill/last_killer");
+			killer->add("kill/pkgain", gain);
+			killer->add("daoxing", gain);
+
+			victim->set("kill/last_killer", killerid);
+			victim->set("kill/last_lose", gain);
 
 			victim_penalty(victim);
 
-			str=chinese_daoxing(gain);
-			if(strlen(str)>1) {
-				str=killer->name(1)+"得到"+str+"道行！";
-			} 
+			str = chinese_daoxing(gain);
+			if(strlen(str) > 1)
+				str = killer->name(1) + "得到" + str + "道行！";
+			str = victim->name(1) + "被" + killer->name(1) +  "吃掉了。" + str;
+			CHANNEL_D->do_channel(this_object(), "rumor", str);
 
-			//      add by dragon for PK rumor
-
-			weapon=killer->query_temp("kill_weapon");
-			if(weapon && rkmsg)
-			{			
-				str=victim->name(1)+"在"+
-					MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用"HIY+weapon->name()+HIM+rkmsg+"死了。"+str;
-				CHANNEL_D->do_channel(this_object(), "rumor",str);
-			} else {
-				if(rkmsg && !weapon)
-				{
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用一招"+HIW"“"+rkmsg+"”"+HIM"送去了阎罗地府。"+str;
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}else if(weapon && !rkmsg){
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用"HIY+weapon->name()+HIM"送去了阎罗地府。"+str;
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}else {
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"杀死了。"+str;
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}
-
-
-
-			}
-			bls=10;
-			killer->delete_temp("kill_weapon");
-			killer->delete_temp("kill_msg");
 		} else {    // killer is not user or killer didn't init the kill.
-			int i;
-			string last_faint;
 			object fainter;
-			// mon 8/1/98
-			// check who fainted the victim.
-			// if it was a player faint the victim,
-			// give the player credit for pk :)
-			last_faint=victim->query_temp("last_fainted_from");
-			if(last_faint) {
-				fainter=find_player(last_faint);
-				if(fainter && userp(fainter)) {
-					if(!my_killer_list) init_killer=-1;
-					else init_killer=
-						member_array(last_faint, my_killer_list);
+			string last_faint = victim->query_temp("last_fainted_from");			
 
-					if(init_killer!=-1) {
-						fainter->apply_condition("no_pk_time",240+
-							fainter->query_condition("no_pk_time"));
-						log_file("death","["+ctime(time())+"] "+
-							victim->query("id")+" was fainted by "+
-							fainter->query("id")+" and killed by "+
-							killer->query("id")+".\n");
+			if(last_faint) {
+				fainter = find_player(last_faint);
+				if(fainter && userp(fainter)) {
+					if(!my_killer_list) init_killer = -1;
+					else init_killer = member_array(last_faint, my_killer_list);
+					
+					if(init_killer != -1) {
+						fainter->apply_condition("no_pk_time", 240 + fainter->query_condition("no_pk_time"));
+						log_file("death","[" + ctime(time()) + "] " +
+							victim->query("id") + " was fainted by "+
+							fainter->query("id") + " and killed by "+
+							killer->query("id") + ".\n"
+						);
 					}
 				}
 			}
-
 			victim_penalty(victim);
-
-			bls = 10;
-			//	       CHANNEL_D->do_channel(this_object(), "rumor",
-			//		  sprintf("%s被%s杀死了。", victim->name(1), killer->name(1)));
-			/////////////////for NK rumor		
-			weapon=killer->query_temp("kill_weapon");
-			if(weapon && rkmsg)
-			{			
-				str=victim->name(1)+"在"+
-					MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用"HIY+weapon->name()+HIM+rkmsg+"死了。";
-				CHANNEL_D->do_channel(this_object(), "rumor",str);
-			} else {
-				if(rkmsg && !weapon)
-				{
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用一招"+HIW"“"+rkmsg+"”"+HIM"送去了阎罗地府。";
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}else if(weapon && !rkmsg){
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"用"HIY+weapon->name()+HIM"送去了阎罗地府。";
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}else {
-					str=victim->name(1)+"在"+
-						MISC_D->find_place(environment(killer))+"被"+killer->name(1)+"杀死了。";
-					CHANNEL_D->do_channel(this_object(), "rumor",str);
-				}
-
-
-
-			}
+			CHANNEL_D->do_channel(this_object(), "rumor",
+				sprintf("%s被%s杀死了。", victim->name(1), killer->name(1)));
 		}
 	} else {  //NPC is the victim.
 		if(userp(killer)) {
-			int reward;
-
-			reward=nk_gain(killer, victim);
+			int reward = nk_gain(killer, victim);
 
 			// nk_reward is defined as needed for each NPC
 			// this allows individual NPC to customize NK reward.
@@ -1114,9 +803,9 @@ void killer_reward(object killer, object victim)
 				string msg;
 				killer->add("kill/nkgain",reward);
 				killer->add("daoxing",reward);
-				str=chinese_daoxing(reward);
+				str = chinese_daoxing(reward);
 				tell_object(killer,"\n你得到了"+str+"道行。\n");
-				msg=sprintf("%s(%d)杀死了%s(%d)，得到%d点道行。", 
+				msg = sprintf("%s(%d)杀死了%s(%d)，得到%d点道行。", 
 					killer->query("id"),(killer->query("daoxing")+
 					killer->query("combat_exp"))/2, 
 					victim->query("id"),(victim->query("daoxing")+
@@ -1126,20 +815,8 @@ void killer_reward(object killer, object victim)
 			}
 		}
 		killer->add("MKS", 1);
-		bls = 1;
 	}
-
-	if(!userp(killer) &&
-		((killer->query("daoxing")+killer->query("combat_exp"))/10>
-		(victim->query("daoxing")+victim->query("combat_exp"))) ) bls=0;
-	//mon 2/15/98
-	//can't use newbie to kill NPC to increase NPC's bls.
-
-	// NPC got 10 times of bellicosity than user.
-	killer->add("bellicosity", bls * (userp(killer)? 1: 10));
-
-	if( stringp(vmark = victim->query("vendetta_mark")) )
-		killer->add("vendetta/" + vmark, 1);
+	killer->add("bellicosity", 1);
 
 	if(userp(killer)) killer->save();
 	if(userp(victim)) victim->save();
@@ -1147,40 +824,32 @@ void killer_reward(object killer, object victim)
 
 void victim_penalty(object victim)
 {
-	int i;
-
-	// by snowcat 2/21/1998 for death/*
 	int combat_exp_loss = (int)victim->query("combat_exp") / 40;
 	int dx_loss = (int)victim->query("daoxing") / 40;
+	int no_pk_time=victim->query_condition("no_pk_time");
 
 	victim->clear_condition();
-	// Give the death penalty to the dying user.
 	victim->set("bellicosity", 0);
+	
+	if(no_pk_time > 240) victim->apply_condition("no_pk_time", no_pk_time - 80);
 
-	i=victim->query_condition("no_pk_time");
-	if(i>240) victim->apply_condition("no_pk_time",i-80);
-
-	victim->set("death/mud_age",victim->query("mud_age"));
-	victim->set("death/combat_exp_loss",combat_exp_loss);
-	victim->set("death/dx_loss",dx_loss);
-	log_file("death",victim->query("id")+
-		" lost "+combat_exp_loss+" exp points and "
-		+ dx_loss+ " dx points.\n");
+	victim->set("death/mud_age", victim->query("mud_age"));
+	victim->set("death/combat_exp_loss", combat_exp_loss);
+	victim->set("death/dx_loss", dx_loss);
+	log_file("death", victim->query("id") + " lost " 
+		+ combat_exp_loss+" exp points and " + dx_loss+ " dx points.\n");
 
 	victim->add("combat_exp", -combat_exp_loss);
 	victim->add("daoxing", -dx_loss);
-	victim->delete("vendetta");
-	if( victim->query("thief") )
-		victim->set("thief", (int)victim->query("thief") / 2);
+
 	if( (int)victim->query("potential") > (int)victim->query("learned_points"))
-		victim->add("potential",
+		victim->add("potential", 
 		((int)victim->query("learned_points") - (int)victim->query("potential"))/2 );
-	if(random(100)>(int)victim->query("kar")) {
+	if(random(100) > (int)victim->query("kar")) {
 		victim->set("death/skill_loss",1);
 		victim->skill_death_penalty();
 	} else
-		victim->set("death/skill_loss",0);
-
+		victim->set("death/skill_loss", 0);
 	victim->save();
 }
 
@@ -1285,7 +954,6 @@ int nk_gain(object killer, object victim)
 		//        no family NPC, dx reward reduse.
 
 		return reward;
-
 	}
 	return 0;
 }
@@ -1347,153 +1015,5 @@ int check_family(string fam)
 		return family[fam];
 	else
 		return 0;
-}
-
-
-//the following functions are for performs...weiqi
-//copy and modified from spelld.c
-
-int attacking_perform_success(object attacker, object target, int skill_level, int success_adj)
-{
-	int ap, dp, success;
-
-	ap = ( skill_level * skill_level * skill_level / 10 ); //this is from skill.
-	//at high exp, the skill level can not follow, so need adjustment here.
-	ap = ap*(1+attacker->query("combat_exp")/500000);
-	ap = ap+attacker->query("combat_exp");
-	dp = target->query("combat_exp");
-
-	success = 0;
-
-	if ( success_adj < 20 ) success_adj = 20;
-	else if( success_adj > 500 ) success_adj = 500;
-
-	ap = ap*success_adj/100;
-
-	if( random(100)>dp*100/(ap+dp) ) success = 1;
-
-	return success;
-}
-
-int attacking_perform_damage(object attacker, object target, int damage_adj)
-{
-	int a_neili, d_neili, damage;
-
-	if( damage_adj < 50 ) damage_adj = 50;
-	else if( damage_adj > 200 ) damage_adj = 200;
-
-	//will use current neili...but do not allow it exceeds 2 time of the max.
-	a_neili = attacker->query("force");
-	if( a_neili > 2*attacker->query("max_force") ) a_neili = 2*attacker->query("max_force");
-	d_neili = target->query("force");
-	if( d_neili > 2*target->query("max_force") ) d_neili = 2*target->query("max_force");
-
-
-	//neili and qi. weaker than cast here...
-	damage = (a_neili - d_neili)/30 + 
-		random(attacker->query("eff_kee") / 30)-random(target->query("eff_kee") / 30);
-
-	//mana_factor, here the attacker has some advantage.
-	//the damage_adj higher, the better for attacker.
-	damage += (3*damage_adj/200) //weaker than cast here...
-		*( attacker->query("force_factor") - random(target->query("force_factor")) );
-
-	//for backfire, we need let it be serious...
-	if( damage < 0 ) damage = damage - target->query("force_factor"); 
-	//here increase the damage, since previously it's included in random()
-
-	damage = damage*damage_adj/100; //last damage scaled again.
-
-	//finally, we need let the force level useful...
-	//the setting is, at enabled level 200, the damage will double.
-	if( damage > 0 )
-	{
-		damage += (damage*(int)attacker->query_skill("force"))/200;
-	}
-	else if ( damage < 0 )
-	{
-		damage += (damage*(int)target->query_skill("force"))/200;
-	}
-
-
-	return damage;
-}
-
-/*
-weiqi 981206
-attacking-cast...called from spells function.
-modified for perform...
-a typical call would be:
-
-COMBAT_D->attacking_perform(
-me, 
-//attacker 
-target, 
-//target
-skill_level, 
-//level of skill used
-success_adj, 
-//success adjustment
-damage_adj, 
-//damage adjustment
-"both", 
-//damage type: could be "qi"/"kee", "shen"/"sen", ...default "both"
-HIC "$N几个指头迅速捻动，突然张嘴一喷！红橙黄三道火焰呼！地一声向$n卷去！\n" NOR,
-//initial message
-HIC "结果$n被烧得焦头烂额！\n" NOR, 
-//success message
-HIC "但是$n轻轻一跳就躲了开来。\n" NOR, 
-//fail message
-HIC "但是火焰被$n以法力一逼，反向$N回卷而去！\n" NOR, 
-//backfire initial message
-HIC "结果太乙真火反噬，$n被烧得焦头烂额！\n" NOR
-//backfire hit message. note here $N and $n!!!
-);
-*/
-void attacking_perform(
-	object attacker, 
-	object target, 
-	int skill_level,//the level of skill used to attack.
-	int success_adj, 
-	int damage_adj, //default value is 100 for this 2 parameters.
-	string damage_type, //must be "shen"/"sen", "qi"/"kee" or "both"(default)
-	string msg_init, 
-	string msg_success, 
-	string msg_fail, 
-	string msg_backfire_init,
-	string msg_backfire_success)
-{
-	int damage;
-
-	//first, show the initial message...
-	message_vision( msg_init, attacker, target );
-
-	//calculate if the casting can happen...
-	if( attacking_perform_success(attacker, target, skill_level, success_adj) == 0 )
-	{
-		message_vision( msg_fail, attacker, target );
-		//let the target kill attacker.
-		target->kill_ob(attacker);
-		return;
-	}
-
-	damage = attacking_perform_damage(attacker, target, damage_adj);
-
-	if( damage > 0 ) //attacker hit target
-		SPELL_D->apply_damage(attacker, target, damage, damage_type, msg_success);
-
-	else if( damage < 0 ) //backfire
-	{
-		message_vision(msg_backfire_init, attacker, target);
-		SPELL_D->apply_damage(target, attacker, -damage, damage_type, msg_backfire_success);
-	}
-
-	else //damge=0
-		message_vision(HIB "结果正好被$N以内力逼住，谁也没有吃亏。\n" NOR, target);
-
-	//let the target kill attacker.
-	target->kill_ob(attacker);
-
-	return;
 }
 
