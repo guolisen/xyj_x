@@ -9,7 +9,6 @@ inherit F_DBASE;
 #define XK					2			//相克系数
 
 
-//门派法术加成
 mapping family_spells_ = ([
 	"南海普陀山"		: "buddhism",
 	"方寸山三星洞"	: "dao",
@@ -25,6 +24,16 @@ mapping family_spells_ = ([
 	"火云洞"			: "pingtian-dafa",
 	"盘丝洞"			: "pansi-dafa",
 ]);
+
+// 纯门派本门法术奖励，firefox 2011.11
+int family_bonus(object who)
+{
+	string skill = who->query_skill_mapped("spells");
+	string family = who->query("family/family_name");
+
+	return !who->query("betray/count") && (family_spells_[family] == skill);
+}
+
 
 // table for 法术相克 
 mapping table = ([
@@ -197,31 +206,31 @@ void apply_damage(object winner, object victim, int damage, string damage_type, 
 }
 
 /*
-weiqi 981206
-attacking-cast...called from spells function.
-a typical call would be:
+	weiqi 981206
+	attacking-cast...called from spells function.
+	a typical call would be:
 
-SPELL_D->attacking_cast(
-me, 
-//attacker 
-target, 
-//target
-success_adj, 	
-//success adjustment
-damage_adj, 	
-//damage adjustment
-"both", 		
-//damage type: could be "qi"/"kee", "shen"/"sen", ...default "both"
-HIC "$N几个指头迅速捻动，突然张嘴一喷！红橙黄三道火焰呼！地一声向$n卷去！\n" NOR,
-//initial message
-HIC "结果$n被烧得焦头烂额！\n" NOR, 
-//success message
-HIC "但是$n轻轻一跳就躲了开来。\n" NOR, 
-//fail message
-HIC "但是火焰被$n以法力一逼，反向$N回卷而去！\n" NOR, 
-//backfire initial message
-HIC "结果太乙真火反噬，$n被烧得焦头烂额！\n" NOR
-//backfire hit message. note here $N and $n!!!
+	SPELL_D->attacking_cast(
+	me, 
+	//attacker 
+	target, 
+	//target
+	success_adj, 	
+	//success adjustment
+	damage_adj, 	
+	//damage adjustment
+	"both", 		
+	//damage type: could be "qi"/"kee", "shen"/"sen", ...default "both"
+	HIC "$N几个指头迅速捻动，突然张嘴一喷！红橙黄三道火焰呼！地一声向$n卷去！\n" NOR,
+	//initial message
+	HIC "结果$n被烧得焦头烂额！\n" NOR, 
+	//success message
+	HIC "但是$n轻轻一跳就躲了开来。\n" NOR, 
+	//fail message
+	HIC "但是火焰被$n以法力一逼，反向$N回卷而去！\n" NOR, 
+	//backfire initial message
+	HIC "结果太乙真火反噬，$n被烧得焦头烂额！\n" NOR
+	//backfire hit message. note here $N and $n!!!
 );
 */
 void attacking_cast(
@@ -250,6 +259,8 @@ void attacking_cast(
 	}
 
 	damage = attacking_cast_damage(attacker, target, damage_adj);
+	if(!family_bonus(attacker)) damage -= damage / 3;					//firefox 2011.11
+
 	if( damage > 0 ) //attacker hit target
 		apply_damage(attacker, target, damage, damage_type, msg_success);
 	else if( damage < 0 ) {
