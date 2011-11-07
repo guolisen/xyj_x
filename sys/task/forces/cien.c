@@ -47,7 +47,6 @@ int pre_check(object employer, object who)
 void give_reward(object who, int reward)
 {
 	who->add(BALANCE, reward);
-	who->add(FAME_PROP + "/misc/cien", REWARD1 / 2);
 //	trace(BALANCE + ":" + reward);
 }
 

@@ -1,4 +1,3 @@
-// cracked by vikee 2/09/2002   vikee@263.net
 // spell_d.c.
 // mon 12/6/98
 
@@ -9,25 +8,38 @@ inherit F_DBASE;
 #define K					1000
 #define XK					2			//相克系数
 
-/* table for 法术相克 
-for example,
-"dao": ({"yaofa","dengxian-dafa"}),
-means, dao can 克制 yaofa and dengxian-dafa.
-*/
+
+//门派法术加成
+mapping family_spells_ = ([
+	"南海普陀山"		: "buddhism",
+	"方寸山三星洞"	: "dao",
+	"五庄观"			: "taiyi",
+	"月宫"			: "moonshentong",
+
+	"将军府"			: "baguazhou",
+	"阎罗地府"		: "gouhunshu",
+	"东海龙宫"		: "seashentong",
+
+	"大雪山"			: "dengxian-dafa",
+	"陷空山无底洞"	: "yaofa",
+	"火云洞"			: "pingtian-dafa",
+	"盘丝洞"			: "pansi-dafa",
+]);
+
+// table for 法术相克 
 mapping table = ([
 	// xian
 	"baguazhou"		: ({"dengxian-dafa"}),
 	"buddhism"		: ({"pingtian-dafa"}),
-	"dao"			: ({"yaofa","tianmo"}),
+	"dao"			: ({"yaofa"}),
 	"taiyi"			: ({"moonshentong"}),
 	// yao
 	"dengxian-dafa"	: ({"moonshentong"}),
 	"pingtian-dafa"	: ({"seashentong"}),
-	"tianmo"		: ({"buddhism"}),
 	"yaofa"			: ({"gouhunshu"}),
 	// neutral
 	"gouhunshu"		: ({"baguazhou"}),
-	"moonshentong"	: ({"tianmo","dao"}),
+	"moonshentong"	: ({"dao"}),
 	"seashentong"	: ({"taiyi"}),
 ]);
 
@@ -143,8 +155,7 @@ int attacking_cast_damage(object attacker, object target, int damage_adj)
 //weiqi 981206
 //this function can be called when want apply a damage to a victim while allow
 //the victim use his/her self-made fabao to defense.
-void apply_damage(object winner, object victim, 
-	int damage, string damage_type, string msg_hit)
+void apply_damage(object winner, object victim, int damage, string damage_type, string msg_hit)
 {
 	int damage_kee = 0;
 	int damage_sen = 0;

@@ -17,7 +17,7 @@ void set_skills(int level)
 	SKI->set_list2(_this, FAMILY->skills_of("½«¾ü¸®"), level);
 
 	set("chat_msg_combat", ({
-        (: perform_action, "axe", "sanban" :),
+//        (: perform_action, "axe", "sanban" :),
         (: exert_function, "jingxin" :) })
 	);
 

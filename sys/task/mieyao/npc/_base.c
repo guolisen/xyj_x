@@ -24,12 +24,12 @@ mapping calc_coef(object ob, int level)
 		"skill"		: n,
 		"exp"		: n,
 		"dx"		: n,
-		"kee"		: n * 2,
-		"sen"		: n * 2,
+		"kee"		: n * 3 / 2,
+		"sen"		: n * 3 / 2,
 		"force"		: n - 20,
 		"mana"		: n - 20,
-		"f_factor"	: 20,
-		"m_factor"	: 1,
+		"f_factor"	: 10,
+		"m_factor"	: 10,
 		"chance"	: 5 + level / 2,	//施法机会
 	]);
 	return c;

@@ -255,6 +255,15 @@ varargs int skill_power(object ob, string skill, int usage)
 	return level;
 }
 
+// weapon vs env
+int weapon_fit_env(object weapon, object env)
+{
+	if(weapon && (weapon->query("flag") & TWO_HANDED))
+		return env->query("outdoors") != 0;
+	else
+		return env->query("outdoors") == 0;
+}
+
 // do_attack()
 //
 // Perform an attack action. This function is called by fight() or as an
@@ -271,6 +280,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	int wounded = 0;
 	//int cost;
 	int mod_val;
+	object my_env = environment(me);
 
 	my = me->query_entire_dbase();
 	your = victim->query_entire_dbase();
@@ -301,6 +311,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	limb = limbs[random(sizeof(limbs))];
 
 	ap = skill_power(me, attack_skill, SKILL_USAGE_ATTACK);
+	if(!weapon_fit_env(weapon, my_env)) ap -= ap / 5;						//firefox 2011.11
 	if( ap < 1) ap = 1;
 
 	dp = skill_power(victim, "dodge", SKILL_USAGE_DEFENSE);
@@ -315,7 +326,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			mod_val = victim_action["dodge_power"];
 	}
 	if( victim->is_busy() ) dp /= 3;
-	if( victim->query_temp("no_move") ) dp /= 3;			//2010.11 for no_move
+	if( victim->query_temp("no_move") ) dp /= 3;							//firefox 2010.11 for no_move
 	if( dp < 0 ) dp = 0;
 
 	// mon 8/10/99
