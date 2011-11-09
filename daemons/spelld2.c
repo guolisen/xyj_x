@@ -36,7 +36,7 @@ int family_bonus(object who)
 
 
 // table for 法术相克 
-mapping table = ([
+mapping xiangke = ([
 	// xian
 	"baguazhou"		: ({"dengxian-dafa"}),
 	"buddhism"		: ({"pingtian-dafa"}),
@@ -51,54 +51,6 @@ mapping table = ([
 	"moonshentong"	: ({"dao"}),
 	"seashentong"	: ({"taiyi"}),
 ]);
-
-/* determine whether two 法术 are 相克制
-if spell1 克制 spell2, then return = 1.
-if spell2 克制 spell1, then return = -1.
-otherwise, return 0.
-*/
-int skill_xiangke(string spell1, string spell2)
-{
-	int neutral=0;
-	int result;
-
-	if(undefinedp(table[spell1]) ||
-		undefinedp(table[spell2])) return neutral;
-
-	if(member_array(spell1, table[spell2])>-1) {
-		// spell2 can 克制 spell1.
-		result=-1;
-	} else if(member_array(spell2, table[spell1])>-1) {
-		// spell1 can 克制 spell2.
-		result=1;
-	} else {
-		result=neutral;
-	}
-
-	return result;
-}
-
-/* determine whether two players' 法术 are 相克制
-only effective between two players,
-or a NPC against a player,
-can't a player take advantage of a npc.
-if obj1 克制 obj2, then return = 1.
-if obj2 克制 obj1, then return = -1.
-otherwise, return 0.
-*/
-int check_xiangke(object obj1, object obj2)
-{
-	int neutral = 0;
-	string skill1 = obj1->query_skill_mapped("spells");
-	string skill2 = obj2->query_skill_mapped("spells");
-
-	// need at least 20 level of special spells.
-	if(obj1->query_skill(skill1,1) < 20) return neutral;
-	if(obj2->query_skill(skill2,1) < 20) return neutral;
-
-	return skill_xiangke(skill1, skill2);
-}
-
 
 //法术能量
 varargs int spell_power(object ob)
@@ -125,22 +77,17 @@ int attacking_cast_success(object attacker, object target, int success_adj)
 	int ap = spell_power(attacker);
 	int dp = spell_power(target);
 
-	int xk = check_xiangke(attacker, target);
-	if(xk == 1) dp = dp / XK;
-	if(xk == -1) ap = ap / XK;
 	if (!target->is_fighting(attacker)) dp /= 2;		//躲树后搓火球
 
 	trace("ap: " + ap + " dp:" + dp);
 
-	return random(ap) * success_adj / 90 >= dp / 2;
+	return random(ap) * success_adj / 100 >= dp / 2;			//firefox 2011.11
 }
 
 private int calc_fali(object who)
 {
-	int fali = who->query("mana") / 30;
-
+	int fali = who->query("mana_factor") * 5;
 	fali += who->query("eff_sen") / 40;
-	fali += who->query("mana_factor") * 4;
 
 	if(!living(who)) fali = 0;
 	return fali;
@@ -154,9 +101,7 @@ int attacking_cast_damage(object attacker, object target, int damage_adj)
 
 	trace("a_fali:" + a_fali + " d_fali:" + d_fali + " damage:" + damage);
 
-	//if(damage > 1000) damage = 1000;
-	
-	if(a_fali < random(d_fali / 10)) damage = -damage / 2;
+	if(a_fali < random(d_fali / 5)) damage = -damage / 2;
 
 	return damage;
 }
@@ -259,7 +204,9 @@ void attacking_cast(
 	}
 
 	damage = attacking_cast_damage(attacker, target, damage_adj);
-	if(!family_bonus(attacker)) damage -= damage / 3;					//firefox 2011.11
+	
+	damage -= damage / 5;									//firefox 2011.11
+	if(!family_bonus(attacker)) damage -= damage / 3;
 
 	if( damage > 0 ) //attacker hit target
 		apply_damage(attacker, target, damage, damage_type, msg_success);

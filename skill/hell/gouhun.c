@@ -10,9 +10,9 @@ inherit SSERVER;
 
 int cast(object me, object target)
 {
-	int n = at_night() ? 1 : 4;
-	int success_adj = 120 * 2 / n;
-	int damage_adj = 120 * 2 / n;
+	int k = at_night() ? 1 : -1;
+	int success_adj = 120 + k * 60;
+	int damage_adj = 120 + k * 60;
 	int cost = 25 + 2 * me->query("mana_factor");
 	int anti_magic = me->query_skill("gouhunshu") * 2 / (1 + me->query("betray/count"));
 

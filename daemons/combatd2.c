@@ -311,7 +311,9 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	limb = limbs[random(sizeof(limbs))];
 
 	ap = skill_power(me, attack_skill, SKILL_USAGE_ATTACK);
-	if(!weapon_fit_env(weapon, my_env)) ap -= ap / 5;						//firefox 2011.11
+	if(weapon_fit_env(weapon, my_env)) ap += ap / 10;						//firefox 2011.11
+	else ap -= ap / 10;
+
 	if( ap < 1) ap = 1;
 
 	dp = skill_power(victim, "dodge", SKILL_USAGE_DEFENSE);
@@ -371,12 +373,15 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 		//
 		//	(4) Check if the victim can parry this attack.
 		//
-		if( victim->query_temp("weapon") ) {
+		object victim_weapon = victim->query_temp("weapon");
+
+		if( victim_weapon ) {
 			pp = skill_power(victim, "parry", SKILL_USAGE_DEFENSE);
 			parry_skill = victim->query_skill_mapped("parry");
 		} else {
 			pp = skill_power(victim, "unarmed", SKILL_USAGE_DEFENSE);
 			parry_skill = victim->query_skill_mapped("unarmed");
+			if(victim->query_temp("apply/damage") < 50) pp /= 2;				//firefox 2011.11
 		}
 
 		if( victim->is_busy() ) pp /= 3;
@@ -433,7 +438,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			}
 
 			if( action["force"] )
-				damage_bonus += action["force"] * damage_bonus / 100;
+				damage_bonus += action["force"] * damage_bonus / 100 / 2;		//firefox 2011.11
 
 			if( martial_skill = me->query_skill_mapped(attack_skill) ) {
 				foo = SKILL_D(martial_skill)->hit_ob(me, victim, damage_bonus);
@@ -452,7 +457,6 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 				else if(intp(foo) ) damage_bonus += foo * 3 / 4;
 			}
 
-			damage_bonus -= damage_bonus / 2;										//firefox 2011.11
 			damage += damage_bonus;	
 			damage = (damage + random(damage)) / 2;
 

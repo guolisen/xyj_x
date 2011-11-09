@@ -96,18 +96,21 @@ int practice_skill(object me)
 #define at_night() (NATURE_D->query_current_day_phase() / 6)
 
 mixed hit_ob(object me, object victim, int damage_bonus)
-{
+{	
 	//吓人与防吓要素：胆大，镇定，长得丑，半夜三更
 	int c1 = me->query("cor") + me->query("cps") - me->query("per");
 	int c2 = victim->query("cor") + victim->query("cps") - victim->query("per");
 	int ratio = c1 * 100 / max2(1, c2);
-	int damage = victim->query("eff_sen") / 5 * min2(200, ratio) / 100;	//最高伤害40%
-	
+	int damage = victim->query("eff_sen") * min2(30, ratio) / 100;	//最高伤害30%
+
 	if(damage_bonus > 100 && at_night() && damage > 100) {
-		victim->receive_damage("sen", damage);
-		victim->receive_wound("sen", damage / 2);
-		return "黑暗中$n毫无防备，被$N这一手惊得头皮发麻，汗毛倒竖！\n";
+		if(cd_start(me, "unarmed_effect", 5))	{
+			victim->receive_damage("sen", damage);
+			victim->receive_wound("sen", damage / 3);
+			return "黑暗中$n毫无防备，被$N这一手惊得头皮发麻，汗毛倒竖！\n";
+		}
 	}
+
 	return 0;
 }
 

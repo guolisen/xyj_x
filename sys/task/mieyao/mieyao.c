@@ -41,12 +41,13 @@ private string reward_skill(object who)
 		({210,	25}),
 		({K*K,	17}),
 	});
-
-	if(skills && sizeof(skills) >= 1) {
+	int n = sizeof(skills);
+	if(skills && n >= 1) {
 		string id = random1(keys(skills));
 		int level = skills[id];
 		int p = MATH->cvt_rang(tab,	level);
-		if(p > random(100)) {
+		
+		if(p > random(100) && n > random(12)) {					//firefox 2011.11
 			string name = to_chinese(id);
 			who->set_skill(id, level + 1);
 			tell_object(who, "你得到了一级" + name + "。\n");
