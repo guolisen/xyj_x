@@ -12,7 +12,7 @@ void create()
 	if( clonep() )
 		set_default_object(__FILE__);
 	else {
-		set("long","拳套上安装着利刃，始于春秋，亦称拳刺、拳剑或拳刃。\n");
+		set("long","拳套上安装着利刃，亦称拳刺、拳剑或拳刃，始于春秋时期。\n");
 		set("unit", "把");
 		set("value", 1000);
 	}

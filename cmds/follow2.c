@@ -1,6 +1,8 @@
 
 inherit F_CLEAN_UP;
 
+object* 
+
 int main(object me, string arg)
 {	
 	if(!arg) return notify_fail("指令格式：follow <某人>|none。\n");
