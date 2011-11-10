@@ -35,10 +35,13 @@ void create()
 	set_skill("dodge", 400);
 	set_skill("parry", 400);
 
-	set("chat_chance", 40);
+	set("chat_chance", 5);
 	set("chat_msg", ({ (: random_move :) }));
 
 	setup();
 
 	carry_object("/d/obj/cloth/linen")->wear();
+
+	if(!random(20))
+		carry_object(X_DIR"obj/weapon/quanli")->wield();
 }
