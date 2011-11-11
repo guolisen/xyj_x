@@ -34,7 +34,7 @@ void init()
 
 int do_dive(string arg)
 {
-	if(cannot_move(_player)) return notify_fail("你现在动不了。\n");
+	if(!can_move(_player)) return notify_fail("你现在动不了。\n");
 
 	message_vision(CYN"$N纵身一跃，扑通一声跳进了莲花池．\n"NOR, _player);
 	_player->move(__DIR__"hudi");

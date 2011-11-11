@@ -5,6 +5,27 @@ inherit NPC;
 
 #include <xyj_x.h>
 
+//判断护法有效性
+int is_valid(object me, object guard)
+{
+	return guard->query_temp("invoker") == me
+		&& living(guard) && !me->is_fighting(guard));
+}
+
+//获取护法
+object* gards(object me)
+{
+	object env = environment(me);
+	object* arr = ({});
+	foreach(object ob in all_inventory(env)) {
+		if(is_valid(me, ob)	{
+			arr += ({ob});
+		}
+	}
+	return arr;
+}
+
+
 void create()
 {
 	set_name("护法", ({"jiashen"}));
@@ -58,6 +79,19 @@ void invocation(object leader)
 	}
 }
 
+int do_follow(object leader, object target)
+{
+}
+
+int do_kill(object leader, object target)
+{
+
+}
+
+int protect(object leader, object target)
+{
+
+}
 
 
 
@@ -66,4 +100,5 @@ void die()
 	message_vison(query("leave_msg"), this_object());
 	destruct(this_object());
 }
+
 

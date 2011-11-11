@@ -3,6 +3,7 @@
 
 #include <ansi.h>
 #include "valid_kill.h";
+#include <xyj_x.h>
 
 inherit F_CLEAN_UP;
 void do_kill(object,object);
@@ -126,12 +127,12 @@ void remove_list(string me, string obj)
 int help(object me)
 {
   write(@HELP
-指令格式 : kill <人物>
+指令格式 : kill [-g] <人物>
  
 这个指令让你主动开始攻击一个人物，并且□试杀死对方，kill 和 fight 最大的
 不同在于双方将会真刀实枪地打斗，也就是说，会真的受伤。由于 kill 只需单方
 面一厢情愿就可以成立，因此你对任何人使用 kill 指令都会开始战斗，通常如果
-对方是 NPC 的话，他们也会同样对你使用 kill。
+对方是 NPC 的话，他们也会同样对你使用 kill。参数-g用于指示护法。
 
 当有人对你使用 kill 指令时会出现红色的字样警告你，对于一个玩家而言，如果
 你没有对一名敌人使用过 kill 指令，就不会将对方真的打伤或杀死( 使用法术除

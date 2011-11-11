@@ -49,7 +49,7 @@ void init()
 int do_drop(string arg)
 {
 	if(_this->query("name") == NAME0 
-		&& !cannot_move(_player)
+		&& can_move(_player)
 		&& REI_D->precondition(_player)
 		&& (arg == "liuli zhan" || arg == "zhan"))
 	{

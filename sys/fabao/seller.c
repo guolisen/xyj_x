@@ -37,7 +37,7 @@ int do_dig(string arg)
 	string str = CYN"$N奋力挖起地上的浮土......，%s映入眼帘。\n"NOR;
 	int i = query("has_box");
 
-	if(cannot_move(_player)) return notify_fail("你正忙着！\n");	
+	if(!can_move(_player)) return notify_fail("你正忙着！\n");	
 	_player->start_busy(3);
 
 	if(random(5)) {

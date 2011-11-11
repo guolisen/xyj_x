@@ -9,6 +9,8 @@
 
 inherit F_DBASE;
 
+#define PROTECT "/cmds/std/protect"
+
 int victim_lose(object killer,object victim,string killerid);
 void victim_penalty(object victim);
 int nk_gain(object killer, object victim);
@@ -281,6 +283,8 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	//int cost;
 	int mod_val;
 	object my_env = environment(me);
+
+	victim = PROTECT->stand_in(victim);			
 
 	my = me->query_entire_dbase();
 	your = victim->query_entire_dbase();

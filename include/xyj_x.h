@@ -27,6 +27,7 @@
 // Inheritable Standard Objects
 
 #define ROOM_SBC			X_DIR"std/sbc"
+#define GUARD				X_DIR"std/guard"
 
 // Features
 

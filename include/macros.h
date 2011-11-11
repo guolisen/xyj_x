@@ -57,11 +57,11 @@
 //判断是不是坐骑
 #define is_horse(ob) (mapp(ob->query("ride")))
 
-//判断目标是否能动作
-#define cannot_move(who) (who->is_busy() || who->query_temp("no_move") || who->query_temp("pending/exercising") || who->query_temp("pending/meditating"))
-
 //判断目标是否能no_move
 #define is_no_move(who) (who->query_temp("no_move"))
+
+//判断目标是否能动作
+#define can_move(who) (!who->is_busy() && !is_no_move(who) && living(who) && !who->query_temp("pending/exercising") && !who->query_temp("pending/meditating"))
 
 //经验总和
 #define total_exp(who) (who->query("combat_exp") + who->query("daoxing"))

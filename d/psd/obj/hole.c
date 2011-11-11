@@ -36,7 +36,7 @@ int do_dig(string arg)
 	});
 	int i = query("has_box");
 
-	if(cannot_move(_player)) return notify_fail("你正忙着！\n");	
+	if(!can_move(_player)) return notify_fail("你正忙着！\n");	
 
 	_player->start_busy(1);
 

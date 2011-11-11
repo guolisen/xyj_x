@@ -1,84 +1,92 @@
 
 #include <ansi.h>
+#include <xyj_x.h>
 
 inherit F_CLEAN_UP;
 
+#define CD						30
+#define DURATION				23		//大约2招
+
+
+//保护某人[舍命]
+int protect_sb(object me, object who, int with_life)
+{
+	int now = time();
+	
+	me->set_temp("protect", who);
+
+	foreach(object ob in who->query_enemy()) {
+		me->fight_ob(ob);
+		ob->fight_ob(me);
+	}
+
+	if(!with_life) 
+		message_vision(HIC"$N开始保护$n。\n"NOR, me, who);
+	else {
+		if(!cd_start(me, "protect", CD)) return notify_fail("你不能连续拼命。\n");
+		
+		who->set_temp("protector", me);
+		who->set_temp("protector_until", 1 + now + DURATION * SEC_PER_HB);
+		tell_object(me, "你准备舍身保护" + who->name() + "。\n");
+	}
+	return 1;
+}
+
+//保护人代替受难
+object stand_in(object me)
+{
+	object who = me->query_temp("protector");
+	int until = me->query_temp("protector_until");
+
+	if(until > time() && same_env(who, me) && can_move(who)) {
+		message_vision("$N不过一切挡在$n身前！\n", who, me);
+		who->start_busy(DURATION);
+		return who;
+	}
+	return me;
+}
+
 int main(object me, string arg)
 {
-	object who,obj;
-	string msg;
+	object who;
 
-	if( !arg ) {
-		if(me->query_temp("protect") ) {
-			if( objectp(obj=find_living(me->query_temp("protect")) )){
-				tell_object(me, "你现在正在保护"+obj->query("name")+"。\n");
-				return 1;
-			}
-		}
-		tell_object(me,"你要保护什么人？\n");
-		return 1;
+	if(!arg) {
+		who = me->query_temp("protect");
+		if(who)	tell_object(me, "你现在正在保护" + who->name() + "。\n");
+		else tell_object(me, "你现在没有保护任何人。\n");
+	} 
+	else if(arg == "none") {
+		me->set_temp("protect", 0);
+		return notify_ok("OK.\n");
 	}
-
-	if( arg=="me" || arg==me->query("id") )  
+	else if(arg == "me" || arg == me->query("id"))  
 		return notify_fail("你要保护什么人？\n");
+	else {
+		int with_life = sscanf(arg, "-l %s", arg) == 1;
 
-	if( arg=="none") {
-		if( !me->query_temp("protect") ){
-			tell_object(me, "你并没有保护任何人。\n");
-			return 1;
-		}
-		if( objectp(obj=find_living(me->query_temp("protect")) )) {
-			tell_object(obj, me->query("name")+"放弃保护你了。\n");
-			tell_object(me, "你放弃保护"+obj->query("name")+"。\n");
-			me->delete_temp("protect");
-			return 1;
-		}
-		tell_object(me, "你放弃保护别人。\n");                
-		me->delete_temp("protect");                
-		return 1;
+		who = present(arg, environment(me));
+
+		if(!objectp(who))
+			return notify_fail("你要保护什么人？\n");
+
+		if(!living(who))
+			return notify_fail("你不能保护" + who->name() + "。\n");
+
+		if(me->is_fighting(who))
+			return notify_fail("你不能保护战斗对象。\n");
+
+		if(!userp(who) && who->query("owner") != me->query("id"))
+			return notify_fail(who->name() + "拒绝被你保护。\n");
+
+		if(me->query_condition("no_pk_time") > 480)
+			return notify_fail("你最近杀人太多。。。\n");
+
+		if(me->query("age") < 18)
+			return notify_fail("你尚未年幼。\n");
+
+		return protect_sb(me, who, with_life);
 	}
-
-	if( !objectp(who=present(arg, environment(me))))
-		return notify_fail("你要保护什么人？\n");
-
-	if( !living(who) )
-		return notify_fail("你不能保护"+who->query("name")+"。\n");
-
-	if ( 	!userp(who) 
-		&& who->query("owner")
-		&& who->query("owner") != me->query("id") )
-	{
-		message_vision("$n试图保护$N。\n", who, me );
-		who->command("heng");
-		message_vision("$N冷笑道："
-			+ "笑话！在下还用的着" 
-			+ RANK_D->query_rude(me) + "你来保护？\n", who, me);
-		return 1;
-	}		
-
-
-	if( me->query_temp("protect") == who->query("id") )
-		return notify_fail("你已经在保护这个人了。\n");
-
-	if( time()-30 <= (int)me->query_temp("protect_time") )
-		return notify_fail("你保护太多人了。\n");
-
-	if((int)me->query_condition("no_pk_time") > 480 )
-		return notify_fail("你最近杀人太多。。。\n");
-
-	if( me->query_temp("protect") ) {
-		if( objectp(obj=find_living(me->query_temp("protect")) )) {
-			tell_object(obj, me->query("name")+"放弃保护你了。\n");
-			tell_object(me, "你放弃保护"+obj->query("name")+"。\n");
-		}
-	}
-
-	message_vision(HIC"$N开始保护$n。\n"NOR, me, who);
-
-	who->set_temp("protected", 1);
-	who->set_temp("protect_ob", me->query("id"));
-	me->set_temp("protect", who->query("id"));
-	me->set_temp("protect_time", time());
+	
 	return 1;
 
 }
@@ -86,9 +94,9 @@ int main(object me, string arg)
 int help(object me)
 {
    write( @HELP
-指令格式: protect [<人物>|<NPC>|none]
+指令格式: protect [-l] [<人物>|<NPC>|none]
 
-开始保护／放弃保护某人。
+开始保护／放弃保护某人。可选参数-l表示舍身保护目标。
 HELP
    );
    return 1;

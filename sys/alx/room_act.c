@@ -190,6 +190,7 @@ private int post_climb(mapping climb_buff)
 	{
 		mapping buff = camp_buff(me);
 
+		if(!buff) return 1;	//爬旗同时退出，buff可能已经被clear
 		camp_occupy(flag, camp_id(me), buff["color"]);
 		msv(HIC"$N爬到旗杆顶，换上一面战旗。\n"NOR, me);
 		
