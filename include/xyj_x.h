@@ -28,6 +28,7 @@
 
 #define ROOM_SBC			X_DIR"std/sbc"
 #define GUARD				X_DIR"std/guard"
+#define BIAN				X_DIR"std/bian"
 
 // Features
 
@@ -43,6 +44,7 @@
 #define F_IP2ID				X_DIR"feature/ip2id"
 #define F_GREET				X_DIR"feature/greet"
 #define F_LIFE				X_DIR"feature/life"
+#define F_NO_CLEAN_UP		X_DIR"feature/no_clean_up"
 
 // Constant
 

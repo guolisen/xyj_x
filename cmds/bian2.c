@@ -3,13 +3,14 @@
 #include <xyj_x.h>
 #include <ansi.h>
 
-//inherit F_CLEAN_UP;	//带函数指针或callout的对象不要自动销毁
+inherit F_NO_CLEAN_UP;
 
 #define BUFF_ID		"bian2"
 #define BUFF_NAME	HIG"变化"NOR
 #define DMANA		30		//原法力消耗公式 = 30 + 400 / (spells - 20)
 
 int on_timer(mapping buff);
+varargs mapping get_buff(object who, int no_cost);
 
 int main(object me, string arg)
 {
@@ -23,8 +24,8 @@ int main(object me, string arg)
 	if(msg) return notify_fail("你" + msg + "\n");
 
 	if(buff_ori && (!arg || arg == "me" || arg == me->query("id"))) {
-		BUFF->remove1(buff_ori);
 		msv(HIY"$N口念咒语，身形一晃，现了真身。\n"NOR, me);
+		BUFF->remove1(buff_ori);		
 	} else {
 		object who = present(arg + "", environment(me));
 		if(!objectp(who) || who == me) {
@@ -34,22 +35,37 @@ int main(object me, string arg)
 				"skill"		: ([ "spells"	: 25]),
 				"prop"		: ([ "mana"		: 150,	"daoxing": 16000, "max_mana" : 640]),
 				]);
-			mapping buff = BUFF->find(who, BUFF_ID);
+
 
 			if(wizardp(who) && !wizardp(me)) return notify_fail("你的法术不足以变成巫师。\n");
 			if(!BTL->require(me, BUFF_NAME, req)) return 1;
 			BTL->pay(me, (["mana" : 100]));
-			if(buff) {
-				buff = buff + ([]);			//复制buff
-			} else {
-				buff = ([					//创建新的buff
-					"id"		: BUFF_ID,
-					"name"		: BUFF_NAME,
-					"comment"	: "变身成其他的人或物。",
-					"class"		: "变身术",
-					"attr"		: 2,		//隐藏buff
-					"temp"		: ([
-						"d_mana"		: DMANA,
+
+			msv(HIY"$N手捻口诀，念动真言，摇身一变，变得和$n一模一样！\n"NOR, me, who);
+			if(buff_ori) BUFF->remove1(buff_ori);
+			
+			BUFF->add(me, get_buff(who));
+		}
+	}
+	return 1;
+}
+
+//获取目标的变化状态buff
+varargs mapping get_buff(object who, int no_cost)
+{
+	mapping buff = BUFF->find(who, BUFF_ID);
+
+	if(buff) {
+		buff = buff + ([]);			//复制buff
+	} else {
+		buff = ([					//创建新的buff
+			"id"		: BUFF_ID,
+				"name"		: BUFF_NAME,
+				"comment"	: "变身成其他的人或物。",
+				"class"		: "变身术",
+				"attr"		: 2,		//隐藏buff
+				"temp"		: ([
+					"d_mana"		: DMANA,
 						"apply/id"		: who->parse_command_id_list(),
 						"apply/name"	: ({ who->name() }),
 						"apply/short"	: ({ who->short() }),
@@ -62,23 +78,17 @@ int main(object me, string arg)
 						"age"			: who->query("age"),
 						"race"			: who->query("race"),
 						"family"		: who->query("family"),
-					]),
-					"interval"	: 5,
-					"timer_act"	: (: on_timer :),
-					"post_act"	: function(mapping buff) {
-						object me = buff["me"];
-						while( environment(me)->is_character())
-							me->move(environment(environment(me)));
+				]),
+				"interval"	: (no_cost ? 0 : 5),
+				"timer_act"	: (: on_timer :),
+				"post_act"	: function(mapping buff) {
+					object me = buff["me"];
+					while( environment(me)->is_character())
+						me->move(environment(environment(me)));
 					},
-				]);
-			}
-			if(buff_ori) BUFF->remove1(buff_ori);
-			BUFF->add(me, buff);
-		
-			msv(HIY"$N手捻口诀，念动真言，摇身一变，变得和$n一模一样！\n"NOR, me, who);
-		}
+		]);
 	}
-	return 1;
+	return buff;
 }
 
 int on_timer(mapping buff)

@@ -87,10 +87,10 @@ int to_max(object who)
 }
 
 //按比例复制属性
-void copy_prop(object src, object dest, string* tab, int ratio)
+void copy_prop(object src, object dest, string* tab)
 {
 	foreach(string prop in tab) {
-		dest->set(prop, src->query(prop) * ratio / 100);
+		dest->set(prop, src->query(prop));
 	}
 }
 
@@ -111,7 +111,7 @@ void copy_status(object src, object dest, int ratio)
 {
 	string* tab = ({CEXP, DEXP, "max_kee", "max_sen", "max_force", "max_mana"});
 
-	copy_prop(src, dest, tab, ratio);
+	copy_prop(src, dest, tab);
 	copy_skills(src, dest, ratio);
 
 	full(dest);

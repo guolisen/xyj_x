@@ -4,6 +4,8 @@
 #include <xyj_x.h>
 #include <ansi.h>
 
+inherit F_NO_CLEAN_UP;
+
 #define PROP			"buff"
 #define ID(id)			(PROP"/" + id)
 

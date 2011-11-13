@@ -1,3 +1,4 @@
+// firefox 11/11/2011
 
 #include <xyj_x.h>
 
@@ -8,8 +9,9 @@ int follow_sb(object me, object who)
 	if(who == me) return notify_fail("不能跟随自己。\n");
 	me->set_leader(who);
 	tell_object(me, "你决定开始跟随" + who->name() +"一起行动。\n");
-	if(ob->visible(me)) 
+	if(who->visible(me)) 
 		tell_object(who, me->name() + "决定开始跟随你一起行动。\n");
+	return 1;
 }
 
 int main(object me, string arg)
@@ -23,9 +25,9 @@ int main(object me, string arg)
 		int for_guard = sscanf(arg, "-g %s", arg) == 1;
 		object who = (arg == "me") ? me : present(arg, environment(me));
 
-		if(!objectp(ob))
+		if(!objectp(who))
 			return notify_fail("这里没有 " + arg + "。\n");
-		if(!ob->is_character())
+		if(!who->is_character())
 			return notify_fail("只能跟随活物。\n");
 
 		if(for_guard) {

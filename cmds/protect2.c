@@ -1,3 +1,4 @@
+// firefox 11/11/2011
 
 #include <ansi.h>
 #include <xyj_x.h>
@@ -5,30 +6,49 @@
 inherit F_CLEAN_UP;
 
 #define CD						30
-#define DURATION				23		//大约2招
+#define DURATION				3		//大约2招
+
+
+//判断护法有效性
+int is_valid(object me, object guard)
+{
+	return guard->query_temp("protect") == me
+		&& living(guard) && !me->is_fighting(guard);
+}
+
+//获取护法
+object* gards(object me)
+{
+	object env = environment(me);
+	object* arr = ({});
+	foreach(object ob in all_inventory(env)) {
+		if(is_valid(me, ob))	{
+			arr += ({ob});
+		}
+	}
+	return arr;
+}
 
 
 //保护某人[舍命]
 int protect_sb(object me, object who, int with_life)
 {
 	int now = time();
-	
-	me->set_temp("protect", who);
 
-	foreach(object ob in who->query_enemy()) {
-		me->fight_ob(ob);
-		ob->fight_ob(me);
-	}
-
-	if(!with_life) 
-		message_vision(HIC"$N开始保护$n。\n"NOR, me, who);
-	else {
+	if(!with_life) {
+		me->set_temp("protect", who);		
+		foreach(object ob in who->query_enemy()) {
+			me->kill_ob(ob);
+			ob->kill_ob(me);
+		}
+	} else {	
 		if(!cd_start(me, "protect", CD)) return notify_fail("你不能连续拼命。\n");
-		
+
 		who->set_temp("protector", me);
 		who->set_temp("protector_until", 1 + now + DURATION * SEC_PER_HB);
 		tell_object(me, "你准备舍身保护" + who->name() + "。\n");
 	}
+	message_vision(HIC"$N开始保护$n。\n"NOR, me, who);
 	return 1;
 }
 

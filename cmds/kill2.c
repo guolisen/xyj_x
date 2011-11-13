@@ -1,127 +1,74 @@
-// cracked by vikee 2/09/2002   vikee@263.net
-// kill.c
-
-#include <ansi.h>
-#include "valid_kill.h";
-#include <xyj_x.h>
+// firefox 11/21/2009
 
 inherit F_CLEAN_UP;
-void do_kill(object,object);
 
-mapping kill=([]);
-mapping query_kill() {return kill;}
-void remove_list(string me, string obj);
+#include <xyj_x.h>
+#include <ansi.h>
+#include "/cmds/std/valid_kill.h"
 
-int main(object me, string arg)
-{
-	object obj, guard_ob;
-	string *killer, callname;
-	int just_issued=0;
+#define PROTECT "/cmds/std/protect"
 
-	if( !wizardp(me) && environment(me)->query("no_fight") )
-		return notify_fail("这里不准战斗。\n");
-
-	if( !arg )
-		return notify_fail("你想杀谁？\n");
-
-	if(!objectp(obj = present(arg, environment(me))))
-		return notify_fail("这里没有这个人。\n");
-
-	if( !obj->is_character() || obj->is_corpse() )
-		return notify_fail("看清楚一点，那并不是活物。\n");
-
-	if(obj==me)
-		return notify_fail("用 suicide 指令会比较快:P。\n");
-
-        if(!valid_kill(me,obj,0)) return 0;
-
-	callname = RANK_D->query_rude(obj);
-
-	//mon 5/29/99
-	if(userp(me)) {
-	  string myid=me->query("id");
-	  string objid=obj->query("id");
-
-	  if(undefinedp(kill[myid])) {
-	    just_issued=0;
-	    kill+=([myid:({objid})]);
-	    call_out("remove_list",1,myid,objid);
-	  } else {
-	    string *targs=kill[myid];
-	    if(targs && member_array(objid,targs)!=-1) {
-		// just issued kill on this target recently.
-		just_issued=1;
-	    } else {
-		// not issue kill recently.
-		just_issued=0;
-		if(!targs)
-		    targs=({objid});
-		else
-		    targs+=({objid});
-		kill[myid]=targs;
-		call_out("remove_list",1,myid,objid);
-	    }
-	  }
-	}
-
-	if(just_issued==0) {
-	    message_vision("\n$N对着$n喝道：「" 
-		+ callname + "！今日不是你死就是我活！」\n\n", me, obj);	
-	} else {
-	    // avoid too much screen rolling to the target.
-	    write("\n你对着"+obj->name()+"喝道：「"
-		    + callname + "！今日不是你死就是我活！」\n\n");
-	    return 1;
-	}
-
-        if( obj->query_temp("protected")
-          && objectp(guard_ob=present(obj->query_temp("protect_ob"), environment(obj)))
-          && (string)guard_ob->query_temp("protect")==obj->query("id")
-	  && guard_ob!=me ) {
-
-message_vision(HIC"$N对着$n大声说：有我在此，不用担心！\n"NOR,guard_ob,obj);
-                        message_vision(HIC"$N冲上前去挡住了$n的攻击。\n"NOR, guard_ob, me);
-                        guard_ob->kill_ob(me);
-			me->kill_ob(guard_ob);
-		}
-
-
-	do_kill(me, obj);
-
-	return 1;
-}
+//叫杀
 void do_kill(object me, object obj)
 {
-
 	me->kill_ob(obj);
-	if( !userp(obj) ){
-	
-		if(!obj->accept_kill(me) )
+	if(!userp(obj) && !obj->accept_kill(me))
 		obj->kill_ob(me);
-
-	} else if( !userp(me) ) {
+	else if(!userp(me))
 		obj->kill_ob(me);
-	} else {
+	else {
 		obj->kill_ob(me);
 		tell_object(obj, HIR "如果你要和" + me->name() 
 			+ "性命相搏，请你也对这个人下一次 kill 指令。\n" NOR);
-
 	}
 
+	//护法
+	foreach(object ob in PROTECT->gards(obj)) {
+		message_vision(HIC"$N冲上前去挡住了$n。\n"NOR, ob, me);
+		obj->kill_ob(me);
+	}
 }
 
-void remove_list(string me, string obj)
+int main(object me, string arg)
 {
-    string *targs;
+	if(!arg) {
+		return notify_fail("你想杀谁？\n");
+		/*
+		if(me->is_busy()) return notify_ok("你现在正忙着呢。\n");
+		if(me->is_fighting()) return notify_ok("你正在打架，自顾不暇。\n");
 
-    if(undefinedp(kill[me])) return;
-    targs=kill[me];
-    if(!targs || sizeof(targs)<2) {
-	map_delete(kill, me);
-    } else {
-	targs-=({obj});
-	kill[me]=targs;
-    }
+		me->remove_all_killer();
+		write("你心中默念一个『"HIG"恕"NOR"』字，一切冤仇抛诸脑后。\n");
+		me->start_busy(10);*/
+	} else {
+		object env = environment(me);
+		int for_guard = sscanf(arg, "-g %s", arg) == 1;
+		object target = present(arg, env);
+		string callname;
+
+		if(env->query("no_fight")) return notify_fail("这里不准战斗。\n");
+		if(!objectp(target)) return notify_fail("这里没有这个人。\n");
+		if(!BTL->can_attack(me, target)) return notify_fail("你想杀谁？\n");
+		if(!env->query("in_bg") && !valid_kill(me, target, 0)) return 0;
+		
+		callname = RANK_D->query_rude(target);
+
+		if(!for_guard) {
+			if(me->is_killing(target->query("id"))) {
+				write("\n你对着" + target->name() + "喝道：「" + callname + "！今日不是你死就是我活！」\n\n");
+			} else {
+				message_vision("\n$N对着$n喝道：「" + callname + "！今日不是你死就是我活！」\n\n", me, target);				
+			}
+			do_kill(me, target);
+			return 1;
+		} else {
+			foreach(object ob in GUARD->gards(me)) {
+				do_kill(ob, target);
+			}
+			return notify_ok("OK.\n");
+		}
+	}
+	return 1;
 }
 
 int help(object me)
@@ -145,4 +92,4 @@ HELP
     );
     return 1;
 }
- 
+

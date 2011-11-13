@@ -9,7 +9,7 @@ inherit NPC;
 int is_valid(object me, object guard)
 {
 	return guard->query_temp("invoker") == me
-		&& living(guard) && !me->is_fighting(guard));
+		&& living(guard) && !me->is_fighting(guard);
 }
 
 //获取护法
@@ -18,7 +18,7 @@ object* gards(object me)
 	object env = environment(me);
 	object* arr = ({});
 	foreach(object ob in all_inventory(env)) {
-		if(is_valid(me, ob)	{
+		if(is_valid(me, ob))	{
 			arr += ({ob});
 		}
 	}
@@ -43,7 +43,7 @@ void create()
 
 	setup();
 }
-
+/*
 
 void call()
 {
@@ -59,46 +59,72 @@ void call()
 		environment(), this_object() );
 }
 
+*/
 
-void invocation(object leader)
+
+void copy_status(object leader, object guard)
 {
-	object me = this_object();
+	string* arr = ({
+		"title", "nickname", "race", "age", "unit", 
+		"str", "int", "con", "per", "cor", "spi", "cps", "kar", 
+		"max_kee", "max_sen", "max_force", "max_mana",
+		"combat_exp", "daoxing",
+	});
 
-	set_temp("invoker", leader);
-	set_leader(leader);
+	HP->copy_prop(leader, guard, arr, 100);
+	HP->copy_skills(leader, guard, 100);
+	
+	HP->full(guard);
+}
 
-	foreach(object enemy in leader->query_enemy()) {
-		if(enemy && living(enemy)) {
-			kill_ob(enemy);
-			if(userp(enemy)) enemy->fight_ob(me);
-			else {
-				enemy->kill_ob(me);
-				enemy->kill_ob(leader);
+void copy_equips(object leader, object guard)
+{
+	foreach(object o in all_inventory(leader)) {
+		if(o->query("equipped")) {
+			if(o->query("weapon_prop")) {
+				guard->carry_object(base_name(o))->wield();                
+			}
+			if(o->query("armor_prop")) {
+				guard->carry_object(base_name(o))->wear();
 			}
 		}
 	}
 }
 
-int do_follow(object leader, object target)
+static object _leader;
+
+//初始化对象属性
+int init_jiashen(object guard)
 {
+	if(!_leader) return 0;
+	guard->set_name(_leader->query("name"), _leader->query_my_id());
+	copy_status(_leader, guard);
+	guard->setup();
+	return 1;
 }
 
-int do_kill(object leader, object target)
+//复制假身
+object clone_jiashen(object leader)
 {
+	object guard;
 
+	if(!leader) return 0;
+
+	_leader = leader;
+	guard = new(__DIR__"jiashen");
+
+	guard->set_temp("invoker", _leader);
+	guard->set_leader(_leader);
+	copy_equips(_leader, guard);
+
+	guard->move(environment(_leader));
+	BTL->copy_enemy(_leader, guard);
+
+	return guard;
 }
 
-int protect(object leader, object target)
+void test()
 {
-
+	object o = clone_jiashen(_player);
+	
 }
-
-
-
-void die()
-{
-	message_vison(query("leave_msg"), this_object());
-	destruct(this_object());
-}
-
-

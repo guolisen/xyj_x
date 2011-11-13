@@ -12,7 +12,8 @@ int cast(object me, object target)
 	object soldier;
 	mapping db, tdb;
 	int dao = me->query_skill("dao", 1);
-	int cost = 10 + dao;
+	int num = 1 + min2(2, dao / 100);
+	int cost = 10 + dao * num;
 
 	if(!me->is_fighting())
 		return notify_ok("只有战斗中才能使用分身法！\n");	
@@ -23,7 +24,7 @@ int cast(object me, object target)
 	if(!cd_start(me, "invoke", CD)) 
 		return notify_ok("你刚刚分过身，再分身很危险！\n");
 
-	message_vision("$N喃喃地念了几句咒语。\n", me);
+	message_vision("$N拔下毫毛嚼在口中，喷出去叫声“变！”。\n", me);
 
 	me->add("mana", -cost);
 
