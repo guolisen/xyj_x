@@ -80,7 +80,7 @@ void copy_status(object leader, object guard)
 void copy_equips(object leader, object guard)
 {
 	foreach(object o in all_inventory(leader)) {
-		if(o->query("equipped")) {
+		if(o->query("equipped") && !o->query_unique()) {
 			if(o->query("weapon_prop")) {
 				guard->carry_object(base_name(o))->wield();                
 			}
@@ -119,6 +119,8 @@ object clone_jiashen(object leader)
 
 	guard->move(environment(_leader));
 	BTL->copy_enemy(_leader, guard);
+
+	_leader = 0;
 
 	return guard;
 }
