@@ -87,11 +87,13 @@ int bg_fort()
 
 private int cmp_kill0(object user1, object user2)
 {
+	reset_eval_cost();
 	return score_query(user1, "kill") < score_query(user2, "kill") ? 0 : -1;
 }
 
 private int cmp_kill1(object user1, object user2)
 {
+	reset_eval_cost();
 	return score_query(user1, "kill", 1) < score_query(user2, "kill", 1) ? 0 : -1;
 }
 
