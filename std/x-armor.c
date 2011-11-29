@@ -54,14 +54,15 @@ void create()
 {
 	set_name("X装备", ({ "x armor" }) );
 	set_weight(1);
-	if( clonep() )
-		set_default_object(__FILE__);
-	else {
-		set("unit", "件");
-		set("material", "gold");
-		set("value", 4000);
-		set("armor_prop/armor", 30);
-	}
+
+	set("unit", "件");
+	
+	set("no_sell", 1);
+	set("no_stock", 1);
+	set("armor_prop/armor", 30);
+
+	set("long", "一把可以随时变化的兵器。\n");
+
 	setup();
 }
 

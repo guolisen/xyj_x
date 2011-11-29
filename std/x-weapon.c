@@ -2,6 +2,7 @@
 // 可变兵器
 
 #include <weapon.h>
+#include <ansi.h>
 
 inherit EQUIP;
 
@@ -19,7 +20,6 @@ static mapping _infos = ([
 	"sword"		: ({ EDGED,	({ "slash", "slice", "thrust", "pierce" }) }),
 	"whip"		: ({ 0,	({ "whip","wave" }) }),
 	"unarmed"	: ({ 0, ({ "bash", "crush", "slam" }) }),
-
 ]);
 
 ///初始化成兵器
@@ -47,7 +47,7 @@ void create()
 	set("no_sell", 1);
 	set("no_stock", 1);
 
-	set("long", "一把可以随时变化的兵器。\n");
+	set("long", "一把可以随意变化的兵器。\n");
 
 
 	init_type("stick", 60);
@@ -79,16 +79,22 @@ int do_transform(string arg)
 {
 	mixed* info = _infos[arg];
 	mixed* arr = _weapons[arg];
-	object weapon = this_player()->query_temp("weapon");
+	ojbect who = this_player();
+	object weapon = who->query_temp("weapon");
+	string name;
 	
 	if(!info) return notify_fail("要把武器变成什么？\n");
-	if(weapon != this_object()) return notify_fail("只能变化主手武器。\n");	
+	if(weapon != this_object()) return notify_fail("只能变化主手武器。\n");
 	
+	name = name();
 	unequip();
 	
 	init_type(arg, 30, 0);
 	set_name(arr[0], arr[1]);
 	set("unit", arr[2]);
 
-	wield();	
+	wield();
+	message_vision(CYN"$N对着手中" + name + "吹了口气变作" + name() + "。\n"NOR, who);
+	who->reset_action();
+	return 1;
 }
