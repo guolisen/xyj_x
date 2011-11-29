@@ -93,7 +93,7 @@ void copy_equips(object leader, object guard)
 
 static object _leader;
 
-//初始化对象属性
+//初始化对象属性(由假身create调用)
 int init_jiashen(object guard)
 {
 	if(!_leader) return 0;

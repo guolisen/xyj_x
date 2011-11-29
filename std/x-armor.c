@@ -52,8 +52,8 @@ varargs void init_type(string type, int damage, int flag)
 
 void create()
 {
-	set_name("天兵战甲", ({ "heaven armor", "armor" }) );
-	set_weight(25000);
+	set_name("X装备", ({ "x armor" }) );
+	set_weight(1);
 	if( clonep() )
 		set_default_object(__FILE__);
 	else {

@@ -16,13 +16,13 @@ static mapping _infos = ([
 	"spear"		: ({ POINTED, ({ "thrust", "impale", "pierce" }) }),
 	"staff"		: ({ LONG,	({ "bash", "crush", "slam", "pierce", "impale" }) }),
 	"stick"		: ({ LONG,	({ "bash", "crush", "slam" }) }),
-	"swork"		: ({ EDGED,	({ "slash", "slice", "thrust", "pierce" }) }),
+	"sword"		: ({ EDGED,	({ "slash", "slice", "thrust", "pierce" }) }),
 	"whip"		: ({ 0,	({ "whip","wave" }) }),
-	"mace"		: ({ 0,	({ "impale", "bash", "crush", "slam" }) }),
 	"unarmed"	: ({ 0, ({ "bash", "crush", "slam" }) }),
 
 ]);
 
+///初始化成兵器
 varargs void init_type(string type, int damage, int flag)
 {
 	mixed* info = _infos[type];
@@ -39,15 +39,16 @@ varargs void init_type(string type, int damage, int flag)
 
 void create()
 {
-	set_name("降魔棒", ({"xiangmo bang", "bang"}));
-	set_weight(8000);
+	set_name("可变武器", ({"x weapon"}));
+	set_weight(1);
 
 	set("unit", "把");
+	
 	set("no_sell", 1);
-	set("long", "一把淡青色的短棒，上面有暗红流动，如同一条火蛇般绕在棒上。\n");
-	set("value", 20000);
-	set("material", "steel");
-	set("wield_msg", "$N「呼」地一声抽出一把$n握在手中。\n");
+	set("no_stock", 1);
+
+	set("long", "一把可以随时变化的兵器。\n");
+
 
 	init_type("stick", 60);
 	setup();
@@ -58,10 +59,36 @@ void init()
 	add_action("do_transform", "transform");
 }
 
+static mapping _weapons = ([
+	"axe"		: ({ "铁斧", ({ "tie fu", "axe" }), "把" }),
+	"blade"		: ({ "钢刀", ({ "gang dao", "blade" }), "把" }),
+	"dagger"	: ({ "匕首",	({ "bi shou", "dagger" }), "把" }),
+	"fork"		: ({ "钢叉",	({ "gang cha", "fork" }), "柄" }),
+	"hammer"	: ({ "铁锤",	({ "tie chui", "hammer", "柄" }) }),
+	"mace"		: ({ "铜锏",	({ "tong jian", "mace", "只" }) }),
+	"rake"		: ({ "铁耙",	({ "tie pa", "rake" }), "柄" }),
+	"spear"		: ({ "铁枪", ({ "tie qiang", "spear" }), "杆" }),
+	"staff"		: ({ "铁杖",	({ "tie zhang", "staff" }), "根" }),
+	"stick"		: ({ "铁棍",	({ "tie gun", "stick" }), "根" }),
+	"sword"		: ({ "铁剑",	({ "tie jian", "sword" }), "柄" }),
+	"whip"		: ({ "皮鞭",	({ "pi bian","whip" }), "条" }),
+]);
+
+///变成其他兵器
 int do_transform(string arg)
 {
 	mixed* info = _infos[arg];
+	mixed* arr = _weapons[arg];
+	object weapon = this_player()->query_temp("weapon");
+	
 	if(!info) return notify_fail("要把武器变成什么？\n");
+	if(weapon != this_object()) return notify_fail("只能变化主手武器。\n");	
+	
+	unequip();
+	
+	init_type(arg, 30, 0);
+	set_name(arr[0], arr[1]);
+	set("unit", arr[2]);
 
-	init_type(arg, 100, 0);
+	wield();	
 }
