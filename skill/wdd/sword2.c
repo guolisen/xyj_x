@@ -107,7 +107,7 @@ int on_timer(mapping buff)
 	if(buff["_heal"] && attacker && attacker->is_fighting(me))
 		attacker->receive_curing("sen", damage);	//见血就兴奋
 
-	message_vision(RED"$N身上的血静静的滴落。\n"NOR, me);
+	message_vision(RED"$N身上的血静静地滴落。\n"NOR, me);
 	buff["_damage"] -= damage;
 
 	if(random(2) && damage > 500 && ys_buff)		//血流过多会破除隐身
