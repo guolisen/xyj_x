@@ -7,20 +7,17 @@ inherit EQUIP;
 
 
 mapping _infos = ([
-	TYPE_ARMOR		: ({ EDGED, ({ "chop", "slice", "hack" }) }),
-	"blade"		: ({ EDGED, ({ "slash", "slice", "hack", "chop" }) }),
-	"dagger"	: ({ EDGED | SECONDARY,	({ "pierce", "thrust" }) }),
-	"fork"		: ({ POINTED,	({ "pierce", "thrust" }) }),
-	"hammer"	: ({ 0,	({ "bash", "crush", "slam" }) }),
-	"mace"		: ({ 0,	({ "impale", "bash", "crush", "slam" }) }),
-	"rake"		: ({ EDGED,	({ "rake", "strike", "bash" }) }),
-	"spear"		: ({ POINTED, ({ "thrust", "impale", "pierce" }) }),
-	"staff"		: ({ LONG,	({ "bash", "crush", "slam", "pierce", "impale" }) }),
-	"stick"		: ({ LONG,	({ "bash", "crush", "slam" }) }),
-	"swork"		: ({ EDGED,	({ "slash", "slice", "thrust", "pierce" }) }),
-	"whip"		: ({ 0,	({ "whip","wave" }) }),
-	"mace"		: ({ 0,	({ "impale", "bash", "crush", "slam" }) }),
-	"unarmed"	: ({ 0, ({ "bash", "crush", "slam" }) }),
+	TYPE_HEAD
+	TYPE_NECK
+	TYPE_CLOTH
+	TYPE_ARMOR
+	TYPE_SURCOAT
+	TYPE_WAIST
+	TYPE_WRISTS
+	TYPE_SHIELD
+	TYPE_FINGER
+	TYPE_HANDS
+	TYPE_BOOTS
 
 ]);
 

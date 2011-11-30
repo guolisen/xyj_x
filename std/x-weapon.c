@@ -72,6 +72,7 @@ static mapping _weapons = ([
 	"stick"		: ({ "铁棍",	({ "tie gun", "stick" }), "根" }),
 	"sword"		: ({ "铁剑",	({ "tie jian", "sword" }), "柄" }),
 	"whip"		: ({ "皮鞭",	({ "pi bian","whip" }), "条" }),
+	"unarmed"	: ({ "拳利",	({ "quan li","knuckles" }), "把" }),
 ]);
 
 ///变成其他兵器
@@ -79,7 +80,7 @@ int do_transform(string arg)
 {
 	mixed* info = _infos[arg];
 	mixed* arr = _weapons[arg];
-	ojbect who = this_player();
+	object who = this_player();
 	object weapon = who->query_temp("weapon");
 	string name;
 	
