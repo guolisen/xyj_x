@@ -30,33 +30,12 @@ varargs void init_type(string type, int damage, int flag)
 	set("weapon_prop/damage", damage);
 	set("flag", flag | info[0]);
 	set("skill_type", type);
-	if( !query("actions") ) {
+	if(!query("actions")) {
 		set("actions", (: call_other, WEAPON_D, "query_action" :) );
-		set("verbs", info[1] );
+		set("verbs", info[1]);
 	}
-}
-
-
-void create()
-{
-	set_name("可变武器", ({"x weapon"}));
-	set_weight(1);
-
-	set("unit", "把");
-	
-	set("no_sell", 1);
-	set("no_stock", 1);
-
-	set("long", "一把可以随意变化的兵器。\n");
-
-
-	init_type("stick", 60);
-	setup();
-}
-
-void init()
-{
-	add_action("do_transform", "transform");
+	if(!query("weapon_prop/dodge") && (weight() >= 3000))
+		set("weapon_prop/dodge", -weight() / 3000);
 }
 
 static mapping _weapons = ([
@@ -98,4 +77,42 @@ int do_transform(string arg)
 	message_vision(CYN"$N对着手中" + name + "吹了口气变作" + name() + "。\n"NOR, who);
 	who->reset_action();
 	return 1;
+}
+
+///造假
+void make_fake(object ob)
+{
+	int damage = 1 + ob->query("weapon_prop/damage") / 2;
+
+	set_name(ob->query("name"), ob->query_my_id());
+	init_type(ob->query("skill_type"), damage, ob->query("flag"));
+	set("unit", ob->query("unit"));
+
+	set("no_get", 1);
+	set("no_stock", 1);
+	set("no_give", 1);
+}
+
+void create()
+{
+	set_name("可变武器", ({"x weapon"}));
+	set_weight(1);
+
+	set("unit", "把");
+
+	set("long", "一把可以随意变化的兵器。\n");
+
+	init_type("stick", 60);
+	setup();
+}
+
+void init()
+{
+	add_action("do_transform", "transform");
+	add_action("do_test", "test");
+}
+
+int do_test()
+{
+	make_fake(this_player()->query_temp("weapon"));
 }

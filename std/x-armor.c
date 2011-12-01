@@ -5,7 +5,7 @@
 
 inherit EQUIP;
 
-
+/*
 mapping _infos = ([
 	TYPE_HEAD
 	TYPE_NECK
@@ -18,34 +18,31 @@ mapping _infos = ([
 	TYPE_FINGER
 	TYPE_HANDS
 	TYPE_BOOTS
-
 ]);
+*/
 
-
-
-void setup(string type)
+///初始化一个类型
+void init_type(string type, int armor)
 {
 	set("armor_type", type);
-	if( !query("armor_apply/dodge")
-	&&	weight() > 3000 )
-		set("armor_prop/dodge", - weight() / 3000 );
+	if(!query("armor_apply/dodge") && weight() > 3000)
+		set("armor_prop/dodge", -weight() / 3000);
+	set("armor_prop/armor", armor);
 }
 
-
-varargs void init_type(string type, int damage, int flag)
+///造假
+void make_fake(object ob)
 {
-	mixed* info = _infos[type];
+	int armor = 1 + ob->query("armor_prop/armor") / 2;
 
-	set("weapon_prop/damage", damage);
-	set("flag", flag | info[0]);
-	set("skill_type", type);
-	if( !query("actions") ) {
-		set("actions", (: call_other, WEAPON_D, "query_action" :) );
-		set("verbs", info[1] );
-	}
+	set_name(ob->query("name"), ob->query_my_id());
+	init_type(ob->query("armor_type"), armor);
+	set("unit", ob->query("unit"));
+
+	set("no_get", 1);
+	set("no_stock", 1);
+	set("no_give", 1);
 }
-
-
 
 void create()
 {
@@ -53,14 +50,19 @@ void create()
 	set_weight(1);
 
 	set("unit", "件");
-	
-	set("no_sell", 1);
-	set("no_stock", 1);
-	set("armor_prop/armor", 30);
-
 	set("long", "一把可以随时变化的兵器。\n");
 
-	setup();
+	init_type(TYPE_ARMOR, 30);
 }
 
 
+void init()
+{
+//	add_action("do_transform", "transform");
+	add_action("do_test", "test");
+}
+
+int do_test()
+{
+	make_fake(this_player()->query_temp("armor/armor"));
+}

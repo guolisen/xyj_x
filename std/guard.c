@@ -82,10 +82,16 @@ void copy_equips(object leader, object guard)
 	foreach(object o in all_inventory(leader)) {
 		if(o->query("equipped") && !o->query_unique()) {
 			if(o->query("weapon_prop")) {
-				guard->carry_object(base_name(o))->wield();                
+				object w = new(X_DIR"std/x-weapon");
+				w->make_fake(o);
+				w->move(guard);
+				w->wield();
 			}
 			if(o->query("armor_prop")) {
-				guard->carry_object(base_name(o))->wear();
+				object w = new(X_DIR"std/x-armor");
+				w->make_fake(o);
+				w->move(guard);
+				w->wear();
 			}
 		}
 	}
