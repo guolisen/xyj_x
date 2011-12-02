@@ -22,3 +22,10 @@ void die()
 	destruct(_this);
 }
 
+
+varargs int set_life(int delay, string leave_msg)
+{
+	remove_call_out("die");
+	call_out("die", delay);
+	set("leave_msg", leave_msg);
+}

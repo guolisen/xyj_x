@@ -71,27 +71,29 @@ void copy_status(object leader, object guard)
 		"combat_exp", "daoxing",
 	});
 
-	HP->copy_prop(leader, guard, arr, 100);
+	HP->copy_prop(leader, guard, arr);
 	HP->copy_skills(leader, guard, 100);
-	
+
 	HP->full(guard);
 }
 
 void copy_equips(object leader, object guard)
 {
-	foreach(object o in all_inventory(leader)) {
-		if(o->query("equipped") && !o->query_unique()) {
-			if(o->query("weapon_prop")) {
-				object w = new(X_DIR"std/x-weapon");
-				w->make_fake(o);
-				w->move(guard);
-				w->wield();
-			}
-			if(o->query("armor_prop")) {
-				object w = new(X_DIR"std/x-armor");
-				w->make_fake(o);
-				w->move(guard);
-				w->wear();
+	object* arr = all_inventory(leader);
+	for(int i = sizeof(arr) - 1; i > -1; --i) {
+		if(arr[i]->query("equipped") && !arr[i]->query_unique()) {
+			//trace(o->name());
+			if(arr[i]->query("weapon_prop")) {
+				object e = new(X_DIR"std/x-weapon");
+				e->make_fake(arr[i]);
+				e->move(guard);
+				e->wield();
+			} 
+			else if(arr[i]->query("armor_prop")) {
+				object e = new(X_DIR"std/x-armor");
+				e->make_fake(arr[i]);
+				e->move(guard);
+				e->wear();
 			}
 		}
 	}
@@ -116,8 +118,9 @@ object clone_jiashen(object leader)
 
 	if(!leader) return 0;
 
+	seteuid(getuid());
 	_leader = leader;
-	guard = new(__DIR__"jiashen");
+	guard = new(X_DIR"std/jiashen");
 
 	guard->set_temp("invoker", _leader);
 	guard->set_leader(_leader);

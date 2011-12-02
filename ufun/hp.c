@@ -38,7 +38,7 @@ varargs void full(object who, int no_force)
 	if(!no_force) {
 		db["mana"]		= db["max_mana"] * 2;
 		db["force"]		= db["max_force"] * 2;
-		en_max(who);
+		en_max(who);				
 	}	
 	who->clear_condition();
 }
@@ -98,11 +98,14 @@ void copy_prop(object src, object dest, string* tab)
 void copy_skills(object src, object dest, int ratio)
 {
 	mapping skills = src->query_skills();
+	mapping enables = src->query_skill_map();
 	if(!skills) return;
 	foreach(string skill, int lvl in skills) {
-		string mapped = src->query_skill_mapped(skill);
 		dest->set_skill(skill, lvl * ratio / 100);
-		if(mapped) dest->map_skill(skill, mapped);
+	}
+	if(!enables) return;
+	foreach(string k, string v in enables) {
+		dest->map_skill(k, v);
 	}
 }
 

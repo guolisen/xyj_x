@@ -27,7 +27,6 @@
 // Inheritable Standard Objects
 
 #define ROOM_SBC			X_DIR"std/sbc"
-#define GUARD				X_DIR"std/guard"
 #define BIAN				X_DIR"std/bian"
 
 // Features
@@ -85,6 +84,7 @@
 #define SCREEN				UFUN_DIR"screen"
 #define TRANSLATOR			UFUN_DIR"translator"
 #define LCALENDAR			UFUN_DIR"lcalendar"
+#define GUARD				UFUN_DIR"guard"
 // Sub Systems
 
 //ÎÄµµÏµÍ³

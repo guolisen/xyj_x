@@ -16,23 +16,21 @@ mapping _action = ([
 
 int perform(object me, object target)
 {
+	int skill = me->query_skill("qianjun-bang", 1);	
+	int cost = 100 + me->query("force_factor");
 	int damage = me->query_skill("wuxiangforce", 1) / 5;
 
 	if(!target) target = offensive_target(me);
 
-	if(!target || !me->is_fighting(target))
-		return notify_fail("「乾坤一棒」只能在战斗中使用！\n");
-
-	if(me->query("force") < 1000 )
-		return notify_fail("你的内力不足！\n");
-
-	if(me->query_skill("qianjun-bang", 1) + me->query_kar() < 150)
-		return notify_fail("你的千钧棒级别还不够，使用这一招会有困难！\n");
+	if(!target || !me->is_fighting(target))	return notify_fail("「乾坤一棒」只能在战斗中使用！\n");
+	if(skill < 120)	return notify_fail("你的千钧棒级别还不够！\n");
+	if(me->query("force") < cost) return notify_fail("你的内力不足！\n");
+	
 
 	if(!cd_start(me, "im_pfm", 2))
 		return notify_fail("绝招用的太多太滥就不灵了。\n");
 
-	me->add("force", -200);
+	me->add("force", -cost);
 
 	message_vision(HIC"\n$N运足精神，一个高跳在空，使出了「乾坤一棒」的绝技！\n"NOR,me);
 
