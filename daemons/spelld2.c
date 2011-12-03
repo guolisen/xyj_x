@@ -150,34 +150,7 @@ void apply_damage(object winner, object victim, int damage, string damage_type, 
 	return;
 }
 
-/*
-	weiqi 981206
-	attacking-cast...called from spells function.
-	a typical call would be:
-
-	SPELL_D->attacking_cast(
-	me, 
-	//attacker 
-	target, 
-	//target
-	success_adj, 	
-	//success adjustment
-	damage_adj, 	
-	//damage adjustment
-	"both", 		
-	//damage type: could be "qi"/"kee", "shen"/"sen", ...default "both"
-	HIC "$N几个指头迅速捻动，突然张嘴一喷！红橙黄三道火焰呼！地一声向$n卷去！\n" NOR,
-	//initial message
-	HIC "结果$n被烧得焦头烂额！\n" NOR, 
-	//success message
-	HIC "但是$n轻轻一跳就躲了开来。\n" NOR, 
-	//fail message
-	HIC "但是火焰被$n以法力一逼，反向$N回卷而去！\n" NOR, 
-	//backfire initial message
-	HIC "结果太乙真火反噬，$n被烧得焦头烂额！\n" NOR
-	//backfire hit message. note here $N and $n!!!
-);
-*/
+///attacking cast
 void attacking_cast(
 	object attacker, 
 	object target, 
@@ -222,6 +195,62 @@ void attacking_cast(
 
 	return;
 }
+
+//随机选择仇人
+object random_enemy(object me)
+{
+	object* arr;
+
+	me->clean_up_enemy();
+	arr = me->query_enemy();
+	return sizeof(arr) ? random1(arr) : 0;
+}
+
+/// do cast
+int do_cast(
+	object me,
+	object target,
+	int success_adj,
+	int damage_adj,
+	string damage_type,
+	string msg_init,
+	string msg_success,
+	string msg_fail,
+	string msg_backfire_init,
+	string msg_backfire_success,
+	int cost,
+	int busy,
+	int no_cast)
+{
+	cost += 2 * me->query("mana_factor");
+
+	if(!target) target = random_enemy(me);
+
+	if(!target || !target->is_character() || target->is_corpse() || target == me)
+		return notify_fail("你要对谁施法？\n");
+
+	if(me->query("mana") < cost)
+		return notify_fail("你的法力不足！\n");
+
+	me->add("mana", -cost);
+
+	attacking_cast(
+		me, 
+		target, 
+		success_adj,    
+		damage_adj,     
+		damage_type,          
+		msg_init,
+		msg_success, 
+		msg_fail, 
+		msg_backfire_init, 
+		msg_backfire_success
+	);
+
+	if(busy) me->start_busy(busy);
+	return no_cast;
+}
+
 
 void create()
 {

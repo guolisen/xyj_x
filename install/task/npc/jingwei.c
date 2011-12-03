@@ -40,17 +40,20 @@ void flyaway()
 	object me = this_object();
 
 	call_out("flyaway",5 + random(5));
-	if (!living(me)) return;
-	if (!environment()) return;
+	if(!living(me)) return;
+	if(!environment()) return;
+	
 	all=all_inventory(environment(me));
-	if (environment()->query("short")=="东海之滨") {
-		if (random(10)) {
-			if(!random(5)) message_vision("$N从地上叼起一些石块。\n",me);
+	
+	if(environment()->query("short")=="东海之滨") {
+		if(random(2)) {
+			message_vision("$N从地上叼起一些石块。\n",me);
 			return;
 		}
 		dest = beach + random(8);
-	} else if (environment()->query("short")=="东海海滩") {
-		if (!random(5)) {
+	}
+	else if(environment()->query("short")=="东海海滩") {
+		if(random(2)) {
 			message_vision("$N将嘴里衔着的石块投入海中。\n",me);
 			return;
 		}
@@ -61,10 +64,12 @@ void flyaway()
 	message_vision("$N拍着翅膀飞走了。\n",me);
 	me->move(dest);	
 	message_vision("$N飞了过来。\n",me);
-	if (!all) return;
-	if (phase < 6) return;
-	for (int i=0;i<sizeof(all);i++)
-		if (userp(all[i]) && all[i]->query_temp("follow_jingwei")) {
+
+	if(!all) return;
+	if(phase < 6) return;
+	
+	for(int i = 0; i < sizeof(all); i++)
+		if(userp(all[i]) && all[i]->query_temp("follow_jingwei")) {
 			all[i]->move(dest);
 			all[i]->delete_temp("follow_jingwei");
 		}
@@ -80,11 +85,11 @@ int do_gen(string arg)
 	object me = this_player();
 	object jignwei = this_object();
 
-	if (!arg && arg!="jing wei" && arg!="bird" && arg!="wei")
+	if(!arg && arg != "jing wei" && arg != "bird" && arg != "wei")
 		return notify_fail("你要跟谁？\n");
-	if (me->query_temp("follow_jingwei"))
+	if(me->query_temp("follow_jingwei"))
 		return notify_fail("你已经在跟着精卫了。\n"); 
-	if (phase < 6) 
+	if(phase < 6) 
 		return notify_fail("精卫对你说：“白天天气太热了，晚上我再带你去吧。”\n");
 
 	me->set_temp("follow_jingwei", 1);

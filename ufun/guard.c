@@ -61,7 +61,7 @@ void call()
 
 */
 
-
+///复制状态
 void copy_status(object leader, object guard)
 {
 	string* arr = ({
@@ -75,6 +75,23 @@ void copy_status(object leader, object guard)
 	HP->copy_skills(leader, guard, 100);
 
 	HP->full(guard);
+}
+
+///弱化目标气血/力量为n分之一
+void weaken(object who, int n)
+{
+	mapping db = who->query_entire_dbase();
+
+	db["max_kee"] /= n;
+	db["eff_kee"] = db["max_kee"];
+	db["kee"] = db["max_kee"];
+
+	db["max_sen"] /= n;
+	db["eff_sen"] = db["max_sen"];
+	db["sen"] = db["max_sen"];
+
+	db["force_factor"] /= n;
+	db["mana_factor"] /= n;
 }
 
 void copy_equips(object leader, object guard)
@@ -136,6 +153,5 @@ object clone_jiashen(object leader)
 
 void test()
 {
-	object o = clone_jiashen(_player);
-	
+	object o = clone_jiashen(_player);	
 }

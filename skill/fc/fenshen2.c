@@ -1,6 +1,6 @@
-// fenshen.c 分身术
+// firefox 2011.12
 
-inherit SSERVER;
+inherit F_CLEAN_UP;
 
 #include <xyj_x.h>
 
@@ -34,6 +34,9 @@ int cast(object me, object target)
 				(: call_other, guard, "perform_action", "stick", "qiankun" :),
 			});
 			db["cps"] = 1;								//傀儡无定力	
+			db["combat_exp"] += 40000;					//辅助新人
+			
+			GUARD->weaken(guard, num);
 
 			SKI->set_level(guard, dao);
 			guard->reset_action();

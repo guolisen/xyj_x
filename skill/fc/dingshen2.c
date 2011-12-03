@@ -1,9 +1,9 @@
-// dingshen.c 定身法
+// firefox 2011.12
 
 #include <xyj_x.h>
 #include <ansi.h>
 
-inherit SSERVER;
+inherit F_CLEAN_UP;
 
 #define DURATION		5
 
@@ -21,7 +21,7 @@ int cast(object me, object target)
 
 	target = BTL->get_victim(me, target);
 
-	if(dao < 80) return  notify_ok("你的道家仙法太低。\n");	
+	if(dao < 80) return notify_ok("你的道家仙法太低。\n");	
 	if(!target)	return notify_fail("你想把谁定住？\n");
 	if(target->is_busy()) return notify_fail(target->name() + "已经动弹不得了！\n");
 	if(me->query("mana") < cost) return notify_fail("你的法力不足！\n");

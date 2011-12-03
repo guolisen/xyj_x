@@ -362,3 +362,27 @@ int in_safy(object who)
 	object env = environment(who);
 	return env && (env->query("no_fight") || env->query("no_magic"));
 }
+
+//忠实成员
+int loyal_member(object who, string family)
+{
+	return who->query("family/family_name") == family
+		&& !who->query("betray/count");
+}
+
+///开始busy
+int start_no_move(object me, int duration)
+{
+	if(!me->query_temp("no_move")) {
+		me->set_temp("no_move", 1);
+		call_out("remove_no_move", duration, me);
+		return 1;
+	}
+	return 0;
+}
+
+//移除no_move
+void remove_no_move(object me) 
+{
+	if(me) me->delete_temp("no_move");
+}
