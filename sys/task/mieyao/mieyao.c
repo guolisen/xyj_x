@@ -2,6 +2,7 @@
 // 灭妖任务
 
 #include <xyj_x.h>
+#include <ansi.h>
 
 inherit TT_BASE;
 
@@ -51,7 +52,7 @@ private string reward_skill(object who)
 			string name = to_chinese(id);
 			who->set_skill(id, level + 1);
 			tell_object(who, "你得到了一级" + name + "。\n");
-			who->command_function("rumor 听说" + who->query("name") + "的" + name + "又有所进境了！");
+			who->command_function("rumor 听说" + who->query("name") + "的"HIG + name + HIM"又有所进境了！");
 			return id;
 		}
 	}
