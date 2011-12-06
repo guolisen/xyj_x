@@ -18,6 +18,7 @@ int cast(object me, object target)
 	object env, *inv;
 	int size, i, taiyi_level;
 	int maxenc;
+	int cost;
 
 	seteuid(getuid());
 
@@ -78,16 +79,11 @@ int cast(object me, object target)
 		|| target==me)
 		return notify_fail("你要对谁施展袖里乾坤？\n");
 
-	if( me->query("mana") < 400 )
-		return notify_fail("你的法力不够了！\n");
+	//cost
+	cost = 50 + target->query("mana_factor") * 4);	
+	if(me->query("mana") < cost) return notify_fail("你的法力不够了！\n");
+	me->add("mana", -cost);
 
-	if( me->query("sen") < me->query("max_sen")/2 )
-		return notify_fail("你现在头脑不清醒，哪里使得出袖里乾坤！\n");
-
-	if( random(me->query("max_mana")) < 50 ) {
-		write("你失败了！\n");
-		return 1;
-	}
 
 	msg =  HIR "$N喃喃地念了几句咒语，突然大袖一挥朝$n罩了过去！\n" NOR;
 	message_vision(msg, me, target);
@@ -95,18 +91,9 @@ int cast(object me, object target)
 	if(!userp(target)) target->kill_ob(me);
 
 	success = 1;
-	ap = me->query_skill("spells") / 10;
-	ap = ap * ap * ap /10 ;
-	ap += me->query("daoxing") / 1000;
-	ap = 3 * ap; 
-	dp = target->query("daoxing") / 1000;
-	if( random(ap + dp) < dp ) success = 0;
-	//here we compared exp and spells level. 
-	//note: has nothing to do with target's spells level.
-
 	ap = me->query("max_mana");
 	dp = target->query("max_mana");
-	if( ap < random(dp) ) success = 0;
+	if(ap < random(dp)) success = 0;
 	//here we compared max_mana.
 	//if the attacher has half of the max_mana of the target, 
 	//he has 50% chance to success.
@@ -117,30 +104,20 @@ int cast(object me, object target)
 		if(!sleeveroom) return notify_fail("你的袖子恐怕破了。\n");
 
 		sname=me->query("id")+"'s sleeve";
-		if(!sleeve=present(sname,sleeveroom)) {
-			sleeve=new("/d/obj/fabao/sleeve");
+		if(!sleeve = present(sname,sleeveroom)) {
+			sleeve = new("/d/obj/fabao/sleeve");
 			if(!sleeve) return notify_fail("你的袖子恐怕破了。\n");
 
 			taiyi_level = me->query_skill("taiyi", 1);
-			maxenc=taiyi_level*2000;
-			if(maxenc>400000) maxenc=400000;
+			maxenc = taiyi_level * 2000;
+			if(maxenc>400000) maxenc = 400000;
 			sleeve->set_max_encumbrance(maxenc);
-			// mon 4/15/98
-			/*
-			if( taiyi_level < 50 ) sleeve->set_max_encumbrance(100000);
-			else if( taiyi_level < 100 ) sleeve->set_max_encumbrance(200000);
-			else if( taiyi_level < 150 ) sleeve->set_max_encumbrance(300000);
-			else sleeve->set_max_encumbrance(400000);
-			*/
 			//400000 correspondes to about 4 people?
 			//note...if we want a npc can not be moved...can set its str very high...:)
 
-			sleeve->set_name(
-				me->query("name")+"的衣袖中",({sname,"sleeve"}));
-			sleeve->set("short",
-				me->query("name")+"的衣袖中");
-			if(!sleeve->move(sleeveroom)) 
-				return notify_fail("你的袖子恐怕破了。\n");
+			sleeve->set_name(me->query("name") + "的衣袖中", ({sname, "sleeve"}));
+			sleeve->set("short", me->query("name") + "的衣袖中");
+			if(!sleeve->move(sleeveroom)) return notify_fail("你的袖子恐怕破了。\n");
 		}
 
 		if(target->move(sleeve)) {
@@ -164,9 +141,7 @@ int cast(object me, object target)
 
 	} else  {
 		msg =  HIR "结果被$n法力一逼，差点罩住$N自己的脑袋。\n" NOR;
-		message_vision(msg, me, target);
-
-		me->add("mana", -400);
+		message_vision(msg, me, target);		
 	} 
 
 	return 3 + 4;

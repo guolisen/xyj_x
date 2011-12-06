@@ -12,7 +12,7 @@ int cast(object me, object target)
 	int dao = me->query_skill("dao", 1);
 	int num = min2(3, dao / 50);
 	int real = random(num + 1);
-	int cost = 10 + dao * num;
+	int cost = 10 + dao * num / 2;
 	
 	if(num < 1) return  notify_ok("你的道家仙法太低。\n");
 	if(me->query("mana") < cost) return notify_ok("你的法力不足！\n");

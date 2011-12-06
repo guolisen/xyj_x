@@ -5,7 +5,7 @@
 
 inherit F_CLEAN_UP;
 
-#define DURATION		5
+#define DURATION		8
 
 string* _msgs = ({
 	HIC"$N口中念了句咒文，朝$n一指，大喝一声：定！\n"NOR,

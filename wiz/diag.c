@@ -24,6 +24,8 @@ void init()
 		add_action("do_getc", "getc");
 
 		add_action("do_accepts", "accepts");
+
+		add_action("do_remove_no_move", "remove_no_move");
 	}
 }
 
@@ -124,3 +126,18 @@ int do_accepts(string arg)
 	return 1;
 }
 
+
+
+int do_remove_no_move(string arg)
+{
+	int i = 0;
+	foreach(object user in users()) {
+		if(user->query_temp("no_move")) {
+			user->set_temp("no_move", 0);
+			++i;
+		}
+	}
+	write(i + " player removed.\n");
+	return 1;
+
+}

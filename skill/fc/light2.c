@@ -18,7 +18,7 @@ int cast(object me, object target)
 		HIC"但是金光被$n以法力反激，反向$N射去！\n"NOR,
 		HIR"结果金光从$n身上透体而过，拖出一条长长的血箭，直射到两三丈外的地下！\n"NOR,
 		25,
-		2 + 2,
+		2 + 1,
 		5
 	);
 }

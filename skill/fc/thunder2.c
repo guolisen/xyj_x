@@ -19,6 +19,6 @@ int cast(object me, object target)
 		HIC"结果$n被雷声震得眼冒金星，心神不定，差点跌倒在地！\n"NOR,
 		25,
 		2 - 2,
-		5
+		4
 	);
 }
