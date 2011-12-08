@@ -58,6 +58,12 @@
 #define	PEXP				"potential"
 #define LINE1				"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 #define LINE2				"------------------------------------------------------------------------------\n"
+#define SD_BUSY				"sd_busy"										//『忙』效果衰减
+#define SD_NO_MOVE			"sd_no_move"									//『无法移动』效果衰减
+#define SD_FEAR				"sd_fear"										//『恐惧』效果衰减
+#define SD_DUMMY			"sd_dummy"										//『被控』效果衰减
+#define SD_PUZZLE			"sd_puzzle"										//『迷惑』效果衰减
+
 
 // User IDs
 

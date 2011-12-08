@@ -5,7 +5,7 @@
 
 inherit F_CLEAN_UP;
 
-#define DURATION		8
+#define DURATION			9
 
 string* _msgs = ({
 	HIC"$N口中念了句咒文，朝$n一指，大喝一声：定！\n"NOR,
@@ -15,7 +15,7 @@ string* _msgs = ({
 
 int cast(object me, object target)
 {
-	int dao = me->query_skill("dao", 1);	
+	int dao = me->query_skill("dao", 1);
 	int cost = 50 + me->query("mana_factor");
 	int ap, dp;
 
@@ -30,12 +30,14 @@ int cast(object me, object target)
 
 	ap = me->query("mana_factor") / 8;
 	dp = target->query("mana_factor");
-
+	if(!cd_end(target, SD_BUSY)) ap /= 3;			//衰减判定
+	
 	message_vision(_msgs[0], me, target);
 
-	if(random(ap + dp) > dp) {						//  1/9成功率
+	if(random(ap + dp) > dp) {						//1/9成功率
 		message_vision(_msgs[1], me, target);
 		target->start_busy(DURATION);
+		cd_start(target, SD_BUSY, 2 * DURATION);	//衰减开始
 	} else {
 		message_vision(_msgs[2], me, target);		
 	} 
