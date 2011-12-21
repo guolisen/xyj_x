@@ -4,9 +4,9 @@
 
 inherit F_CLEAN_UP;
 
-#define PROP						"sitting__"
+#define PROP						"sitting"
 #define DURATION					120			//单次时间
-#define DX_GAIN						1500		//200 buddhism，1.5年/小时，36年/天
+#define DX_GAIN						1100		//200 buddhism，1.0年/小时，24年/天
 #define	NORM_RATIO					100
 
 int main(object me, string arg)
@@ -65,21 +65,21 @@ void finish(object me, int dx)
 	if(me->query("betray/count")) ratio -= 30;
 
 	dx = dx * ratio / 100;
-	gains = ([ DEXP : dx, PEXP : dx / 2 ]);
+	gains = ([ DEXP : dx, PEXP : dx / 4 ]);
 
 	message_vision(HIY"$N轻声念道：" + msg[random(sizeof(msg))] + "\n"NOR, me);
 	message_vision(HIY"$N缓缓睁开眼睛，长舒一口气站了起来。\n"NOR, me);
 
 	//检查配额
 	if(TASK_EXC->do_reward(me, "自己", "诵经", gains, NORM_RATIO)) {
-		int point = dx / 4 * 20;
+		int point = dx / 2 * 20;
 		me->add("daoxing", dx);
 		me->add("potential", dx / 2);
-		me->add("learned_points", dx / 4);
+		me->add("learned_points", dx / 2);
 		me->improve_skill("buddhism", point, 1);
 		
 		tell_object(me, HIC"你的道行增加了" + chinese_number(dx*3) + "时辰！\n"NOR);
-		tell_object(me, HIC"你的潜能增加了" + chinese_number(dx/4) + "点！\n"NOR);		
+		//tell_object(me, HIC"你的潜能增加了" + chinese_number(dx/4) + "点！\n"NOR);		
 		tell_object(me, HIC"你的大乘佛法增加了" + chinese_number(point)+ "点！\n"NOR);
 
 		me->add("mana", -20);

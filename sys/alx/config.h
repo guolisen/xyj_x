@@ -17,7 +17,7 @@
 
 //奖惩设定
 #define MAX_TOTAL_POT			99000	//奖励上限
-#define MIN_TOTAL_POT			30000	//奖励下限
+#define MIN_TOTAL_POT			10000	//奖励下限
 #define KILL_POT				4000	//杀死一个人的奖励		***
 #define MIN_RATIO				25		//杀人奖励比率下限
 #define MAX_RATIO				400		//杀人奖励比率上限

@@ -61,7 +61,7 @@ mapping query_cost()
 	return _cost;
 }
 
-string* show_cost()
+void show_cost()
 {
 	string* cmds = sort_array(keys(_cost), "cmp_cmds_cost");
 		
@@ -69,5 +69,10 @@ string* show_cost()
 	for(int i = 0; i < 50 && i < sizeof(cmds); ++i) {		
 		printf("%2d  %-16s %8d  %8f\n", i, cmds[i], _cost[cmds[i]][0], _cost[cmds[i]][1]);
 	}
-
 }
+
+void clear_cost()
+{
+	_cost = ([]);
+}
+

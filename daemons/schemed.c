@@ -1,11 +1,11 @@
 
-#define TEXT_SIZE				2000
-#define SCHEME_CMD              "/cmds/usr/scheme"
+#define TEXT_SIZE					2000
+#define SCHEME_CMD					"/cmds/usr/scheme"
 
 #include <ansi.h>
 #include <xyj_x.h>
 
-#define SPC							6		//每n秒执行一条命令
+#define SPC							10		//每n秒执行一条命令
 
 #define WHO							0
 #define CMDS						1
