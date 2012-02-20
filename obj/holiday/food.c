@@ -6,24 +6,27 @@ inherit ITEM;
 
 #define PROP		"gift/holiday"
 
-#define DATE		20111001
-#define POT			60000
+#define DATE		20120101
+#define POT			90000
 
-#define NAME		""
+
 //#define ID			"mang guo"
 //#define LONG		"太忙了，祝大家吃得开心，玩得愉快。"
 //string* _prefixs = ({"芒果", "芒果"});
 
 //#define LONG		"愿MUD西游记一年更比一年红火。"
 //#define LONG		"四时花竞巧，九子粽争新。祝大家端午愉快。"
+//#define LONG		"唐初最盛胡饼，即后世月饼。祝大家中秋/国庆快乐。"
 
-#define ID			"hu bing"
-#define LONG		"唐初最盛胡饼，即后世月饼。祝大家中秋/国庆快乐。"
-string* _prefixs = ({YEL"胡饼"NOR});
+#define NAME		""
+#define ID			""
+#define LONG		"愿大家节日快乐，原MUD西游记一年更比一年红火。"
+string* _tab = ({ ({"年糕", "nian gao"}), ({"饺子", "jiao zi"}), ({"汤圆", "tang yuan"}) });
 
 void create()
 {
-	set_name(random1(_prefixs) + NAME, ({ID, "food"}));
+	string arr = random1(_tab);
+	set_name(arr[0] + NAME, ({arr[1] + ID, "food"}));
 	set_weight(0);
 	if (clonep())
 		set_default_object(__FILE__);

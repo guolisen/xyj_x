@@ -4,9 +4,10 @@
 #define ADMX_D                  "/adm/daemons/admxd"
 
 #define AUCTION_TIME            (31*24*3600)            //时限
-#define AUCTION_TAX             1                       //交易税(%)
-#define AUCTION_MIN_PRICE       1                       //最低价(黄金)
+#define AUCTION_TAX             5                       //交易税(%)
+#define AUCTION_MIN_PRICE       20                      //最低价(黄金)
 #define AUCTION_MAX_PRICE       9999                    //最高价(黄金)
+#define AUCTION_MAX_LIST        20                      //列表项上限
 
 inherit ROOM;
 inherit F_SAVE;
@@ -163,14 +164,15 @@ int do_list(string arg)
 {
 	string* timeouts = ({});
 	string* attrs = ({"id", "name", "sid", "sname"});
-	string msg;
+	int n = 0;
+
 	if(!sizeof(_items))
 		return notify_fail(query("short")+"目前没有任何货物在拍卖。\n"); 
 
-	msg = query("short") + NOR"在售物品如下：\n";
-	msg += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"; 
-	msg += "序号    物品名称                  数量  价格  到期    拍卖者\n"; 
-	msg += "------------------------------------------------------------------------\n"; 
+	write(query("short") + NOR"在售物品如下(至多显示20个)：\n");
+	write("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+	write("序号    物品名称                  数量  价格  到期    拍卖者\n");
+	write("------------------------------------------------------------------------\n");
 
 	foreach(string sn, mapping item in _items) {
 		int time_left = AUCTION_TIME - (time() - item["time"]);
@@ -178,7 +180,7 @@ int do_list(string arg)
 			timeouts += ({ sn });
 		} 
 		else if(item_filter(item, arg, attrs)) {
-			msg += sprintf("%-6s  %-26s%4d  %4d  %-6s  %s\n",
+			printf("%-6s  %-26s%4d  %4d  %-6s  %s\n",
 				sn, 
 				filter_color(item["name"]) + "(" + item["id"] + ")",
 				item["amount"] = item["amount"] ? item["amount"] : 1,
@@ -186,13 +188,13 @@ int do_list(string arg)
 				time_str(time_left),
 				item["sname"] + "(" + item["sid"]+")"
 				);
+			if(++n >= 20) break;
 		}
-		reset_eval_cost();
+		reset_eval_cost();		
 	}
-	msg += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"; 
-	msg += "注：用 <mai 序号> 来购买物品。\n"; 
+	write("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+	write("注：用 <mai 序号> 来购买物品。\n");
 
-	this_player()->start_more(msg); 
 	give_back(timeouts);
 	return 1;
 }

@@ -31,10 +31,23 @@ private int add(object who)
 	_users[getuid(who)] = ({ who, 0, time() });
 }
 
+void check_heart_beat()
+{
+	if(!query_heart_beat())
+		set_heart_beat(1);
+	call_out("check_heart_beat", 611);
+}
+
+int pause()
+{
+	set_heart_beat(0);
+	return 1;
+}
+
 void create()
 {
 	seteuid(getuid());
-	set_heart_beat(1);
+	check_heart_beat();	
 
 	//更新时，登记已经在执行scheme的玩家
 	foreach(object who in children("/obj/user")) {
