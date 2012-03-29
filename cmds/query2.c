@@ -128,7 +128,7 @@ int main(object me, string arg)
 	arr = explode(arg, ",");
 	
 	write("\n" + title + ":");
-	foreach(string str in arr) {		
+	foreach(string str in arr) {
 		string fun, args;
 		
 		result = 0;
