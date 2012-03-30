@@ -5,6 +5,13 @@
 
 inherit F_CLEAN_UP;
 
+//查询天赋
+int query_attr(string prop, object who)
+{
+	if(prop == "int") return who->query_int();
+	if(prop == "spi") return who->query_spi();
+	return 0;
+}
 //查询两属性比率
 int query_ratio(string prop0, string prop1, object who)
 {
@@ -13,7 +20,6 @@ int query_ratio(string prop0, string prop1, object who)
 	if(intp(i0) && intp(i1) && i1 != 0) return 100 * i0 / i1;
 	return 0;
 }
-
 //查询两属性之差
 int query_diff(string prop0, string prop1, object who)
 {
@@ -22,19 +28,49 @@ int query_diff(string prop0, string prop1, object who)
 	if(intp(i0) && intp(i1)) return i0 - i1;
 	return 0;
 }
+//身上物品数量
+int inv_count(object who, string id)
+{
+	int s = 0;
+	foreach(object ob in all_inventory(who)) {
+		if(ob->query("id") == id) {
+			int n = ob->query_amount();
+			s += n ? n : 1;
+		}
+	}
+	return s;
+}
+//房间属性
+mixed room_prop(object who, string prop)
+{
+	object room = environment(who);
+	string* props = ({"short", "outdoors", "no_fight", "no_magic", "water"});
 
+	if(member_array(prop, props) != -1) 
+		return room->query(prop);
+	if(prop == "exits") {
+		mixed exits = room->query(prop);
+		if(mapp(exits)) return implode(keys(exits), "|");
+	}
+	return 0;
+}
+//房间属性
+string here_obj(object who, string id)
+{
+	object room = environment(who);
+	object ob = id ? present(id, room) : 0;
+	return ob ? ob->name() : 0;
+}
 //查询技能等级
 int skill_level(object who, string skill)
 {
 	return who->query_skill(skill, 1);
 }
-
 //查询技能激发
 string skill_map(object who, string skill)
 {
 	return who->query_skill_mapped(skill);
 }
-
 //查询技能学习点数
 int skill_learned(object who, string skill)
 {
@@ -42,19 +78,16 @@ int skill_learned(object who, string skill)
 	if(!m) return 0;
 	return m[skill];
 }
-
 //查询任务状态
 string task_state(object who, string id)
 {
 	return who->query(TASK_PROP"/list/" + id + "/state");
 }
-
 //查询任务对象
 string task_target(object who, string id)
 {
 	return who->query(TASK_PROP"/list/" + id + "/tname");
 }
-
 //查询任务备注
 string task_remark(object who, string id)
 {
@@ -64,7 +97,7 @@ string task_remark(object who, string id)
 //属性对应表
 mapping _props = ([
 
-	//hp命令
+	//hp
 	"kee"			: "kee",
 	"sen"			: "sen",		
 	"eff_kee"		: "eff_kee",
@@ -81,33 +114,39 @@ mapping _props = ([
 
 	"food"			: "food",
 	"water"			: "water",
+	"bellicosity"	: "bellicosity",
 
 	"combat_exp"	: "combat_exp",
 	"daoxing"		: "daoxing",
 
 	"potential"		: (: query_diff, "potential", "learned_points" :),
 
-	//score命令
+	//score
 	"title"			: "title",
 	"name"			: "name",
 	"id"			: "id",
 	"age"			: "age",
-
+	"int"			: (: query_attr, "int" :),
+	"spi"			: (: query_attr, "spi" :),
 	"damage"		: "damage",
 	"armor"			: "armor",
 	"family"		: "family/family_name",
 	"master"		: "family/master_name",
-
 	"balance"		: "balance",
 
-	//skills
-	
+	//i
+	"count"			: (: inv_count :),
+
+	//look
+	"room"			: (: room_prop :),
+	"here"			: (: here_obj :),
+
+	//skills	
 	"skill_level"	: (: skill_level :),
 	"skill_learned"	: (: skill_learned :),
 	"skill_map"		: (: skill_map :),
 
-	//tasks
-	
+	//tasks	
 	"task_norm"		: TASK_PROP"/norm",
 	"task_state"	: (: task_state :),
 	"task_target"	: (: task_target :),
@@ -123,7 +162,7 @@ int main(object me, string arg)
 	string* arr;
 		
 	if(!arg) arg = "";
-	sscanf(arg, "%s %s", title, arg);
+	sscanf(arg, "%s:%s", title, arg);
 
 	arr = explode(arg, ",");
 	
@@ -151,44 +190,55 @@ int help(object me)
 {
 	write(@HELP
 
-指令格式 ： query [标题] <属性>|<属性列表>
+指令格式 ： query [标题:]<属性>|<属性列表>
 
 查询自身的属性或属性列表（以逗号分隔），显示被查询属性的值，命令返回最后一个属性
 的值，如果值为字符串，则返回1。该指令旨在减少带宽占用，思想源自北大侠客行。
 
-hp相关属性
+hp相关
 - 气血/精神：kee sen eff_kee eff_sen kee_ratio sen_ratio 
 - 内力/法力：force mana max_force max_mana force_ratio mana_ratio
-- 食物/饮水：food water
+- 饮食/杀气：water food bellicosity
 - 经验/潜能：combat_exp daoxing potential
 
 score相关属性
 - 名称/头衔：title name id
 - 攻击/防护：damage armor
 - 门派/师承：family master
+- 悟性/灵性：int spi
 - 其他：     balance age
 
-skills相关属性
+i相关
+- 物品数量：count(物品ID)，计算身上该物品总数
+
+look相关
+- 房间属性：room(属性)，属性包括：short exits outdoors no_fight no_magic water
+- 目标存在：here(目标ID)，查看该目标的名字
+
+skills相关
 - 技能等级：skill_level(技能)
 - 学习点：  skill_learned(技能)
 - 技能激发：skill_map(技能)
 技能为技能id，比如unarmed。
 
-tasks相关属性
+tasks相关
 - 任务额度：task_norm
 - 任务状态：task_state(任务)
 - 任务目标：task_target(任务)
 - 任务备注：task_remark(任务)
 任务格式为：<任务类别>/<任务>，类别和任务如下：
 - 灭妖(mieyao)：mieyao
-- 解谜(quest)：food，weapon，armor，cloth，ask，give，kill
+- 解谜(quest)：food weapon armor cloth ask give kill
 - 势力(forces)：cien
 比如李靖任务为：mieyao/mieyao，猪八戒任务为：quest/food。
 
 用法举例
-- 查看气血：query 气血 kee,eff_kee,kee_ratio
-- 查看技能：query 技能 skill_level(force),skill_level(spells)
+- 查看气血：query 气血:kee,eff_kee,kee_ratio
+- 查看技能：query 技能:skill_level(force),skill_level(spells)
 - 查看任务：query task_target(quest/food),task_state(quest/food)
+- 几个枕头：query count(huangliang zhen)
+- 查看出口：query room(exits)
+
 HELP
 	);
 	return 1;
