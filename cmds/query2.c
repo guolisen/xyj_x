@@ -184,7 +184,7 @@ int main(object me, string arg)
 	}
 	write("\n");
 
-	return intp(result) ? result : 1;
+	return 1;
 }
 
 int help(object me)
@@ -193,8 +193,8 @@ int help(object me)
 
 指令格式 ： query [标题:]<属性>|<属性列表>
 
-查询自身的属性或属性列表（以逗号分隔），显示被查询属性的值，命令返回最后一个属性
-的值，如果值为字符串，则返回1。该指令旨在减少带宽占用，思想源自北大侠客行。
+查询自身/环境的属性/属性列表(以逗号分隔)，显示被查询属性的值，该指令旨在减少带宽
+占用，思想源自北大侠客行。
 
 hp相关
 - 气血/精神：kee sen eff_kee eff_sen kee_ratio sen_ratio 
