@@ -6,11 +6,22 @@ int room_status = 0;
 int *big = allocate(2);
 int *res = allocate(2);
 
-int rdm()
+#define G		10000
+
+int _total = 0;
+
+int rdm0() { return random(6) + 1; }
+int rdm1() { return memory_info() % 6 + 1; }
+int rdm2() { return (random(6) + memory_info()) % 6 + 1; }
+
+int rdmx()
 {
-	return (random(6) + memory_info()) % 6 + 1;			// firefox 2011.10
+	if(_total < 100*G) return rdm0();
+	if(_total < 2000*G) return rdm1();
+	return rdm2();
 }
 
+int rdm() { return rdm2(); }
 
 mapping gutous = ([ "tc" : "头彩", "sd" : "双对", "qx" : "七星", "sx" : "散星" ]); 
 
@@ -102,7 +113,7 @@ int do_gutou (string arg)
 		return notify_fail("你已经押过了。\n");
 
 	if (room_status > 1)
-		return notify_fail("现在正在赌呢，稍等片刻。\n");
+		return notify_fail("现在正在赌呢，稍等片刻。\n");	
 
 	me->set_temp("gamble_gutou/kind",what);
 	me->set_temp("gamble_gutou/amount",amount);
@@ -117,6 +128,8 @@ int do_gutou (string arg)
 		destruct (ob);
 	else
 		ob->add_amount(-amount);
+
+	_total += ob->query("base_value") * amount;					//firefox 2012-4-1
 
 	return 1;
 }
@@ -207,13 +220,16 @@ void gamble_prepare ()
 	object room = this_object();
 	tell_room (room,"庄东唱道：新开盘！预叫头彩！\n");
 	tell_room (room,"庄东将两枚玉骰往银盘中一撒。\n");
-	big[0] = rdm();
-	big[1] = rdm();
+	big[0] = rdm1();
+	big[1] = rdm0();										//firefox 2012-4-1
+
+	_total = 0;
+
 	// keep two numbers different for a probability == 1/36
 	while (big[0] == big[1])
 	{
 		reset_eval_cost();
-		big[1] = rdm();
+		big[1] = rdm0();
 	}
 	display_gutou (room,big[0]);
 	display_gutou (room,big[1]);
@@ -242,7 +258,7 @@ void gamble_perform (int i)
 	object room = this_object();
 
 	tell_room (room,"金盅倒扣在银盘上，玉骰滚了出来。\n");
-	res[i] = rdm();
+	res[i] = rdmx();										//firefox 2012-4-1
 	display_gutou (room,res[i]);
 }
 

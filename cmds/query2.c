@@ -152,6 +152,7 @@ mapping _props = ([
 	"task_target"	: (: task_target :),
 	"task_remark"	: (: task_remark :),	//quest/food
 
+	"stl_zg"		: (: query_diff, "sys_alx/exp", "sys_alx/exp_used" :),
 ]);
 
 
@@ -201,7 +202,7 @@ hp相关
 - 饮食/杀气：water food bellicosity
 - 经验/潜能：combat_exp daoxing potential
 
-score相关属性
+score相关
 - 名称/头衔：title name id
 - 攻击/防护：damage armor
 - 门派/师承：family master
@@ -232,12 +233,16 @@ tasks相关
 - 势力(forces)：cien
 比如李靖任务为：mieyao/mieyao，猪八戒任务为：quest/food。
 
+其他
+* 狮驼岭战功：stl_zg，随着相关指令的上线，该参数会移去
+
 用法举例
-- 查看气血：query 气血:kee,eff_kee,kee_ratio
+- 气血比例：query 气血:kee,eff_kee,kee_ratio
 - 查看技能：query 技能:skill_level(force),skill_level(spells)
-- 查看任务：query task_target(quest/food),task_state(quest/food)
+- 任务信息：query task_target(quest/food),task_state(quest/food)
 - 几个枕头：query count(huangliang zhen)
-- 查看出口：query room(exits)
+- 房间出口：query room(exits)
+- NPC在否：query here(li jing)
 
 HELP
 	);
