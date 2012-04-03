@@ -189,8 +189,8 @@ int do_list(string arg)
 	string* attrs = ({"id", "name", "sid", "sname"});
 	int n = 0;
 
-	if(!sizeof(_items))
-		return notify_fail(query("short")+"目前没有任何货物在拍卖。\n"); 
+	if(!sizeof(_items)) return notify_fail(query("short")+"目前没有任何货物在拍卖。\n"); 
+	if(!cd_start(this_player(), "cmd", 5)) return notify_fail("请不要连续使用该指令。\n");
 
 	write(query("short") + NOR"在售物品如下(至多显示20个)：\n");
 	write("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
