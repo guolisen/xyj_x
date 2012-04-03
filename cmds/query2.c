@@ -217,7 +217,7 @@ tasks相关
 用法举例
 - 气血比例：query 气血:kee,eff_kee,kee_ratio
 - 查看技能：query 技能:skill(force),skill(spells)
-- 任务信息：query task(quest/food),task(quest/food)
+- 任务信息：query task(mieyao/mieyao),task(quest/food)
 - 几个枕头：query count(huangliang zhen)
 - 房间出口：query room(exits)
 - NPC在否：query here(li jing)

@@ -1058,7 +1058,7 @@ varargs void enter_world(object ob, object user, int silent)
 		log_file("cmds/login", sprintf("%s(%s)从(%s)登陆系统. 时间在：(%s)\n",
 			user->name(),query_ip_number(user),user->query("id"),ctime(time()) ) );
 	}
-	NEWS_D->prompt_user(user);
+	//NEWS_D->prompt_user(user);
 
 	UPDATE_D->check_user(user, 0);
 	MPTOP_D->check_mp_player(user);

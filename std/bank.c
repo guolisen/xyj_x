@@ -93,7 +93,7 @@ int do_deposit(string arg)
 		
 		foreach(string id in _ids) {
 			object ob = present(id, me);
-			if(ob) {
+			if(ob && ob->value() > 0) {
 				amount += ob->value();
 				destruct(ob);
 			}

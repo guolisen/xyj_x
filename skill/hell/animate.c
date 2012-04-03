@@ -45,7 +45,7 @@ int cast(object me, object target)
 
 void dest_zombie(object zombie)
 {
-	zombie->die();
+	if(zombie) zombie->die();
 }
 
 object animate(object who, object target)

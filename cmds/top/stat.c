@@ -95,6 +95,34 @@ mixed* stat_wq()
 	return m2arr(m);
 }
 
+mapping _attrs = ([
+	"cps" : "定力", "per" : "容貌", "cor" : "胆识", "kar" : "福缘",
+	"str" : "体格", "con" : "根骨", "int" : "悟性", "spi" : "灵性",
+]);
+
+//统计天赋
+mixed* stat_attr()
+{
+	object* users = children("/obj/user");
+	string* attrs = keys(_attrs);
+	mapping m = ([]);
+	int n = 0;
+	foreach(object who in users) {
+		if(environment(who) && NWIZARD(who)) {
+			mapping db = who->query_entire_dbase();
+			if(db[CEXP] + db[DEXP] < 1000000) continue;
+			foreach(string k in attrs) {
+				m[_attrs[k]] += db[k];
+			}
+			n++;
+		}
+	}
+	foreach(string k in keys(m)) {
+		m[k] /= n;
+	}
+	return m2arr(m);
+}
+
 //初始化各个子榜单
 void create()
 {
@@ -114,5 +142,10 @@ void create()
 			"format"	: (: format1 :),
 		]);
 	}
+	_lists["tf"] = ([
+		"header"	: "   天赋                   人均值    百分比\n",
+		"source"	: (: stat_attr :),
+		"format"	: (: format1 :),
+	]);
 }
 

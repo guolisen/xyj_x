@@ -1,10 +1,8 @@
 // by firefox 04/02/2010
 // 寄卖行
 
-#define ADMX_D                  "/adm/daemons/admxd"
-
-#define AUCTION_TIME            (31*24*3600)            //时限
-#define AUCTION_TAX             5                       //交易税(%)
+#define AUCTION_TIME            (10*24*3600)            //时限
+#define AUCTION_TAX             20                      //交易税(%)
 #define AUCTION_MIN_PRICE       20                      //最低价(黄金)
 #define AUCTION_MAX_PRICE       9999                    //最高价(黄金)
 #define AUCTION_MAX_LIST        20                      //列表项上限
@@ -22,6 +20,7 @@ int do_goumai(string arg);
 
 mapping _items = ([]);                      //记录拍卖的物件
 int _serial = 0;                            //物品序列号
+mapping _sellers = ([]);                    //拍卖者
 
 /*
 void create1()
@@ -51,30 +50,52 @@ void setup()
 	restore();
 	set("no_fight", 1);
 	set("no_magic", 1);
+	if(!_sellers) _sellers = ([]);
 }
 
 void init()
 {
 	object who = this_player();
 
-	if(userp(who)) {
-		add_action("do_sale", ({"sell", "jishou"}) ); 
-		add_action("do_goumai", ({"goumai", "mai"}) ); 
-		add_action("do_list", "list"); 
-		add_action("do_look", "look"); 
-	}
-	if(wizardp(who))
+	if(!userp(who)) return;
+
+	add_action("do_sale", ({"sell", "jishou"}) ); 
+	add_action("do_goumai", ({"goumai", "mai"}) ); 
+	add_action("do_list", "list"); 
+	add_action("do_look", "look"); 
+	
+	if(wizardp(who)) {
 		add_action("do_timeout", "timeout");
+		add_action("do_total", "total");
+	}
+
+	if(_sellers[getuid(who)] > 0) call_out("give_money", 1, who);
+}
+
+void give_money(object who)
+{
+	string id = getuid(who);
+	who->add("balance", _sellers[id]);	
+	who->save();
+	tell_object(who, HIG"你寄卖所得" + (_sellers[id]/10000) + "两黄金已汇入钱庄帐户。\n"NOR);	
+	map_delete(_sellers, id);
+	
 }
 
 int do_sale(string arg) 
 { 
 	object ob, who = this_player();
-	int price;
+	string id;
+	int price = 0;
 
-	if(!arg || sscanf(arg, "%s %d", arg, price) != 2) 
+	if(arg) {
+		int i = rfind(arg, ' ');
+		id = arg[0..i-1];
+		price = to_int(arg[i+1..]);
+	}
+	if(!price)
 		return notify_fail("指令格式：sell <物品> <价格>\n");
-	if(!(ob = present(arg, who))) 
+	if(!(ob = present(id, who))) 
 		return notify_fail("你要寄卖什么？\n"); 
 	if(who->is_busy())
 		return notify_fail(BUSY_MESSAGE);
@@ -83,7 +104,7 @@ int do_sale(string arg)
 	if(price < AUCTION_MIN_PRICE)
 		return notify_fail("要价过低。\n");
 	if(price > AUCTION_MAX_PRICE)
-		return notify_fail("要价过高。\n");     
+		return notify_fail("要价过高。\n");
 	price *= 10000; //换算
 	if(who->query("balance") < price*AUCTION_TAX/100) 
 		return notify_fail("你的存款不足支付手续费。\n");
@@ -92,7 +113,7 @@ int do_sale(string arg)
 
 int sell(object who, object ob, int price) 
 { 
-	int sn = ++_serial;
+	int sn = (_serial + 1) % 10000;
 	mapping item = save_item(ob);
 	{
 		item["sid"] = getuid(who);
@@ -101,6 +122,7 @@ int sell(object who, object ob, int price)
 		item["time"] = time();
 		item["sn"] = sn;
 	}
+	_serial = sn;
 	_items[sn + ""] = item;
 
 	message_vision("$N把" + item["name"] + "托商人代售，标号为"HIR + sn + NOR"。\n", who);
@@ -154,6 +176,7 @@ int give_back(string* timeouts)
 		send_mail(mail);
 
 		map_delete(_items, sn);
+		reset_eval_cost();
 	}
 	save();
 	return 1;
@@ -190,7 +213,7 @@ int do_list(string arg)
 				);
 			if(++n >= 20) break;
 		}
-		reset_eval_cost();		
+		reset_eval_cost();
 	}
 	write("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 	write("注：用 <mai 序号> 来购买物品。\n");
@@ -218,14 +241,13 @@ int do_goumai(string arg)
 
 	if(ob->move(who)) {
 		int price = item["price"];
-		object seller = ADMX_D->global_find_player(item["sid"]);        // 调入在线/离线卖家档案
-		if (seller) {
+		object seller = find_player(item["sid"]);        // 调入在线/离线卖家档案
+		if(seller) {
 			seller->add("balance", price);
 			seller->save();
 			tell_object(seller, HIG"你寄卖的『" + item["name"] + "』已售出。\n"NOR);
-			ADMX_D->global_destruct_player(seller);
 		} else {
-			//买家数据加载失败，或许已经自杀了
+			_sellers[item["sid"]] += price;
 		}
 		who->add("balance", -price);
 		map_delete(_items, arg);
@@ -269,3 +291,8 @@ int do_timeout(string arg)
 	return 1;
 }
 
+int do_total(string arg)
+{
+	printf("商品总数：%d。\n", sizeof(_items));
+	return 1;
+}
