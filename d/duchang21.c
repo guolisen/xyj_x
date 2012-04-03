@@ -124,12 +124,13 @@ int do_gutou (string arg)
 		ob->query("name"),
 		gutous[what]),
 		me);
+	
+	_total += ob->query("base_value") * amount;					//firefox 2012-4-1
+
 	if (amount == ob->query_amount())
 		destruct (ob);
 	else
 		ob->add_amount(-amount);
-
-	_total += ob->query("base_value") * amount;					//firefox 2012-4-1
 
 	return 1;
 }

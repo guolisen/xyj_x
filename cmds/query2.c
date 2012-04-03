@@ -61,37 +61,24 @@ string here_obj(object who, string id)
 	object ob = id ? present(id, room) : 0;
 	return ob ? ob->name() : 0;
 }
-//查询技能等级
-int skill_level(object who, string skill)
-{
-	return who->query_skill(skill, 1);
-}
-//查询技能激发
-string skill_map(object who, string skill)
-{
-	return who->query_skill_mapped(skill);
-}
-//查询技能学习点数
-int skill_learned(object who, string skill)
+//查询技能
+string skill(object who, string skill)
 {
 	mapping m = who->query_learned();
-	if(!m) return 0;
-	return m[skill];
+	return who->query_skill(skill, 1) + "|" +
+		and2(m, m[skill]) + "|" + 
+		who->query_skill_mapped(skill);
 }
-//查询任务状态
-string task_state(object who, string id)
+
+//查询任务
+string task(object who, string id)
 {
-	return who->query(TASK_PROP"/list/" + id + "/state");
-}
-//查询任务对象
-string task_target(object who, string id)
-{
-	return who->query(TASK_PROP"/list/" + id + "/tname");
-}
-//查询任务备注
-string task_remark(object who, string id)
-{
-	return who->query(TASK_PROP"/list/" + id + "/remark");
+	mapping m =  who->query(TASK_PROP"/list/" + id);
+	if(!m) return "0|0|0|0|0|0";
+
+	return m["ename"] + "|" + m["tname"] + "|" + m["tid"] + "|" +
+		m["state"] + "|" + m["level"] + "|" 
+		+ (m["remark"] != "" ? m["remark"] : "0");
 }
 
 //属性对应表
@@ -142,15 +129,11 @@ mapping _props = ([
 	"here"			: (: here_obj :),
 
 	//skills	
-	"skill_level"	: (: skill_level :),
-	"skill_learned"	: (: skill_learned :),
-	"skill_map"		: (: skill_map :),
+	"skill"			: (: skill :),
 
 	//tasks	
 	"task_norm"		: TASK_PROP"/norm",
-	"task_state"	: (: task_state :),
-	"task_target"	: (: task_target :),
-	"task_remark"	: (: task_remark :),	//quest/food
+	"task"			: (: task :),
 
 	"stl_zg"		: (: query_diff, "sys_alx/exp", "sys_alx/exp_used" :),
 ]);
@@ -162,7 +145,7 @@ int main(object me, string arg)
 	mixed result = 0;
 	string* arr;
 		
-	if(!arg) arg = "";
+	if(!arg) return notify_fail("指令格式 ： query [标题:]<属性>|<属性列表>\n");
 	sscanf(arg, "%s:%s", title, arg);
 
 	arr = explode(arg, ",");
@@ -213,20 +196,15 @@ i相关
 - 物品数量：count(物品ID)，计算身上该物品总数
 
 look相关
-- 房间属性：room(属性)，属性包括：short exits outdoors no_fight no_magic water
+- 房间属性：room(属性)，属性：short exits outdoors no_fight no_magic water
 - 目标存在：here(目标ID)，查看该目标的名字
 
 skills相关
-- 技能等级：skill_level(技能)
-- 学习点：  skill_learned(技能)
-- 技能激发：skill_map(技能)
-技能为技能id，比如unarmed。
+- 技能信息：skill(技能ID)
 
 tasks相关
 - 任务额度：task_norm
-- 任务状态：task_state(任务)
-- 任务目标：task_target(任务)
-- 任务备注：task_remark(任务)
+- 任务信息：task(任务)
 任务格式为：<任务类别>/<任务>，类别和任务如下：
 - 灭妖(mieyao)：mieyao
 - 解谜(quest)：food weapon armor cloth ask give kill
@@ -238,8 +216,8 @@ tasks相关
 
 用法举例
 - 气血比例：query 气血:kee,eff_kee,kee_ratio
-- 查看技能：query 技能:skill_level(force),skill_level(spells)
-- 任务信息：query task_target(quest/food),task_state(quest/food)
+- 查看技能：query 技能:skill(force),skill(spells)
+- 任务信息：query task(quest/food),task(quest/food)
 - 几个枕头：query count(huangliang zhen)
 - 房间出口：query room(exits)
 - NPC在否：query here(li jing)
