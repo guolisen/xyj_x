@@ -123,15 +123,15 @@ string reward_gift(object who, int point)
 }
 
 private void _improve(object who, string name, int point, int level)
-{
-	int pot = level*level*2;
-	int high = (level > 50);
-
-	if(point > pot) {
-		who->improve_skill(name, pot, high);
-		_improve(who, name, point - pot, level + 1);
-	} else
-		who->improve_skill(name, point, high);
+{	
+	while(1) {
+		int pot = level*level*2;
+		if(point <= pot) break;
+		who->improve_skill(name, pot, (level > 50));
+		level++;
+		point -= pot;
+	}
+	who->improve_skill(name, point, (level > 50));
 }
 
 //½±Àø¼¼ÄÜ

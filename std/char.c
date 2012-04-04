@@ -99,7 +99,6 @@ void heart_beat()
 			&&	wimpy_ratio > 0
 			&&	(	my["kee"] * 100 / my["max_kee"] <= wimpy_ratio
 			||	my["sen"] * 100 / my["max_sen"] <= wimpy_ratio) )
-			// ||	my["gin"] * 100 / my["max_gin"] <= wimpy_ratio) )
 			GO_CMD->do_flee(me);
 		// Do attack or clean up enemy if we have fleed.
 		attack();

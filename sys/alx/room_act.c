@@ -63,6 +63,7 @@ int room_get_out(object who)
 
 	who->move(PLACE->random_room1("/d/city"));
 	who->start_busy(2);
+	who->set_temp("last_damage_from", 0);
 	return 1;
 }
 

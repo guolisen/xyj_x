@@ -311,7 +311,8 @@ int	demote(object me, object who)
 
 //设置成员头衔
 int title(object me, object who, string title)
-{	
+{
+	if(title && sizeof(title) > 10) notify_fail("头衔过长。\n");
 	if(!who) notify_fail("设置谁的头衔？\n");
 	else {
 		mapping g1 = GANG->data(me);

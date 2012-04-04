@@ -258,12 +258,17 @@ varargs int skill_power(object ob, string skill, int usage)
 }
 
 // weapon vs env
-int weapon_fit_env(object weapon, object env)
+private int weapon_fit_env(object weapon, object env)
 {
 	if(weapon && (weapon->query("flag") & TWO_HANDED))
 		return env->query("outdoors") != 0;
 	else
 		return env->query("outdoors") == 0;
+}
+
+//check stop_attack
+private int stop_attack(object me, object victim)
+{
 }
 
 // do_attack()
@@ -283,6 +288,8 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	//int cost;
 	int mod_val;
 	object my_env = environment(me);
+
+	if(me->query_temp("no_attack")) return 0;									//firefox 2012.4
 
 	victim = PROTECT->stand_in(victim);			
 
@@ -332,7 +339,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			mod_val = victim_action["dodge_power"];
 	}
 	if( victim->is_busy() ) dp /= 3;
-	if( victim->query_temp("no_move") ) dp /= 3;							//firefox 2010.11 for no_move
+	if( victim->query_temp("no_move") ) dp /= 5;							//firefox 2010.11 for no_move
 	if( dp < 0 ) dp = 0;
 
 	// mon 8/10/99
@@ -385,7 +392,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 		} else {
 			pp = skill_power(victim, "unarmed", SKILL_USAGE_DEFENSE);
 			parry_skill = victim->query_skill_mapped("unarmed");
-			if(victim->query_temp("apply/damage") < 50) pp /= 2;				//firefox 2011.11
+			if(victim->query_temp("apply/damage") < 50) pp /= 2;				//firefox 2011.11	TODO damage & parry
 		}
 
 		if( victim->is_busy() ) pp /= 3;
@@ -416,6 +423,10 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			damage = RESULT_PARRY;
 
 		} else {
+
+			function before_attacked = victim->query_temp("events/before_beaten", 1);	//firefox 2012.4
+			if( functionp(busy) ) {
+		if( !evaluate(busy, this_object()) ) {
 
 			//
 			//	(5) We hit the victim and the victim failed to parry
