@@ -2,6 +2,7 @@
 
 inherit F_CLEAN_UP;
 
+#include <weapon.h>
 #include <ansi.h>
 #include <xyj_x.h>
 
@@ -59,6 +60,7 @@ int cast(object me, object target)
 		if(!userp(target) && !random(10)) {
 			target->command("say 还用得着吗？又烧！何苦呢－－？何必呢－－？");
 		}
+		if(part == "裆部") call_out("cut", DURATION * SEC_PER_HB + 1, target);
 		
 		SKILL_D("pansi-dafa")->random_level_up(me);
 
@@ -67,4 +69,26 @@ int cast(object me, object target)
 	}
 	BTL->fight_enemy(target, me);
 	return 2;
+}
+
+void cut(object who)
+{
+	object env = who ? environment(who) : 0;
+	object weapon;
+
+	if(!env) return;
+	foreach(object ob in all_inventory(env)) {
+		if(ob == who || !ob->is_character() || userp(ob)) continue;
+		weapon = ob->query_temp("weapon");
+		if(weapon && weapon->query("flag") & EDGED) {
+			string id = who->parse_command_id_list()[0];
+
+			msv(CYN"$N同情的看着$n。\n", ob, who);
+			ob->command("say 都烧焦了，还是割了吧...");
+			if(who->query("env/no_accept"))	ob->command("drop " + weapon->query("id"));
+			else ob->command("give " + weapon->query("id") + " to " + id);
+			return;
+		}
+	}
+
 }

@@ -259,7 +259,7 @@ void gamble_perform (int i)
 	object room = this_object();
 
 	tell_room (room,"金盅倒扣在银盘上，玉骰滚了出来。\n");
-	res[i] = rdmx();										//firefox 2012-4-1
+	res[i] = i ? rdmx() : rdm0();										//firefox 2012-4-1	 
 	display_gutou (room,res[i]);
 }
 
