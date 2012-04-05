@@ -66,7 +66,7 @@ string skill(object who, string skill)
 {
 	mapping m = who->query_learned();
 	return who->query_skill(skill, 1) + "|" +
-		and2(m, m[skill]) + "|" + 
+		(m ? m[skill] : 0) + "|" + 
 		who->query_skill_mapped(skill);
 }
 
