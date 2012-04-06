@@ -91,6 +91,7 @@
 #define TRANSLATOR			UFUN_DIR"translator"
 #define LCALENDAR			UFUN_DIR"lcalendar"
 #define GUARD				UFUN_DIR"guard"
+#define STATUS				UFUN_DIR"status"
 // Sub Systems
 
 //ÎÄµµÏµÍ³

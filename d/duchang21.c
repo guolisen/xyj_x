@@ -1,32 +1,54 @@
 // by snowcat 7/5/1997
 
 inherit ROOM;
+inherit F_SAVE;
 
-int room_status = 0;
-int *big = allocate(2);
-int *res = allocate(2);
+#include <xyj_x.h>
+
+static int room_status = 0;
+static int *big = allocate(2);
+static int *res = allocate(2);
 
 #define G		10000
 
-int _total = 0;
+static int _total = 0;
+mapping _account = ([]);
 
 int rdm0() { return random(6) + 1; }
-int rdm1() { return memory_info() % 6 + 1; }
-int rdm2() { return (random(6) + memory_info()) % 6 + 1; }
 
-int rdmx()
+int rdmx(int i)
 {
-	if(_total < 100*G) return rdm0();
-	if(_total < 2000*G) return rdm1();
-	return rdm2();
+	string* arr = ({"string", "mem", "nodes", "mappings", "objects", "callout"});
+	int n = 0;
+
+	if(_total < 1*G) return rdm0();
+	else if(_total < 100*G) n = 1;
+	else if(_total < 1000*G) n = 2;
+	else if(_total < 2000*G) n = 3;
+	else if(_total < 5000*G) n = 4;
+	n = STATUS->query(arr[n + i]);
+	return (random(6) + n) % 6 + 1;
 }
 
-int rdm() { return rdm2(); }
+string query_save_file()
+{
+	return DATA_DIR "npc/duchang2";
+}
+
+int remove()
+{
+	save();
+	return 0;
+}
+
+
 
 mapping gutous = ([ "tc" : "头彩", "sd" : "双对", "qx" : "七星", "sx" : "散星" ]); 
 
 void create()
 {
+	restore();
+
 	set("short", "骨骰房");
 	set("long", @LONG
 
@@ -71,6 +93,8 @@ void init ()
 	add_action ("do_bian","bian");
 	add_action ("do_get","get");
 
+	if(wizardp(me)) add_action ("do_state","state");
+
 	if (room_status > 0)
 		return;
 
@@ -86,7 +110,7 @@ int do_gutou (string arg)
 {
 	object me = this_player();
 	string what;
-	int amount;
+	int amount, value;
 	string money;
 	object ob;
 
@@ -125,7 +149,9 @@ int do_gutou (string arg)
 		gutous[what]),
 		me);
 	
-	_total += ob->query("base_value") * amount;					//firefox 2012-4-1
+	value = ob->query("base_value") * amount / 100;				//firefox 2012-4-1
+	_total += value;
+	_account[getuid(me)] -= value;
 
 	if (amount == ob->query_amount())
 		destruct (ob);
@@ -221,14 +247,13 @@ void gamble_prepare ()
 	object room = this_object();
 	tell_room (room,"庄东唱道：新开盘！预叫头彩！\n");
 	tell_room (room,"庄东将两枚玉骰往银盘中一撒。\n");
-	big[0] = rdm1();
+	big[0] = rdm0();
 	big[1] = rdm0();										//firefox 2012-4-1
 
 	_total = 0;
 
 	// keep two numbers different for a probability == 1/36
-	while (big[0] == big[1])
-	{
+	while (big[0] == big[1]) {
 		reset_eval_cost();
 		big[1] = rdm0();
 	}
@@ -259,7 +284,7 @@ void gamble_perform (int i)
 	object room = this_object();
 
 	tell_room (room,"金盅倒扣在银盘上，玉骰滚了出来。\n");
-	res[i] = i ? rdmx() : rdm0();										//firefox 2012-4-1	 
+	res[i] = rdmx(i);											//firefox 2012-4-1	 
 	display_gutou (room,res[i]);
 }
 
@@ -274,6 +299,9 @@ void player_wins (object who, int total)
 		money->query("base_unit"),
 		money->query("name")),
 		who);
+	
+	_account[getuid(who)] += money->value() / 100;				//firefox 2012-4-1
+	
 	money->move(who);
 }
 
@@ -368,3 +396,19 @@ int do_get(string arg)
 	return 0;
 }
 
+int do_state(string arg)
+{
+	if(arg == "clear") {
+		_total = 0;
+		_account = ([]);
+	} else {
+		int s = 0;
+		printf("赌徒成绩单：\n");
+		foreach(string k, int v in _account) {
+			printf("%-16s    %d\n", k, v / 100);
+			s += v / 100;
+		}
+		printf("共计:%d 当前赌注:%d\n", s, _total / 100);
+	}
+	return 1;
+}

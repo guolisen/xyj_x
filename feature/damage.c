@@ -285,7 +285,7 @@ varargs void revive(int quiet)
 	if(this_object()->is_busy()) this_object()->start_busy(1);
 	//clear the busy flag.
 
-	while( environment()->is_character() )
+	while(environment() && environment()->is_character() )
 		this_object()->move(environment(environment()));
 	this_object()->enable_player();
 	if( !quiet ) {
@@ -363,7 +363,8 @@ void die()
 		corpse->move(environment());
 
 	this_object()->remove_all_killer();
-	all_inventory(environment())->remove_killer(this_object());
+	if(environment())
+		all_inventory(environment())->remove_killer(this_object());
 
 	this_object()->dismiss_team();
 	if (this_object()->self_purge()) return;

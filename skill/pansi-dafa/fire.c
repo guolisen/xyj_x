@@ -29,7 +29,7 @@ int cast(object me, object target)
 	int mana = 10 + me->query("mana_factor");
 	mapping req = ([
 		"cd"		: ([ ID				: 1 ]),
-		"skill1"	: ([ "pansi-dafa"	: 20 ]),
+		"skill1"	: ([ "pansi-dafa"	: 30 ]),
 		"prop"		: ([ "mana"			: mana ]),
 	]);
 	mapping cmp_parm = ([
@@ -47,20 +47,20 @@ int cast(object me, object target)
 
 	msv(MSG0, me, target);
 
-	if(BTL->cmp_random20(me, target, cmp_parm) > 75) {
+	if(BTL->cmp_random20(me, target, cmp_parm) > 80) {
 		int damage = 50 + mana * 2;
 		string part = (target->query("gender") == "女性") ? "手上" : random1(({"手上", "裆部"}));
-		if(target->query_temp("weapon"))
-			BUFF->start_no_wield(target, DURATION, sprintf(MSG3, part));
+
+		BUFF->start_no_wield(target, DURATION, sprintf(MSG3, part));
 		msvx(MSG1, me, target, part);
 
 		target->receive_damage("kee", damage, me);
 		target->receive_wound("kee", damage, me);
 
-		if(!userp(target) && !random(10)) {
+		if(!userp(target) && !random(80))
 			target->command("say 还用得着吗？又烧！何苦呢－－？何必呢－－？");
-		}
-		if(part == "裆部") call_out("cut", DURATION * SEC_PER_HB + 1, target);
+		if(part == "裆部" && !random(20))
+			call_out("cut", DURATION * SEC_PER_HB + 1, target);
 		
 		SKILL_D("pansi-dafa")->random_level_up(me);
 
@@ -76,17 +76,18 @@ void cut(object who)
 	object env = who ? environment(who) : 0;
 	object weapon;
 
-	if(!env) return;
+	if(!env || who->is_fighting()) return;
 	foreach(object ob in all_inventory(env)) {
 		if(ob == who || !ob->is_character() || userp(ob)) continue;
 		weapon = ob->query_temp("weapon");
-		if(weapon && weapon->query("flag") & EDGED) {
-			string id = who->parse_command_id_list()[0];
+		if(weapon && (weapon->query("flag") & EDGED) && weapon->query("weapon_prop/damage") < 51) {
+			string uid = who->parse_command_id_list()[0];
+			string wid = weapon->query("id");
 
 			msv(CYN"$N同情的看着$n。\n", ob, who);
 			ob->command("say 都烧焦了，还是割了吧...");
-			if(who->query("env/no_accept"))	ob->command("drop " + weapon->query("id"));
-			else ob->command("give " + weapon->query("id") + " to " + id);
+			if(who->query("env/no_accept"))	ob->command("drop " + wid);
+			else ob->command("give " + wid + " to " + uid);
 			return;
 		}
 	}
