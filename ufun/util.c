@@ -146,3 +146,9 @@ int today()
 	return localtime(time())[LT_MDAY];
 }
 
+//ÈÕÆÚ
+string date()
+{
+	mixed* t = localtime(time());
+	return sprintf("%d-%d-%d", t[LT_YEAR], t[LT_MON] + 1, t[LT_MDAY]);
+}

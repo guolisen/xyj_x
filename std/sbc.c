@@ -6,6 +6,7 @@
 #define AUCTION_MIN_PRICE       20                      //最低价(黄金)
 #define AUCTION_MAX_PRICE       9999                    //最高价(黄金)
 #define AUCTION_MAX_LIST        20                      //列表项上限
+#define AUCTION_CAPACITY		10000					//总容量
 
 inherit ROOM;
 inherit F_SAVE;
@@ -108,12 +109,23 @@ int do_sale(string arg)
 	price *= 10000; //换算
 	if(who->query("balance") < price*AUCTION_TAX/100) 
 		return notify_fail("你的存款不足支付手续费。\n");
-	return sell(who, ob, price); 
+	if(sizeof(_items) >= AUCTION_CAPACITY - 10)
+		return notify_fail("货物积压太多了，暂不受理寄卖。\n");
+	return sell(who, ob, price);
+}
+
+//产生新的序列号
+private int gen_sn()
+{
+	do {
+		_serial = (_serial + 1) % AUCTION_CAPACITY;		
+	} while(_items[_serial + ""]);
+	return _serial;
 }
 
 int sell(object who, object ob, int price) 
 { 
-	int sn = (_serial + 1) % 10000;
+	int sn = gen_sn();
 	mapping item = save_item(ob);
 	{
 		item["sid"] = getuid(who);
@@ -122,10 +134,9 @@ int sell(object who, object ob, int price)
 		item["time"] = time();
 		item["sn"] = sn;
 	}
-	_serial = sn;
 	_items[sn + ""] = item;
 
-	message_vision("$N把" + item["name"] + "托商人代售，标号为"HIR + sn + NOR"。\n", who);
+	message_vision("$N把" + item["name"] + "托商人代售，标号为" + sn + "。\n", who);
 
 	who->add("balance", -price*AUCTION_TAX/100);    // 拍卖手续费，从存款扣除
 	who->save();
