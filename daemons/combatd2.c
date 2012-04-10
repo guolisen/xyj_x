@@ -266,9 +266,12 @@ private int weapon_fit_env(object weapon, object env)
 		return env->query("outdoors") == 0;
 }
 
-//check stop_attack
-private int stop_attack(object me, object victim)
+//check abort_attack
+private int abort_attack(object victim, object me)
 {
+	function fun = victim->query_temp("events/abort_attack", 1);	
+	if(functionp(fun)) return evaluate(fun, victim, me);
+	return 0;
 }
 
 // do_attack()
@@ -423,16 +426,13 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			damage = RESULT_PARRY;
 
 		} else {
-
-			function before_attacked = victim->query_temp("events/before_beaten", 1);	//firefox 2012.4
-			if( functionp(busy) ) {
-		if( !evaluate(busy, this_object()) ) {
-
 			//
 			//	(5) We hit the victim and the victim failed to parry
 			//
 
-			object weapon2 = me->query_temp("secondary_weapon");
+			object weapon2 = me->query_temp("secondary_weapon");			//firefox 2012.4
+
+			if(abort_attack(victim, me)) return 0;
 
 			damage = me->query_temp("apply/damage");
 			if(weapon2 && weapon2->query("skill_type") != attack_skill)		//firefox 2011.11 
