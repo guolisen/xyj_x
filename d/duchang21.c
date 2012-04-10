@@ -405,7 +405,7 @@ int do_state(string arg)
 		int s = 0;
 		printf("赌徒成绩单：\n");
 		foreach(string k, int v in _account) {
-			printf("%-16s    %d\n", k, v / 100);
+			printf("%-12s    %8d\n", k, v / 100);
 			s += v / 100;
 		}
 		printf("共计:%d 当前赌注:%d\n", s, _total / 100);

@@ -280,8 +280,8 @@ void register_relay_channel(string channel)
 void channel_log(string msg)
 {
 	mixed* t = localtime(time());
-	string file = sprintf(LOG_DIR"channel/%d/%d/%d.log", t[LT_YEAR], t[LT_MON] + 1, t[LT_MDAY]);
-	//write(file + "\n");
+	string file = sprintf(LOG_DIR"channel/%d/%02d/%02d.log", t[LT_YEAR], t[LT_MON] + 1, t[LT_MDAY]);
+
 	assure_file(file);
-	write_file(file, msg);
+	write_file(file, sprintf("%02d:%02d:%02d %s", t[LT_HOUR], t[LT_MIN], t[LT_SEC], msg));
 }

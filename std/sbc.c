@@ -67,7 +67,7 @@ void init()
 	
 	if(wizardp(who)) {
 		add_action("do_timeout", "timeout");
-		add_action("do_total", "total");
+		add_action("do_state", "state");
 	}
 
 	if(_sellers[getuid(who)] > 0) call_out("give_money", 1, who);
@@ -302,7 +302,7 @@ int do_timeout(string arg)
 	return 1;
 }
 
-int do_total(string arg)
+int do_state(string arg)
 {
 	printf("商品总数：%d。\n", sizeof(_items));
 	return 1;

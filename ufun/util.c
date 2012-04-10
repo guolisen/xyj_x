@@ -150,5 +150,12 @@ int today()
 string date()
 {
 	mixed* t = localtime(time());
-	return sprintf("%d-%d-%d", t[LT_YEAR], t[LT_MON] + 1, t[LT_MDAY]);
+	return sprintf("%02d-%02d-%02d", t[LT_YEAR], t[LT_MON] + 1, t[LT_MDAY]);
+}
+
+//Ê±¼ä
+string time1()
+{
+	mixed* t = localtime(time());
+	return sprintf("%02d:%02d:%02d", t[LT_HOUR], t[LT_MIN], t[LT_SEC]);
 }
