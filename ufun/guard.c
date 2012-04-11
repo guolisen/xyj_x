@@ -64,19 +64,19 @@ void call()
 ///复制状态
 void copy_status(object leader, object guard)
 {
-	string* arr = ({
+	string* props = ({
 		"title", "nickname", "race", "unit",
 		"age", "life/live_forever", "fake_age",
 		"str", "int", "con", "per", "cor", "spi", "cps", "kar", 
 		"max_kee", "max_sen", "max_force", "max_mana",
 		"combat_exp", "daoxing",
 	});
+	string* tmp_props = ({ "apply/personality", "env/no_accept" });
 
-	HP->copy_prop(leader, guard, arr);
+	HP->copy_prop(leader, guard, props);
+	HP->copy_temp_prop(leader, guard, tmp_props);
 	HP->copy_skills(leader, guard, 100);
 	HP->full(guard);
-
-	guard->set_temp("apply/personality", leader->query_temp("apply/personality"));
 }
 
 ///弱化目标气血/力量为n分之一

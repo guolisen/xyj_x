@@ -5,10 +5,11 @@
 
 inherit F_CLEAN_UP;
 
+#define INTERVAL			10
 
 string* _dirs = ({"login", "user", "mail"});
-
-int purge_dir(string dir, int day);
+int _total = 0;
+int purge_players(int day);
 
 string file(string dir, string id)
 {
@@ -32,7 +33,7 @@ int main(object me, string arg)
 
 	if(!arg) return notify_fail(SYNTAX);
 
-	if(sscanf(arg, "%d", day) && day >= 0) return purge_dir(day);
+	if(sscanf(arg, "%d", day) && day >= 0) return purge_players(day);
 
 	if(sscanf(arg, "%s because %s", name, reason) != 2) return notify_fail(SYNTAX);
 
@@ -43,7 +44,7 @@ int main(object me, string arg)
 		return notify_fail("非玩家档案不能被删除。\n"); 
 
 	purge_id(name);
-	write( "使用者 " + capitalize(name) + " 被删除掉了。\n");
+	write("删除用户：" + name + "。\n");
 	log_file("static/PURGE", sprintf("[%s] %s purged %s because %s.\n",
 		ctime(time())[0..15], geteuid(this_player(1)), name, reason));
 
@@ -51,11 +52,11 @@ int main(object me, string arg)
 }
 
 
-int purge_dir(string dir, int day)
+int purge_dir(string dir, int last_day)
 {
 	object who;
 	string* ids = get_dir(dir);
-	reset_eval_cost();
+	
 	foreach(string id in ids) {
 		string file = dir + id;
 		if(sscanf(id, "%s.o", id) != 1) continue;
@@ -64,26 +65,38 @@ int purge_dir(string dir, int day)
 		who->set("id", id);
 
 		if(who->restore()) {
-			int d = (time() - who->query("last_on"))/86400;
+			int t = who->query("last_on");
 			int c = who->query("count_come");
-			if(d > day && c >-1)
-				printf("\t%s %d %d\n", who->query("name"), day, come);
+			if(t < last_day && c < 5) {
+				printf("\t%s(%s) %d %d\n", who->query("name"), id, (time() - t) / 86400, c);
+				purge_id(id);
+				_total++;
+			}
 		}
 		destruct(who);
+		reset_eval_cost();
 	}
+	printf("目录:%s 累计删除:%d。\n", dir, _total);
+	
 }
-//DATA_DIR + "login/"
+
 int purge_players(int day)
 {
-	mixed* dirs = get_dir((DATA_DIR + "login/", -1);
-
+	string path = DATA_DIR + "login/";
+	mixed* dirs = get_dir(path, -1);
+	int last_day = time() - day * 86400;
+	int delay = 0;
+	
 	seteuid(getuid());
-
+	_total = 0;
 	foreach(mixed* info in dirs) {
 		if(info[1] == -2) {
-			call_out("purge_dir", 10, path + info[0] + "/", day);
+			delay += INTERVAL;
+			call_out("purge_dir", delay, path + info[0] + "/", last_day);
 		}
 	}
+
+	return 1;
 }
 
 
