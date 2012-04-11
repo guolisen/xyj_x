@@ -14,9 +14,8 @@ void create()
 		set("long", "一件猪赐的护甲，据说它的能力不会随主人成长。\n");
 		set("material", "cloth");
 		set("unit", "件");
-		set("armor_prop/armor", 200);
-		set("value", 55);
-
+		set("armor_prop/armor", 20);
+		set("no_stock", 1);
 	}
 	setup();
 }

@@ -280,7 +280,7 @@ mapping start_no_cast(object me, int duration)
 		"name"		: "法术冷却",
 		"comment"	: "法术冷却，此间不能施放任何法术。",
 		"duration"	: duration,
-		"temp"		: (["no_cast" : 1]),
+		"add_temp"	: (["no_cast" : 1]),
 	]);
 	return add(me, buff);
 }
@@ -291,9 +291,22 @@ mapping start_no_move(object me, int duration)
 	mapping buff = ([
 		"id"		: "no_move",
 		"name"		: "禁止移动",
-		"comment"	: "禁止移动，此间不能移动。",
+		"comment"	: "期间不能移动。",
 		"duration"	: duration,
-		"temp"		: (["no_move" : 1]),
+		"add_temp"	: (["no_move" : 1]),
+	]);
+	return add(me, buff);
+}
+
+//开始禁止移动
+mapping start_no_attack(object me, int duration)
+{
+	mapping buff = ([
+		"id"		: "no_attack",
+		"name"		: "禁止攻击",
+		"comment"	: "期间不能攻击。",
+		"duration"	: duration,
+		"add_temp"	: (["no_attack" : 1]),
 	]);
 	return add(me, buff);
 }
@@ -325,7 +338,7 @@ varargs mapping start_no_wield(object me, int duration, string msg)
 		"name"		: HIY"放下屠刀"NOR,
 		"comment"	: "禁止使用武器。",
 		"duration"	: duration,
-		"temp"		: ([ "No_Wield" : 1 ]),
+		"add_temp"	: ([ "No_Wield" : 1 ]),
 		"stop_msg"	: msg,
 		"post_act"	: function(mapping buff) {
 			object weapon = buff["_weapon"];

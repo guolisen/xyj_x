@@ -14,10 +14,10 @@ void create()
 	else {
 		set("unit", "把");
 		set("long", "一柄灰色的利刃。\n");
-		set("value", 55);
 		set("material", "steel");
+		set("no_stock", 1);
 	}
-	init_dagger(40);
+	init_dagger(4);
 
 	set("wield_msg", "$N从怀中摸出一把$n握在手中。\n");
 	set("unwield_msg", "$N将手中的$n藏入怀中。\n");

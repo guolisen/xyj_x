@@ -28,10 +28,19 @@ int abort_attack(object me, object target)
 	msv(MSG1, me, target);
 
 	if(BTL->cmp_random20(me, target, cmp_parm) > thr) {
+		BUFF->add(me, ([
+			"id"		: ID,
+			"name"		: NAME,
+			"comment"	: "防御状态，时刻准备出手反击。",
+			"duration"	: DURATION,
+			"temp"		: ([ "No_Wield" : 1, "no_attack" : 1 ]),
+			"_damage"	: mana + force,
+			"_fun"		: (: abort_attack :),
+		]));
 		msv(MSG2, me, target);
-
-		me->receive_damage("kee", damage);
-		me->receive_wound("kee", damage, attacker);
+		me->add("water", -40);
+		me->receive_damage("kee", damage, attacker);
+		//me->receive_wound("kee", damage/4, attacker);		
 
 	} else {
 		msv(MSG3, me, target);

@@ -14,15 +14,15 @@ void create()
 	} else {
 		set("unit", "把");
 		set("long", "一把晶莹透明的弯刀，以大雪山中千年不化的寒冰制成。颜色变幻不停，象红又象蓝。\n");
-		set("value", 8000);
 		set("material", "ice");
 		set("wield_msg", "$N「唰」地一声抽出一把$n握在手中，眼中射出一道寒意！\n");
 		set("unwield_msg", "$N将手中的$n插入腰间，嘴里轻轻地舒了口气。\n");
+		set("no_stock", 1);
 	}
 	init_blade(60);
 	setup();
 }
-
+/*
 void init()
 {
 	remove_call_out("melt");
@@ -63,3 +63,4 @@ mixed hit_ob(object me, object victim, int damage_bonus)
 	else 
 		message_vision("$N觉得一阵寒意袭来，差点中了刀上的寒毒！\n", victim);
 }
+*/
