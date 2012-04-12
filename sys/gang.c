@@ -1,4 +1,4 @@
-// by firefox 02/21/2010
+// firefox 02/21/2010
 // 帮会集合
 
 #include <xyj_x.h>
@@ -86,49 +86,20 @@ int list()
 }
 
 //尝试从当前位置进入门派
-int try_enter(object who, string verb)
+int try_enter(object who)
 {
 	foreach(object g in elems()) {
-		if(g->enter(who, verb)) return 1;
+		if(g->enter(who)) return 1;
 	}
 	return 0;
 }
 
 //返回帮会老巢
-int home(object me)
+string home(object me)
 {
 	mapping g = data(me);
 
-	trace(getuid(me));
-
-	if(!g
-		|| me->is_fighting()
-		|| me->is_busy()
-		|| me->query_temp("pending/exercising")
-		|| !(wizardp(me) || environment(me)->query("outdoors"))
-		|| me->is_ghost()
-		|| me->query_temp("no_move")
-		|| me->query("daoxing") < 16000
-		|| me->query("max_mana") < 360
-		|| me->query("mana") < 200)
-	{
-		return 0;
-	} else {
-		string yard = GANG_DIR + g["id"] + "/yard";
-		string ridemsg = "";
-		object ridee = me->ride();
-
-		if (ridee) {
-			ridemsg = ridee->query("ride/msg")+"着"+ridee->name();
-			ridee->move(yard);
-		}
-		message_vision(HIY"$N手一指，召来一朵云彩，高高兴兴地坐了上去，\n"
-			"再吹一声口哨，随之往上冉冉地升起。。。\n\n"NOR, me);
-		me->add("mana", -20);
-		me->move(yard);
-		write("\n\n到了！你按下云头跳了下来。\n");
-		message_vision(HIY"\n只见半空中降下一朵云彩，$N" + ridemsg + "从里面走了出来。\n"NOR, me);
-	}
-	return 1;
+	if(g) return GANG_DIR + g["id"] + "/yard";
+	return 0;
 
 }

@@ -15,6 +15,15 @@ string find_command(string verb)
 	return (string)COMMAND_D->find_command(verb, path);
 }
 
+//command filter
+private int do_filter(function* funs, object me, string verb, string arg)
+{
+	for(int i = sizeof(funs) - 1; i >= 0; --i) {
+		if(functionp(funs[i]) && evaluate(funs[i], me, verb, arg)) return 1;
+	}
+	return 0;
+}
+
 // This is the add_action hook handling movement, commands, emotes and
 // channels. Optimization is needed.
 // private nomask int command_hook(string arg)
@@ -22,61 +31,22 @@ nomask int command_hook(string arg)
 {
 	int start = eval_cost();
 	int ret = 1;
-	string verb, file;
+	string file;
 	object me = this_object();
+	string verb = query_verb();
+	mapping filters = me->query_temp("cmd_filter");
 
-#ifdef PROFILE_COMMANDS
-	int mem, utime, stime;
-	mapping info;
-	int ecost; // added by mon. 2/25/98
-
-	mem = memory_info();
-	info = rusage();
-	utime = info["utime"];
-	stime = info["stime"];
-	ecost = eval_cost();
-#endif
-
-	verb = query_verb();
-
-	//added by mon 11/23/97
-	if(userp(me)&& (me->query_temp("d_mana"))>0) {
-		if(me->query_temp("is_living")!=1) {
-			if(verb!="bian" && verb!="say"
-				&& verb!="tell" && verb!="reply" && verb!="look") {
-					write("别忘了你现在是一"+
-						(undefinedp(me->query_temp("unit"))?
-						"个":me->query_temp("unit"))
-						+me->name()+"！\n");
-					COMMAND_D->verb_cost(verb, start - eval_cost());
-					return 1;
-			}
-		}
-	} 
-
-	if( !arg 
-		&&	(environment() && environment()->query("exits/" + verb))
-		&&	stringp(file = find_command("go"))
-		&&	call_other(file, "main", this_object(), verb))
-		;
-
-	else if( stringp(file = find_command(verb))  
-		&&  call_other(file, "main", this_object(), arg))
-		;
-
-	else if( EMOTE_D->do_emote( this_object(), verb, arg ) )
-		;
-
-	else if( CHANNEL_D->do_channel( this_object(), verb, arg ) )
-		;
-
+	if(sizeof(filters) && (filters["*"] && do_filter(filters["*"], me, verb, arg)
+		|| filters[verb] && do_filter(filters[verb], me, verb, arg)));
+	else if(!arg 
+		&& (environment() && environment()->query("exits/" + verb))
+		&& stringp(file = find_command("go"))
+		&& call_other(file, "main", this_object(), verb));
+	else if(stringp(file = find_command(verb))
+		&& call_other(file, "main", this_object(), arg));
+	else if(EMOTE_D->do_emote(me, verb, arg));
+	else if(CHANNEL_D->do_channel(me, verb, arg));
 	else ret = 0;
-
-#ifdef PROFILE_COMMANDS
-	info = rusage();
-	PROFILE_D->log_command(verb, memory_info() - mem, info["stime"] - stime,
-		info["utime"] - utime, ecost-eval_cost());
-#endif
 
 	COMMAND_D->verb_cost(verb, start - eval_cost());
 

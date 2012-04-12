@@ -17,7 +17,7 @@ int cast(object me, object target)
 	int skill = me->query_skill("buddhism", 1);
 	mapping req = ([
 		"cd"		: ([ ID			: 1 ]),
-		"ex_temp"	: ([ "No_Wield"	: MSG0]),
+		"ex_temp"	: ([ "no_wield"	: MSG0]),
 		"skill1"	: ([ "buddhism"	: 250 ]),
 		"prop"		: ([ "mana"		: skill ]),
 	]);

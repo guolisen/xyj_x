@@ -84,7 +84,7 @@ int zhenshen(object who)
 	object_f race = race_of(who);
 	mapping req = ([
 		"cd"		: ([ BUFF_ID	: 1 ]),
-		"ex_temp"	: ([ "No_Wield" : 1, "powerup" : 1, "d_mana" : 1]),
+		"ex_temp"	: ([ "no_wield" : 1, "powerup" : 1, "d_mana" : 1]),
 		"ex_class"	: ([ "±‰…Ì ı" : 1 ]),
 	]);
 

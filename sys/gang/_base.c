@@ -45,7 +45,6 @@ void create()
 
 		"arrive"		: ([
 			"dst"	: "/d/westway/yinma",
-			"verb"	: "climb",
 			"msg1"	: "$N攀着藤条，向山崖上爬去。",
 			"msg2"	: "$N从崖下爬了上来，灰头土脸，满山草屑。",
 		]),
@@ -157,12 +156,12 @@ int expel(object who)
 }
 
 //进入帮派驻地
-int enter(object who, string verb)
+int enter(object who)
 {
 	mapping m = query("arrive");
 	string room = base_name(environment(who));
 
-	if(room == m["dst"] && verb == m["verb"]) {
+	if(room == m["dst"]) {
 		message_vision(HIC + m["msg1"] + "\n\n"NOR, who);
 		who->move(room("street"));
 		if(!who->is_busy()) who->start_busy(3);

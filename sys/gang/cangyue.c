@@ -62,7 +62,7 @@ void create()
 		"arrive"		: ([
 			"dst"	: "/d/southern/wutai/qinglianggu",
 			"verb"	: "climb",
-			"msg1"	: "$N攀着藤条，向山崖上爬去。",
+			"msg1"	: "$N挤进岩壁的缝隙，攀着藤条向山上爬去。",
 			"msg2"	: "$N从崖下爬了上来，灰头土脸，满山草屑。",
 		]),
 	]);

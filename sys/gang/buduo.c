@@ -51,7 +51,7 @@ void create()
 		"arrive"		: ([
 			"dst"	: "/d/qujing/firemount/nofire",
 			"verb"	: "jump",
-			"msg1"	: "$N纵身一跃，跳下山谷。",
+			"msg1"	: "$N挤进岩壁的缝隙，慢慢滑下山谷。",
 			"msg2"	: "一声闷响，$N趴在地上一动不动。",
 		]),
 	]);
