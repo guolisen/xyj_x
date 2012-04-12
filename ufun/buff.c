@@ -115,6 +115,19 @@ private void reset_replace(object me, string id)
 	me->delete(id);
 }
 
+//减去临时属性(包括数组)
+void sub_temp(object me, string prop, mixed value)
+{
+	if(arrayp(value)) {
+		mixed* arr = me->query_temp(prop);		//for temp array
+		trace(sizeof(arr));
+		arr -= value;
+		trace(sizeof(arr));
+		me->set_temp(prop, arr);
+	}			
+	else me->add_temp(prop, -value);
+}
+
 //从目标上的移除buff
 varargs void remove1(mapping buff, int silent)
 {
@@ -132,8 +145,8 @@ varargs void remove1(mapping buff, int silent)
 		}
 	}
 	if(buff["add_temp"]) {
-		foreach(string k, int v in buff["add_temp"]) {
-			me->add_temp(k, -v);
+		foreach(string k, mixed v in buff["add_temp"]) {
+			sub_temp(me, k, v);
 		}
 	}
 	if(buff["add_apply"]) {
@@ -362,7 +375,7 @@ varargs mapping start_claw(object me, int duration, int damage, string msg)
 		"name"		: HIY"长出利爪"NOR,
 		"comment"	: "长出利爪，伤害增加，不能拿武器。",
 		"duration"	: duration,
-		"temp"		: ([ "No_Wield"		: 1 ]),
+		"temp"		: ([ "no_wield"		: 1 ]),
 		"add_temp"	: ([ "apply/damage"	: damage ]),
 		"stop_msg"	: msg,
 	]);

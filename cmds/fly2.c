@@ -1,6 +1,6 @@
-//Cracked by Roath
-//cglaem...12/17/96.
+// firefox 02/21/2010
 
+#include <xyj_x.h>
 #include <ansi.h>
 
 #define FLY_FAIL	message_vision(HIY"$N奋力望上一跳，似乎想飞起来。结果离地不到三尺就一个倒栽葱摔了下来。\n"NOR, me)
@@ -57,9 +57,8 @@ mapping _maps = ([
 	"jiangzhou"		: "/d/jz/center",
 	"bibotan"		: "/d/qujing/bibotan/gudu",
 	"emei"			: "/d/southern/emei/shanlu4",
-
-	//"bang"			: (: call_other, soldier, "perform_action", "stick", "qiankun" :),
-
+	"bang"			: (: call_other, GANG, "home" :),
+	"gang"			: (: call_other, GANG, "home" :),
 ]);
 
 int MIN_DX = RANK_D->grade_dx(BLU "初领妙道" NOR);
@@ -117,13 +116,12 @@ int main(object me, string arg)
 		write("咦？．．．怎么还在原来的地方？\n");
 		return 1;
 	}
-	if(stringp(dst)) loc = dst;								//1.固定落点
+	if(stringp(dst)) loc = dst;								//固定落点
+	else if(functionp(dst)) loc = evaluate(dst, me);		//个人落点
 	else {		
 		loc = dst[0];
-		if(intp(dst[1])) {									//2.随机落点
+		if(intp(dst[1])) {									//随机落点
 			loc[strlen(loc) - 3] += random(dst[1]);
-		} else {
-
 		}
 	}
 	if(ridee) {

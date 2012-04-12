@@ -26,7 +26,7 @@ int exert(object me, object target)
 		int kee_gain = skill * 4;
 		mapping req = ([
 			"cd"		: ([ BUFF_ID	: 1 ]),
-			"ex_temp"	: ([ "No_Wield" : 1, "powerup" : 1, "d_mana" : 1]),
+			"ex_temp"	: ([ "no_wield" : 1, "powerup" : 1, "d_mana" : 1]),
 			"ex_class"	: ([ "±‰…Ì ı" : 1 ]),
 			"skill1"	: ([ "dragonforce"	: 250]),
 			"prop"		: ([ "force"		: 300,	"kee"		: 150,	"sen"		: 150]),
@@ -44,7 +44,7 @@ int exert(object me, object target)
 				"apply/id"		: ({ trait["id"] }),
 				"apply/short"	: ({ trait["short"] }),
 				"apply/long"	: ({ trait["long"] + NOR"\n" }),
-				"No_Wield"		: 1,
+				"no_wield"		: 1,
 				"powerup"		: 1,
 			]),
 			"add_apply"	: ([

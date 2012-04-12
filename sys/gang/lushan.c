@@ -51,7 +51,7 @@ void create()
 		"arrive"		: ([
 			"dst"	: "/d/xueshan/wroad1",
 			"verb"	: "climb",
-			"msg1"	: "$N攀着冰隙，战战兢兢向冰崖上爬去。",
+			"msg1"	: "$N挤进冰隙，战战兢兢向冰崖上爬去。",
 			"msg2"	: "$N从冰崖下爬了上来，一身霜雪。",
 		]),
 	]);

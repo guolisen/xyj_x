@@ -34,9 +34,7 @@ int main(object me, string arg)
 			mapping req = ([
 				"skill"		: ([ "spells"	: 25]),
 				"prop"		: ([ "mana"		: 150,	"daoxing": 16000, "max_mana" : 640]),
-				]);
-
-
+			]);
 			if(wizardp(who) && !wizardp(me)) return notify_fail("你的法术不足以变成巫师。\n");
 			if(!BTL->require(me, BUFF_NAME, req)) return 1;
 			BTL->pay(me, (["mana" : 100]));
@@ -50,6 +48,18 @@ int main(object me, string arg)
 	return 1;
 }
 
+int cmd_filter(object me, string verb, string arg)
+{
+	string* verbs = ({"bian", "say", "tell", "reply", "look"});
+	if(me->query_temp("is_living") == 1) return 0;
+	if(member_array(verb, verbs) == -1) {
+		string unit = me->query_temp("unit") ? me->query_temp("unit") : "个";
+		write("别忘了你现在是一" + unit + me->name() + "！\n");
+		return 1;
+	}
+	return 0;
+}
+
 //获取目标的变化状态buff
 varargs mapping get_buff(object who, int no_cost)
 {
@@ -60,32 +70,35 @@ varargs mapping get_buff(object who, int no_cost)
 	} else {
 		buff = ([					//创建新的buff
 			"id"		: BUFF_ID,
-				"name"		: BUFF_NAME,
-				"comment"	: "变身成其他的人或物。",
-				"class"		: "变身术",
-				"attr"		: 2,		//隐藏buff
-				"temp"		: ([
-					"d_mana"		: DMANA,
-						"apply/id"		: who->parse_command_id_list(),
-						"apply/name"	: ({ who->name() }),
-						"apply/short"	: ({ who->short() }),
-						"apply/long"	: ({ who->long() }),
-						"no_heal_up/bian" : 1,
-						"is_living"		: living(who),
-						"is_character"	: who->is_character(),
-						"unit"			: who->query("unit"),			
-						"gender"		: who->query("gender"),
-						"age"			: who->query("age"),
-						"race"			: who->query("race"),
-						"family"		: who->query("family"),
-				]),
-				"interval"	: (no_cost ? 0 : 5),
-				"timer_act"	: (: on_timer :),
-				"post_act"	: function(mapping buff) {
-					object me = buff["me"];
-					while( environment(me)->is_character())
-						me->move(environment(environment(me)));
-					},
+			"name"		: BUFF_NAME,
+			"comment"	: "变身成其他的人或物。",
+			"class"		: "变身术",
+			"attr"		: 2,		//隐藏buff
+			"temp"		: ([
+				"d_mana"		: DMANA,
+				"apply/id"		: who->parse_command_id_list(),
+				"apply/name"	: ({ who->name() }),
+				"apply/short"	: ({ who->short() }),
+				"apply/long"	: ({ who->long() }),
+				"no_heal_up/bian" : 1,
+				"is_living"		: living(who),
+				"is_character"	: who->is_character(),
+				"unit"			: who->query("unit"),			
+				"gender"		: who->query("gender"),
+				"age"			: who->query("age"),
+				"race"			: who->query("race"),
+				"family"		: who->query("family"),
+			]),
+			"add_temp"	: ([
+				"cmd_filter/*"	: ({ (: cmd_filter :) }),
+			]),
+			"interval"	: (no_cost ? 0 : 5),
+			"timer_act"	: (: on_timer :),
+			"post_act"	: function(mapping buff) {
+				object me = buff["me"];
+				while( environment(me)->is_character())
+					me->move(environment(environment(me)));
+			},
 		]);
 	}
 	return buff;

@@ -9,15 +9,9 @@ inherit F_CLEAN_UP;
 int main(object me, string arg)
 {
 	object g = GANG->of(me);
-	object token = present("gang token", me);
 	string str;
 
 	seteuid(getuid());
-
-	if(!token) {
-		token = new_to(GANG_DIR"_lib/token", me);
-		if(token) tell_object(me, CYN"有件东西落入你的怀中。\n\n"NOR);
-	}
 
 	if(!arg || arg == "list") return GANG->list();
 

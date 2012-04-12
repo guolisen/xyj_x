@@ -86,13 +86,22 @@ int to_max(object who)
 	full(who);
 }
 
-//按比例复制属性
+//复制属性
 void copy_prop(object src, object dest, string* tab)
 {
 	foreach(string prop in tab) {
 		dest->set(prop, src->query(prop));
 	}
 }
+
+//复制临时属性
+void copy_temp_prop(object src, object dest, string* tab)
+{
+	foreach(string prop in tab) {
+		dest->set_temp(prop, src->query_temp(prop));
+	}
+}
+
 
 //按比例复制属性
 void copy_skills(object src, object dest, int ratio)
