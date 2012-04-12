@@ -56,12 +56,12 @@ int cast(object me, object target)
 	if(me->query("force") < force_cost )
 		return notify_fail("你的内力不够。\n");
 
-	me->add("mana", -mana_cose);
+	me->add("mana", -mana_cost);
 	me->add("force", -force_cost);
 
 	//me->receive_damage("kee", 10);
 
-	success=0;
+	success = 0;
 
 
 	msg = HIC "\n\n$N猛然退后两步，一低头，呼地就向$n撞去！\n" NOR;
@@ -70,24 +70,22 @@ int cast(object me, object target)
 	ap = ( ap * ap * ap / (4 * 400) ) * (int)me->query("sen");
 	ap += (int)me->query("daoxing");
 	dp = target->query("daoxing");
-	if( random(ap + dp) > dp ) 
-	{
+	if( random(ap + dp) > dp ) {
 		damage = (int)me->query("max_mana") / 10 + random((int)me->query("eff_sen") / 5);
 		damage -= (int)target->query("max_mana") / 10 + random((int)me->query("eff_sen") / 5);
 		damage +=(int)me->query("mana_factor")-random((int)target->query("mana_factor"));
 		damage += random( (int)me->query("force_factor") );
 		//here we can see if 2 players are at same status, the attacker has higher chance.
-		if( damage > 0 ) 
-		{
+		if( damage > 0 ) {
 			//finally damage also depends on enabled spells level.
 			damage +=random((damage*(int)me->query_skill("spells"))/100);
 
 			msg += HIC "结果$n躲闪不及，被撞的" NOR;
 
-			env=environment(me);
-			exit=env->query("exits");
+			env = environment(me);
+			exit = env->query("exits");
 
-			if( mapp(exit)) {
+			if(sizeof(exit)) {
 				dirs=keys(exit);
 				n=sizeof(exit);
 				i=random(n);
@@ -96,15 +94,15 @@ int cast(object me, object target)
 					target_dir=default_dirs[dirs[i]];
 				else
 					target_dir=dirs[i]; 
-
-				if( obj=load_object(dest)) {
-					success=1;
+				if(obj = load_object(dest)) {
+					success = 1;
 					msg+= HIC "向" +target_dir+ NOR;
 				}
-
 			}
-
-
+			if(!obj) {
+				obj = env;
+				msg+= HIC "向上"NOR;
+			}
 			msg += HIC "飞了出去！\n\n" NOR;
 
 			if( success == 1){
@@ -115,9 +113,7 @@ int cast(object me, object target)
 				}
 			}
 			target->receive_damage("kee", damage, me);
-		}
-		else 
-		{
+		} else 	{
 			//here, cast failed and the target's mana_factor will be added to the previous 
 			//damage to hurt yourself:(...note, damage<0.
 			msg += HIC "结果被$n以法力一逼，$N没撞上去，自己反而受了内伤！\n" NOR;
@@ -135,10 +131,8 @@ int cast(object me, object target)
 	else if( damage < 0 ) COMBAT_D->report_status(me);
 	//damage=0 corresponding to "但是被$n躲开了。\n"--no report.
 
-	if( !target->is_fighting(me)) 
-	{
-		if( living(target) ) 
-		{
+	if( !target->is_fighting(me)) {
+		if( living(target) ) {
 			if( userp(target) ) target->fight_ob(me);
 			else target->kill_ob(me);
 		}

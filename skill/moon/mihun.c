@@ -1,13 +1,14 @@
-// mihun.c 迷魂术
+
+#include <xyj_x.h>
 #include <ansi.h>
 
 inherit SSERVER;
 
-#define DURATION			30
-#define NAME			"蚀月咒"
-#define MSG0			HIC"$N低头轻声念了句咒文，又抬起头来朝$n妩媚地一笑！\n"NOR
-#define MSG1			HIR"$n神不守舍地看着$N，怜香惜玉之心由然而起，竟然忘了自己在战斗之中。\n"NOR
-#define MSG2			HIR"$n鄙夷地看了$N一眼，毫不为所动！\n"NOR
+#define DURATION	20
+#define NAME		"蚀月咒"
+#define MSG0		HIC"$N低头轻声念了句咒文，又抬起头来朝$n妩媚地一笑！\n"NOR
+#define MSG1		HIR"$n神不守舍地看着$N，怜香惜玉之心由然而起，竟然忘了自己在战斗之中。\n"NOR
+#define MSG2		HIR"$n鄙夷地看了$N一眼，毫不为所动！\n"NOR
 
 int cast(object me, object target)
 {
@@ -17,7 +18,7 @@ int cast(object me, object target)
 		"prop"		: ([ "mana"			: skill ]),
 	]);
 	mapping cmp_parm = ([
-		"prop"		: ([ DEXP : 1, "mana_factor" : 1 ]),
+		"prop"		: ([ DEXP : 1, "mana_factor" : 1, "per" : 1, "cps" : 1 ]),
 		"skill"		: ([ "spells" : 2]),
 	]);
 
@@ -31,8 +32,7 @@ int cast(object me, object target)
 
 	if(BTL->cmp_random20(me, target, cmp_parm) > 85) {
 		msv(MSG1, me, target);
-
-
+		BUFF->start_no_move(target, DURATION);
 	} else {
 		msv(MSG2, me, target);
 		me->apply_condition(POISON, skill / 20);

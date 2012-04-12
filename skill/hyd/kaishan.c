@@ -19,6 +19,7 @@ int perform(object me, object target)
 	int stick = me->query_skill("dali-bang", 1);
 
 	mapping req = ([
+		"ex_temp"	: ([ "powerup"	: "你已经在运功中了。" ]),
 		"skill1"	: ([ "stick"	: 100 ]),
 		"prop"		: ([ "force"	: stick ]),
 	]);
@@ -28,7 +29,8 @@ int perform(object me, object target)
 		"name"		: NAME,
 		"comment"	: "浑身充满力量。",
 		"duration"	: DURATION,
-		"add_apply" : ([ "strength" : enhance ]),	//爆发力
+		"temp"		: ([ "powerup"	: 1 ]),
+		"add_apply" : ([ "strength"	: enhance ]),	//爆发力
 	]);
 
 	target = BTL->get_victim(me, target);
@@ -56,7 +58,7 @@ int perform(object me, object target)
 			"add_apply" : ([ "parry" : -stick * 2 ]),	//招架算是废了
 		]);
 		int damage = me->query_str() - target->query_str();
-		damage = max2(damage * 4, 50);
+		damage = max2(damage * 2, 50);
 
 		target->receive_damage("kee", damage, me);	//内伤，忽视护甲
 		target->receive_wound("kee", damage, me);

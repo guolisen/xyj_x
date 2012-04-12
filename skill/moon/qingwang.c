@@ -1,4 +1,56 @@
 
+#include <xyj_x.h>
+#include <ansi.h>
+
+inherit SSERVER;
+
+#define ID			"qingwang"
+#define DURATION	10
+#define CD			20
+#define NAME		"情网"
+#define MSG0		HIB"$N催动法力，将手中%s舞成一团，化做一张大网，向$n当头罩来。\n"NOR
+#define MSG1		HIB"$N脑子里一片混乱，鬼使神差般突然发呆，甚至忘记了躲闪，被情网当头罩住。\n"NOR
+#define MSG2		HIG"$N神智清醒，不为情所困，轻轻向旁一跃，躲过了情网的袭击。\n"NOR
+
+({"surrender","cast","perform","exert"})
+int cast(object me, object target)
+{
+	int skill = me->query_skill("spells");
+	object weapon = me->query_temp("weapon");
+	mapping req = ([
+		"skill1"	: ([ "moonshentong"	: 100, "jueqingbian" : 100 ]),
+		"prop"		: ([ "mana" : skill, "sen" : skill/2 ]),
+		"skill_map"	: ([ "whip" : "jueqingbian" ]),
+	]);
+	mapping cmp_parm = ([
+		"prop"		: ([ DEXP : 1, "mana_factor" : 1, "cps" : 1 ]),
+		"skill"		: ([ "spells" : 2 ]),
+		"skill_pair1": ([ ({"whip", "dodge"}) : 3 ]),
+	]);
+
+	if(!weapon || weapon->query("skill_type") != "whip")
+		return notify_fail("没有鞭子，你拿什么织情网啊？\n");
+
+	target = BTL->get_victim(me, target);
+	if(!target) return notify_ok("你想对谁使用情网？");
+	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_ok("你刚刚撒出一张网了！\n");
+	BTL->pay(me, req["prop"]);
+
+	msv(MSG0, me, target);
+
+	if(BTL->cmp_random20(me, target, cmp_parm) > 85) {
+		msv(MSG1, me, target);
+		BUFF->start_no_move(target, DURATION);
+	} else {
+		msv(MSG2, me, target);
+		me->start_busy(1);
+	}
+	BTL->fight_enemy(target, me);
+	return 3 + 2;
+}
+
+
 #include <ansi.h>
 
 inherit SSERVER;

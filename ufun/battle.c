@@ -257,15 +257,21 @@ int cmp_parm(object me, object target, mapping parm)
 			weight += max2(w, 0);
 		}
 	}
+	if(parm["skill1"]) {			//原始技能等级
+		foreach(string id, int w in parm["skill1"]) {
+			product *= pow(cmp_f(me->query_skill(id, 1), target->query_skill(id, 1)), w);
+			weight += max2(w, 0);
+		}
+	}
 	if(parm["skill_pair"]) {		//对应skill有效等级
 		foreach(string* arr, int w in parm["skill_pair"]) {
 			product *= pow(cmp_f(me->query_skill(arr[0]), target->query_skill(arr[1])), w);
 			weight += max2(w, 0);
 		}
 	}
-	if(parm["skill1"]) {			//原始技能等级
-		foreach(string id, int w in parm["skill1"]) {
-			product *= pow(cmp_f(me->query_skill(id, 1), target->query_skill(id, 1)), w);
+	if(parm["skill_pair1"]) {		//对应skill有效等级
+		foreach(string* arr, int w in parm["skill_pair1"]) {
+			product *= pow(cmp_f(me->query_skill(arr[0], 1), target->query_skill(arr[1], 1)), w);
 			weight += max2(w, 0);
 		}
 	}
