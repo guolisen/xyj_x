@@ -351,7 +351,7 @@ varargs mapping start_no_wield(object me, int duration, string msg)
 		"name"		: HIY"放下屠刀"NOR,
 		"comment"	: "禁止使用武器。",
 		"duration"	: duration,
-		"add_temp"	: ([ "No_Wield" : 1 ]),
+		"add_temp"	: ([ "no_wield" : 1 ]),
 		"stop_msg"	: msg,
 		"post_act"	: function(mapping buff) {
 			object weapon = buff["_weapon"];
