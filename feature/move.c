@@ -62,14 +62,16 @@ nomask void set_weight(int w)
 // checking in move().
 nomask int weight() { return weight + encumb; }
 
+string ride_msg(object ridee) 
+{
+	return sprintf("%s在%s上", ridee->query("ride/msg"), ridee->name());
+}
+
 string ride_suffix(object me)
 {
-	string ridemsg = 0;
-	object ridee = 0;
-
-	ridee = me->ride();
-	if(ridee) ridemsg = ridee->query("ride/msg") + "在" + ridee->name() + "上";
-	return ridemsg;
+	object ridee = me->ride();
+	if(ridee) return ride_msg(ridee);
+	return 0;
 }
 
 // silently=1: after move, no look.
@@ -252,33 +254,85 @@ void remove(string euid)
 	if( default_ob = me->query_default_object() ) default_ob->add("no_clean_up", -1);
 }
 
-int move_or_destruct( object dest )
+int move_or_destruct(object dest)
 {
 	object me = this_object();
-	if( userp(me) ) {
+	if(userp(me)) {
 		tell_object(me, "一阵时空的扭曲将你传送到另一个地方．．．\n");
 		move(VOID_OB);
 	}
 }
 
+//me & ob in same environment
+int close_to(object ob)
+{
+	object env = environment();
+	return ob && env && env == environment(ob);
+}
+
+varargs int dismount(int silence)
+{
+	object me = this_object();
+	object ridee = me->query_temp("ridee");
+	mapping props;
+
+	if(ridee) {
+		if(!silence) message_vision("$N挺身从$n上跃下来。\n", me, ridee);
+		ridee->set_temp("no_return", 0);
+		ridee->set_temp("rider", 0);
+	}
+	me->set_temp("ridee", 0);
+	props = me->query_temp("ride");
+
+	if(mapp(props)) {
+		foreach(string k, int v in props)
+			me->add_temp("apply/" + k, -v);								//TODO 属性移动
+		me->set_temp("ride", 0);
+	}
+	return 1;
+}
+
+varargs int mount(object ridee, int silence)
+{
+	object me = this_object();
+	object env = environment();
+	object r1 = me->query_temp("ridee");
+	object rider = ridee->query_temp("rider");
+	
+	if(close_to(r1)) return notify_fail("你已经" + ride_msg(r1) + "了！\n");
+	
+	dismount(1);	//清理无效的骑乘数据
+
+	if(rider) return notify_fail(ridee->name() + "上已有人了！\n");
+	
+	if(ridee->query("ride/need_train") && ridee->query("owner") != me->query("id"))				//todo:玩家变坐骑
+		return notify_fail("你需要先驯服" + ridee->name() + "才能去骑它。\n");
+
+	if(!silence) 
+		message_vision("$N潇洒地一个纵身，稳稳地%s！\n", me, ride_msg(ridee));
+	
+	ridee->set_temp("no_return", 1);
+	ridee->set_temp("rider", me);
+  
+	me->set_temp("ridee", ridee);
+	ridee->move(env);
+	me->set_temp("ride/dodge", ridee->query("ride/dodge"));								//todo:属性处置
+	me->add_temp("apply/dodge", ridee->query("ride/dodge"));
+}
+
+
+
+//valid ridee
 object ride()
 {
 	object me = this_object();
-	string ridemsg = "";
-	object ridee;
+	object ridee = me->query_temp("ridee");
 
-	if(ridee = me->query_temp("ridee")) { 
-		if ((environment(ridee) != environment(me) &&
-			environment(ridee) != me) ||
-			(ridee->is_character() && ! living(ridee))) {
-				me->set_temp("ridee",0);
-				ridee->set_temp("rider",0);
-				ridee = 0;
-		}
-	}
-	if(! ridee) {
-		me->add_temp("apply/dodge",-me->query_temp("ride/dodge"));		//TODO 坐骑buff化
-		me->set_temp("ride/dodge",0);
+	if(!ridee) return 0;
+	
+	if(!close_to(ridee) || !living(ridee)) {
+		dismount(1);
+		return 0;
 	}
 	return ridee;
 }

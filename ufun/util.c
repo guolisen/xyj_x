@@ -99,45 +99,6 @@ mixed test()
 	return s[0..<3];
 }
 
-/*****************************骑乘函数*****************************/
-
-//下马
-varargs int dismount(object who, int silence)
-{
-	object ridee = who->query_temp("ridee");
-
-	if(ridee) {
-		if(!silence) msv("$N挺身从$n上跃下来。\n", who, ridee);
-		ridee->set_temp("no_return", 0);
-		ridee->set_temp("rider", 0);
-	}
-
-	who->set_temp("ridee", 0);
-	who->add_temp("apply/dodge", -who->query_temp("ride/dodge"));
-	who->set_temp("ride/dodge", 0);
-	return 1;
-}
-
-//上马
-varargs int mount(object who, object ridee, int silence)
-{
-	object where = environment(who);
-	object r1 = who->query_temp("ridee");
-	if(same_env(r1, who)) return 0;
-	
-	dismount(who, 1);	//清理无效的骑乘数据
-
-	if(!silence) 
-		MSG->vision("$N潇洒地一个纵身，稳稳地%s在$n上！\n", who, ridee, ridee->query("ride/msg"));
-	
-	ridee->set_temp("no_return", 1);
-	ridee->set_temp("rider", who);
-  
-	who->set_temp("ridee", ridee);
-	ridee->move(where);
-	who->set_temp("ride/dodge", ridee->query("ride/dodge"));
-	who->add_temp("apply/dodge", ridee->query("ride/dodge"));
-}
 
 /*****************************其他函数*****************************/
 //今天
