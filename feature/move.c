@@ -62,15 +62,16 @@ nomask void set_weight(int w)
 // checking in move().
 nomask int weight() { return weight + encumb; }
 
-string ride_msg(object ridee) 
+string ridee_msg() 
 {
-	return sprintf("%s在%s上", ridee->query("ride/msg"), ridee->name());
+	object me = this_object();
+	return sprintf("%s在%s上", me->query("ride/msg"), me->name());
 }
 
 string ride_suffix(object me)
 {
 	object ridee = me->ride();
-	if(ridee) return ride_msg(ridee);
+	if(ridee) return ridee->ridee_msg();
 	return 0;
 }
 
@@ -292,24 +293,11 @@ varargs int dismount(int silence)
 	return 1;
 }
 
-varargs int mount(object ridee, int silence)
+
+void mount(object ridee)
 {
 	object me = this_object();
 	object env = environment();
-	object r1 = me->query_temp("ridee");
-	object rider = ridee->query_temp("rider");
-	
-	if(close_to(r1)) return notify_fail("你已经" + ride_msg(r1) + "了！\n");
-	
-	dismount(1);	//清理无效的骑乘数据
-
-	if(rider) return notify_fail(ridee->name() + "上已有人了！\n");
-	
-	if(ridee->query("ride/need_train") && ridee->query("owner") != me->query("id"))				//todo:玩家变坐骑
-		return notify_fail("你需要先驯服" + ridee->name() + "才能去骑它。\n");
-
-	if(!silence) 
-		message_vision("$N潇洒地一个纵身，稳稳地%s！\n", me, ride_msg(ridee));
 	
 	ridee->set_temp("no_return", 1);
 	ridee->set_temp("rider", me);

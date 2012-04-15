@@ -1,4 +1,4 @@
-// by firefox 04/10/2010
+// firefox 04/10/2010
 
 #include <xyj_x.h>
 
