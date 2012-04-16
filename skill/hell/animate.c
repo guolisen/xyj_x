@@ -2,11 +2,13 @@
 
 inherit F_CLEAN_UP;
 
+#include <xyj_x.h>
 #include <ansi.h>
 
+
 #define CD			15
-//判断是否在夜间
-#define at_night() (NATURE_D->query_current_day_phase() / 6)
+#define DURATION	60
+
 
 object animate(object who, object target);
 
@@ -15,48 +17,36 @@ int cast(object me, object target)
 	object zombie;
 	int skill = me->query_skill("gouhunshu", 1);
 
-	if( !me->is_fighting() ) return notify_fail("你只有在战斗中才能使用复活术。\n");
-	if( me->query("mana") < 200 ) return notify_fail("你的法力不够！\n");
+	if( me->query("mana") < skill ) return notify_fail("你的法力不够！\n");
 	if(!cd_start(me, "invoke", CD)) return notify_ok("你暂时不能驱动僵尸！\n");
-
-	if(target && !target->is_corpse()) target = 0;
-
-	if(!target && !at_night()) return notify_fail("你要驱动哪一具尸体？\n");
-
 	
-	me->add("mana", -50);
+	me->add("mana", -skill);
 
 	zombie = animate(me, target);
-	
-	if(target) {
-		message_vision(CYN"$N对著地上的$n喃喃地念了几句咒语，$n抽搐了几下竟站了起来！\n"NOR, me, target);
-		destruct(target);
-	}
-	else
-		message_vision(CYN"$N喃喃地念了几句咒语，地下伸出一只干枯的手，接着$n挣扎着爬了出来！\n"NOR, me, zombie);
-
-	zombie->animate(me);
-	zombie->reset_action();
 	zombie->add_temp("apply/attack", skill / 4);
 
-	call_out("dest_zombie", 60, zombie);
-	return 5;	//3+random(5);
-}
-
-void dest_zombie(object zombie)
-{
-	if(zombie) zombie->die();
+	zombie->set_life(DURATION, "$N慢慢地倒了下去，化为一滩血水。\n");
+	zombie->set("chat_chance_combat", 30);
+	zombie->set("chat_msg_combat", ({ (: call_other, zombie, "exert_function", "sheqi" :), }));
+	zombie->set("cps", 10000);
+	zombie->set("long",	"这是一具被人用符咒控制的僵尸，从它苍白的脸上看不出任何喜怒哀乐。\n");
+	zombie->set_temp("is_zombie", 1);
+	return 5;
 }
 
 object animate(object who, object target)
 {
-	object zombie;
-	string name = target ? target->query("victim_name") : "无名";
+	object zombie = GUARD->new_hufa(who);
+	string name;
 
-	seteuid(getuid());
-	zombie = new("/obj/npc/zombie");
-	zombie->set_name( name + "的僵尸", ({ "zombie" }) );
-	zombie->move(environment(who));
-	zombie->set_temp("invoker", who);
+	if(target) {
+		name = target->query("victim_name")  + "的僵尸";
+		message_vision(CYN"$N对著地上的$n喃喃地念了几句咒语，$n抽搐了几下竟站了起来！\n"NOR, who, target);
+		destruct(target);
+	} else {
+		name = "无名僵尸";
+		message_vision(CYN"$N喃喃地念了几句咒语，地下伸出一只干枯的手，接着" + name + "挣扎着爬了出来！\n"NOR, who);
+	}
+	zombie->set_name(name, ({ "zombie" }));
 	return zombie;
 }

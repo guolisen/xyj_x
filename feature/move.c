@@ -271,14 +271,15 @@ int close_to(object ob)
 	return ob && env && env == environment(ob);
 }
 
-varargs int dismount(int silence)
+int dismount()
 {
 	object me = this_object();
 	object ridee = me->query_temp("ridee");
 	mapping props;
+	int show_msg = 0;
 
 	if(ridee) {
-		if(!silence) message_vision("$N挺身从$n上跃下来。\n", me, ridee);
+		if(close_to(ridee)) show_msg = 1;
 		ridee->set_temp("no_return", 0);
 		ridee->set_temp("rider", 0);
 	}
@@ -290,7 +291,7 @@ varargs int dismount(int silence)
 			me->add_temp("apply/" + k, -v);								//TODO 属性移动
 		me->set_temp("ride", 0);
 	}
-	return 1;
+	return show_msg;
 }
 
 
@@ -319,7 +320,7 @@ object ride()
 	if(!ridee) return 0;
 	
 	if(!close_to(ridee) || !living(ridee)) {
-		dismount(1);
+		dismount();
 		return 0;
 	}
 	return ridee;

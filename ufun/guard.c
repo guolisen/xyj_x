@@ -79,6 +79,18 @@ void copy_status(object leader, object guard)
 	HP->full(guard);
 }
 
+///复制基本状态
+void copy_basic_status(object leader, object guard)
+{
+	string* props = ({
+		"max_kee", "max_sen", "max_force", "max_mana",
+		"combat_exp", "daoxing",
+	});
+	HP->copy_prop(leader, guard, props);
+	HP->copy_skills(leader, guard, 100);
+	HP->full(guard);
+}
+
 ///弱化目标气血/力量为n分之一
 void weaken(object who, int n)
 {
@@ -144,6 +156,7 @@ object clone_jiashen(object leader)
 	guard->set_temp("invoker", _leader);
 	guard->set_leader(_leader);
 	copy_equips(_leader, guard);
+	guard->reset_action();
 
 	guard->move(environment(_leader));
 	BTL->copy_enemy(_leader, guard);
@@ -152,6 +165,28 @@ object clone_jiashen(object leader)
 
 	return guard;
 }
+
+
+//复制护法
+object new_hufa(object leader)
+{
+	object guard;
+
+	if(!leader) return 0;
+
+	seteuid(getuid());
+
+	guard = new(X_DIR"std/hufa");
+	guard->set_temp("invoker", leader);
+	guard->set_leader(leader);
+	guard->reset_action();
+	copy_basic_status(leader, guard);
+	guard->move(environment(leader));
+	BTL->copy_enemy(leader, guard);
+
+	return guard;
+}
+
 
 void test()
 {
