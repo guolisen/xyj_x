@@ -24,13 +24,15 @@ int cast(object me, object target)
 
 	zombie = animate(me, target);
 	zombie->add_temp("apply/attack", skill / 4);
+	zombie->set_temp("is_zombie", 1);
+
+	zombie->set("chat_chance_combat", 30);
+	zombie->set("chat_msg_combat", ({ (: call_other, zombie, "exert_function", "sheqi" :), }));	
+	zombie->set("long",	"这是一具被人用符咒控制的僵尸，从它苍白的脸上看不出任何喜怒哀乐。\n");
+	zombie->set("cps", 10000);
+	zombie->set("per", 10);
 
 	zombie->set_life(DURATION, "$N慢慢地倒了下去，化为一滩血水。\n");
-	zombie->set("chat_chance_combat", 30);
-	zombie->set("chat_msg_combat", ({ (: call_other, zombie, "exert_function", "sheqi" :), }));
-	zombie->set("cps", 10000);
-	zombie->set("long",	"这是一具被人用符咒控制的僵尸，从它苍白的脸上看不出任何喜怒哀乐。\n");
-	zombie->set_temp("is_zombie", 1);
 	return 5;
 }
 
