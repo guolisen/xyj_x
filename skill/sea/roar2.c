@@ -12,11 +12,9 @@ int exert(object me, object target)
 	int cost = skill / 5;
 	int damage = 0;
 
-	if(env->query("no_fight"))
-		return notify_fail("安全区内不能乱吼乱叫！\n");
+	if(env->query("no_fight")) return notify_fail("安全区内不能乱吼乱叫！\n");
 
-	if(me->query("force") < cost )
-		return notify_fail("你的内力不够。\n");
+	if(me->query("force") < cost ) return notify_fail("你的内力不够。\n");
 
 	me->add("force", -cost);
 	me->start_busy(5);

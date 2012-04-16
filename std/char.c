@@ -162,8 +162,8 @@ int visible(object ob)
 	if(n1) {
 		if(wizardp(ob) || !ob->is_character()) return 0;
 
-		n0 = query("env/invisibility")  + query("max_mana")/400;
-		n1 += ob->query("max_mana")/400;
+		n0 = query("env/invisibility")  + query("max_mana")/400 + query("spi")/10;
+		n1 += ob->query("max_mana")/400 + ob->query("spi")/10;
 		return n0 >= n1;	// firefox 2011.9
 	}
 

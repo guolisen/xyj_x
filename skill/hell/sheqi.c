@@ -14,6 +14,9 @@ int exert(object me, object target)
 {
 	int qi_gain, qi_lost, ap, dp, success, exp1, exp2;
 	int skill = me->query_skill("tonsillit", 1);
+	object env = environment(me);
+
+	if(env->query("no_fight")) return notify_fail("安全区禁止摄气！\n");
 
 	if(target == me) target = 0;
 	target = BTL->get_victim(me, target);

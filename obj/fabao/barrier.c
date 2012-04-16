@@ -26,7 +26,7 @@ int success();
 
 void init()
 {
-	add_action("block", ({"exert", "cast", "perform"}));
+	add_action("block", ({"cast", "perform"}));
 	add_action("do_go", ({"go"}));
 }
 
@@ -49,20 +49,22 @@ int do_go(string arg)
 int success()
 {
 	object me = this_player();
+	int cost = me->query("mana_factor") * 4;				//困住敌人要高昂的法力代价
 	object host = query("host");
 	mapping cmp_parm = ([
 		"prop"		: ([ "mana" : 3, "daoxing" : 1]),
 		"skill"		: ([ "spells" : 3]),
 	]);
 	int odds;
-	if(me->is_busy()) return 1;
-	if(!objectp(host) || !host->is_fighting(this_player())) return 1;	
+	if(!objectp(host) || !host->is_fighting(me) || me->is_busy()) return 1;	
 	//计算成功率
 	odds = BTL->cmp_parm(me, host, cmp_parm);
 	if(me->query_skill_mapped("spells") == "taiyi") odds *= 2;
+	if(host->query("betray/count")) odds *= 2;				//门派绝技，叛徒减半
 	
 	if(random(odds) >= 50) return 1;
-
+	if(host->query("mana") < cost) return 1;
+	host->add("mana", -cost);
 	me->start_busy(2);
 	return 0;
 }
