@@ -165,8 +165,9 @@ int list(object who)
 	mapping data = list_data(who);
 	int has_pre = 0;
 	int remain_time = data_of(who, "start_time") + RESET_TIME - time();
+	int norm = (remain_time > 0) ? data_of(who, "norm") : MAX_NORM;	
 
-	printf("任务表(精力：%dK 时间：%dH)：\n", data_of(who, "norm") / 1000, remain_time / 3600);
+	printf("任务表(剩余精力：%dK 更新时间：%dH)：\n", norm / 1000, remain_time / 3600);
 	write(LINE1);
 	write(TIT01);
 	write(LINE1);
