@@ -296,7 +296,7 @@ private int count_exits(object env)
 	return n;
 }
 
-int _heal_times = 50;
+int _heal_times = 40;
 
 int heart_beat()
 {

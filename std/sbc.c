@@ -1,7 +1,7 @@
 // by firefox 04/02/2010
 // 寄卖行
 
-#define AUCTION_TIME            (10*24*3600)            //时限
+#define AUCTION_TIME            (10*24*3610)            //时限
 #define AUCTION_TAX             20                      //交易税(%)
 #define AUCTION_MIN_PRICE       20                      //最低价(黄金)
 #define AUCTION_MAX_PRICE       9999                    //最高价(黄金)

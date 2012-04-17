@@ -33,7 +33,7 @@ int abort_attack(object me, object target)
 			"name"		: NAME,
 			"comment"	: "防御状态，时刻准备出手反击。",
 			"duration"	: DURATION,
-			"temp"		: ([ "No_Wield" : 1, "no_attack" : 1 ]),
+			"temp"		: ([ "no_wield" : 1, "no_attack" : 1 ]),
 			"_damage"	: mana + force,
 			"_fun"		: (: abort_attack :),
 		]));
@@ -73,7 +73,7 @@ int perform(object me, object target)
 		"name"		: NAME,
 		"comment"	: "防御状态，时刻准备出手反击。",
 		"duration"	: DURATION,
-		"temp"		: ([ "No_Wield" : 1, "no_attack" : 1 ]),
+		"add_temp"		: ([ "no_wield" : 1, "no_attack" : 1 ]),
 		"_damage"	: mana + force,
 		"_fun"		: (: abort_attack :),
 	]));
