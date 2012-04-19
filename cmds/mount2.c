@@ -7,8 +7,9 @@ int main(object me, string arg)
 	object env = environment(me);
 	object r1 = me->query_temp("ridee");
 	object rider = ridee->query_temp("rider");
+	string owner;
 	
-	if(!arg || !env || !(ridee = present(arg, env)) || !ridee->query("ride"))
+	if(!arg || !env || !(ridee = present(arg, env)) || !ridee->query("ride_prop"))
 		return notify_fail ("你想骑什么？\n");
 	
 	if(me->close_to(r1)) return notify_fail("你已经" + r1->ridee_msg() + "了！\n");
@@ -17,7 +18,8 @@ int main(object me, string arg)
 
 	if(rider) return notify_fail(ridee->name() + "上已有人了！\n");
 	
-	if(ridee->query("owner") != me->query("id"))				//todo:玩家变坐骑	ridee->query("ride/need_train") && 
+	owner = ridee->query_temp("owner");
+	if(owner && owner != me->query("id"))
 		return notify_fail("你需要先驯服" + ridee->name() + "才能去骑它。\n");
 
 	me->mount(ridee)

@@ -5,29 +5,11 @@
 
 inherit EQUIP;
 
-/*
-mapping _infos = ([
-	TYPE_HEAD
-	TYPE_NECK
-	TYPE_CLOTH
-	TYPE_ARMOR
-	TYPE_SURCOAT
-	TYPE_WAIST
-	TYPE_WRISTS
-	TYPE_SHIELD
-	TYPE_FINGER
-	TYPE_HANDS
-	TYPE_BOOTS
-]);
-*/
-
 ///初始化一个类型
 void init_type(string type, int armor)
 {
 	set("armor_type", type);
-	if(!query("armor_apply/dodge") && weight() > 3000)
-		set("armor_prop/dodge", -weight() / 3000);
-	set("armor_prop/armor", armor);
+	decrease_dodge("weapon_prop");
 }
 
 ///造假

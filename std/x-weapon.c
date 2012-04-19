@@ -34,8 +34,7 @@ varargs void init_type(string type, int damage, int flag)
 		set("actions", (: call_other, WEAPON_D, "query_action" :) );
 		set("verbs", info[1]);
 	}
-	if(!query("weapon_prop/dodge") && (weight() >= 3000))
-		set("weapon_prop/dodge", -weight() / 3000);
+	decrease_dodge("weapon_prop");
 }
 
 static mapping _weapons = ([

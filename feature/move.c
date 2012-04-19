@@ -62,10 +62,11 @@ nomask void set_weight(int w)
 // checking in move().
 nomask int weight() { return weight + encumb; }
 
-string ridee_msg() 
+varargs string ridee_msg(int riding)
 {
 	object me = this_object();
-	return sprintf("%s在%s上", me->query("ride/msg"), me->name());
+	string fmt = riding ? "%s着%s" : "%s在%s上";
+	return sprintf(fmt, me->query_temp("ride_msg"), me->name());
 }
 
 string ride_suffix(object me)
@@ -271,27 +272,27 @@ int close_to(object ob)
 	return ob && env && env == environment(ob);
 }
 
-int dismount()
+object dismount()
 {
 	object me = this_object();
 	object ridee = me->query_temp("ridee");
 	mapping props;
-	int show_msg = 0;
+	object ret;
 
 	if(ridee) {
-		if(close_to(ridee)) show_msg = 1;
+		if(close_to(ridee)) ret = ridee;
 		ridee->set_temp("no_return", 0);
 		ridee->set_temp("rider", 0);
 	}
 	me->set_temp("ridee", 0);
-	props = me->query_temp("ride");
+	props = me->query_temp("ride_prop");
 
 	if(mapp(props)) {
 		foreach(string k, int v in props)
-			me->add_temp("apply/" + k, -v);								//TODO 属性移动
-		me->set_temp("ride", 0);
+			me->add_temp("apply/" + k, -v);
+		me->set_temp("ride_prop", 0);
 	}
-	return show_msg;
+	return ret;
 }
 
 
@@ -299,14 +300,19 @@ void mount(object ridee)
 {
 	object me = this_object();
 	object env = environment();
+	mapping props = ridee->query_temp("ride_prop");
 	
 	ridee->set_temp("no_return", 1);
 	ridee->set_temp("rider", me);
   
 	me->set_temp("ridee", ridee);
 	ridee->move(env);
-	me->set_temp("ride/dodge", ridee->query("ride/dodge"));								//todo:属性处置
-	me->add_temp("apply/dodge", ridee->query("ride/dodge"));
+
+	if(mapp(props)) {
+		me->set_temp("ride_prop", ([]) + props);
+		foreach(string k, int v in props)
+			me->add_temp("apply/" + k, v);		
+	}
 }
 
 

@@ -1,4 +1,3 @@
-// go.c
 
 inherit F_CLEAN_UP;
 #include "/cmds/std/valid_move.h";
@@ -66,7 +65,7 @@ int main(object me, string arg, int silent)
 	else dir = arg;
 
 	// snowcat 12/20/97
-	if (ridee = me->ride()) ridemsg = ridee->query("ride/msg") + "着" + ridee->name();
+	if (ridee = me->ride()) ridemsg = ridee->ridee_msg(1);
 	else ridemsg = "";
 
 	if(ridee && !valid_move(ridee)) return notify_fail("你的座骑走动不了。\n");
@@ -76,7 +75,7 @@ int main(object me, string arg, int silent)
 		min = ridemsg + "跌跌撞撞地跑了过来，模样有些狼狈。\n";
 	} else {
 		//Jiz. 02/11
-		if( ridee && ridee->query("bird") ) {
+		if( ridee && ridee->query_temp("bird") ) {
 			mout = ridemsg + "往" + dir + "飞去。\n";
 			min = ridemsg + "飞了过来。\n";
 		} else {

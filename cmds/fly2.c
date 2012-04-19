@@ -74,34 +74,34 @@ int main(object me, string arg)
 
 	seteuid(getuid());
 
-	if( !arg )
+	if(!arg)
 		return notify_fail("你要飞到哪里去？\n");
-	if( me->is_fighting() )
+	if(me->is_fighting())
 		return notify_fail("你正在战斗，飞不开。\n");
-	if( me->is_busy() || me->query_temp("pending/exercising"))
+	if(me->is_busy() || me->query_temp("pending/exercising"))
 		return notify_fail("你正忙着呢，没工夫腾云驾雾。\n");
-	if( !wizardp(me) && !environment(me)->query("outdoors") )
+	if(!wizardp(me) && !environment(me)->query("outdoors") )
 		return notify_fail("周围没有一片云，没办法腾云驾雾。\n");
-	if( me->is_ghost() )
+	if(me->is_ghost())
 		return notify_fail("做了鬼了，就老实点吧！\n");
-	if( me->query_temp("no_move") )
+	if(me->query_temp("no_move"))
 		return notify_fail("你被定住了，哪里飞得起来！\n");
 
-	if( RANK_D->grade_dx( RANK_D->describe_dx( me->query("daoxing") ) ) < MIN_DX ) {
+	if(RANK_D->grade_dx( RANK_D->describe_dx( me->query("daoxing"))) < MIN_DX ) {
 		FLY_FAIL;
 		return notify_fail("你现在还初领妙道都谈不上，哪里飞得起来。\n");
 	}
-	if( RANK_D->grade_fali( RANK_D->describe_fali( me->query("max_mana") ) ) < MIN_MANA ) {
+	if(RANK_D->grade_fali( RANK_D->describe_fali( me->query("max_mana"))) < MIN_MANA ) {
 		FLY_FAIL;
 		return notify_fail("看来以你的法力修为还不能腾云驾雾。\n");
 	}
-	if( me->query("mana") < 200 ) {
+	if(me->query("mana") < 200) {
 		FLY_FAIL;
 		return notify_fail("你目前法力不够充盈。\n");
 	}
-	if( me->query("sen") * 100 / me->query("max_sen") < 50 )
+	if(me->query("sen") * 100 / me->query("max_sen") < 50)
 		return notify_fail("你现在头脑不太清醒，当心掉下来摔死。\n");
-	if( (int)me->query("kee") * 100 / me->query("max_kee") < 50 )
+	if(me->query("kee") * 100 / me->query("max_kee") < 50)
 		return notify_fail("你想飞起来，可是体力似乎有点不支。\n");
 
 	message_vision(HIY"$N手一指，召来一朵云彩，高高兴兴地坐了上去，\n"
@@ -125,13 +125,13 @@ int main(object me, string arg)
 		}
 	}
 	if(ridee) {
-		ridemsg = ridee->query("ride/msg")+"着"+ridee->name();
+		ridemsg = ridee->ridee_msg(1);
 		ridee->move(loc);
 	} 
 	me->move(loc);
 
 	write("\n\n到了！你按下云头跳了下来。\n");
-	message_vision(HIY"\n只见半空中降下一朵云彩，$N"+ridemsg+"从里面走了出来。\n" NOR, me);
+	message_vision(HIY"\n只见半空中降下一朵云彩，$N" + ridemsg + "从里面走了出来。\n" NOR, me);
 
 	return 1;
 }
@@ -170,6 +170,8 @@ lingshan        ->灵山
 
 gaolao          ->高老庄                 jiangzhou     ->江州城 
 bibotan         ->碧波潭                 emei          ->峨眉山
+
+bang|gang       ->帮派驻地
 
 HELP
         );

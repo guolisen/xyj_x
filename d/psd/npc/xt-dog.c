@@ -39,7 +39,6 @@ void die()
 {
 	if(environment()) message_vision(CYN"\n\n$N惨叫一声，夹着尾巴跑掉了。\n\n"NOR, _this);
 	destruct(this_object());
-
 }
 
 /*****************************四处游走*****************************/
@@ -59,11 +58,10 @@ int mount_dog()
 		object dog = random1(dogs);
 		object env = environment(dog);
 		if(env && me->move(env)) {
-			dog->set("ride/msg", "骑");
-			dog->set("ride/dodge", 10);
+			dog->set_temp("ride_msg", "骑");
+			dog->set_temp("ride_prop/dodge", 1);
 			dog->set("gender", "雌性");
 			me->command("mount " + dog->query("id"));
-			//me->command("chat " "mount " + dog->query("id"));
 		}
 	}
 	return 1;
