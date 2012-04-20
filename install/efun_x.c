@@ -44,6 +44,18 @@ mixed and2(mixed a, mixed b)
 	return !a ? a : b;
 }
 
+//返回a，b，c中第一个非空值，没有则返回c
+mixed or3(mixed a, mixed b, mixed c)
+{
+	return or2(a, or2(b, c));
+}
+
+//返回a，b，c中第一个空值，没有则返回c
+mixed and3(mixed a, mixed b, mixed c)
+{
+	return and2(a, and2(b, c));
+}
+
 //从数组中随机选择一个元素
 mixed random1(mixed* arr)
 {

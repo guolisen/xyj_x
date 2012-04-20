@@ -41,7 +41,7 @@ void create()
 }
 
 //Ë¢ĞÂÌæ´úÎï
-void start()
+void start___()
 {
 	trace("dor start", D_WIZ);
 	foreach(string k, string* v in _replaces) {		
