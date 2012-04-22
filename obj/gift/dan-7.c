@@ -9,6 +9,7 @@ inherit __DIR__"gift";
 string eat_msg()
 {
 	_player->add_maximum_force(10);
+	_player->add("bellicosity", 10);
 
 	return "$N把$n扔进嘴里吞了下去，随即喷出一股浓烟。\n\n";
 }

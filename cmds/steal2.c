@@ -32,7 +32,7 @@ int main(object me, string arg)
 	if(!cd_start(me, "steal", CD)) return notify_fail("连续出手危险性太高了。\n");
 
 	write("你不动声色地慢慢靠近" + victim->name() + "，等待机会下手 ...\n\n");
-	call_out("complete_steal", 3, me, victim, ob);		
+	call_out("complete_steal", 3, me, victim, ob);
 	return 1;
 }
 
