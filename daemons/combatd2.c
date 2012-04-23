@@ -242,7 +242,7 @@ mapping _usage_tab = ([
 varargs int skill_power(object ob, string skill, int usage)
 {
 	int max_sen = ob->query("max_sen");
-	int level = ob->query_skill(skill) + ob->query_skill(skill, 1) / 2;
+	int level = ob->query_skill(skill) + ob->query_skill(skill, 1);
 	int exp = ob->query("combat_exp");
 
 	if(!living(ob)) return 0;
