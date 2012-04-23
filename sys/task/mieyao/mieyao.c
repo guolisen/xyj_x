@@ -48,7 +48,7 @@ private string reward_skill(object who)
 		int level = skills[id];
 		int p = MATH->cvt_rang(tab,	level);
 		
-		if(p > random(100) && n > random(10)) {					//firefox 2011.11
+		if(p > random(100) && n > random(12)) {					//firefox 2011.11
 			string name = to_chinese(id);
 			who->set_skill(id, level + 1);
 			tell_object(who, "你得到了一级" + name + "。\n");
