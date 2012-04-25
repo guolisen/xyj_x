@@ -274,6 +274,37 @@ private int abort_attack(object victim, object me)
 	return 0;
 }
 
+//weapon's skill type
+string weapon_skill(object weapon)
+{
+	return weapon ? weapon->query("skill_type") : "unarmed";
+}
+
+//weapon's damage
+int weapon_damage(object who)
+{	
+	string skill = weapon_skill(who->query_temp("weapon"));
+	object weapon2 = who->query_temp("secondary_weapon");
+	int damage = who->query_temp("apply/damage");
+
+	if(weapon2 && weapon_skill(weapon2) != skill)
+		damage -= weapon2->query("weapon_prop/damage");
+	return damage;
+}
+
+//Inflict the damage.
+varargs int inflict_damage(object me, object victim, int damage, int times)
+{
+	int anti_armor = who->query_temp("apply/anti_armor");							//TODO:ÆÆ¼×
+	int armor = victim->query_temp("apply/armor") - anti_armor;
+	int kee = max2(1, damage - armor / 2);
+	int eff_kee = victim->receive_damage("kee", kee, me) - armor / 2;
+	
+	if(eff_kee > 0)	victim->receive_wound("kee", eff_kee, me);
+	else return 0;
+	return 1;
+}
+
 // do_attack()
 //
 // Perform an attack action. This function is called by fight() or as an
@@ -283,7 +314,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 {
 	mapping my, your, action, victim_action;
 	string limb, *limbs, result;
-	string attack_skill, force_skill, martial_skill, dodge_skill, parry_skill;
+	string force_skill, martial_skill, dodge_skill, parry_skill;
 	mixed foo;
 	int ap, dp, pp;
 	int damage, damage_bonus, defense_factor;
@@ -291,6 +322,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	//int cost;
 	int mod_val;
 	object my_env = environment(me);
+	string attack_skill = weapon_skill(weapon);
 
 	if(me->query_temp("no_attack")) return 0;									//firefox 2012.4
 
@@ -318,8 +350,6 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 	//
 	// (2) Prepare AP, DP for checking if hit.
 	//
-	if( objectp(weapon) ) attack_skill = weapon->query("skill_type");
-	else attack_skill = "unarmed";
 
 	limbs = victim->query("limbs");
 	limb = limbs[random(sizeof(limbs))];
@@ -475,7 +505,7 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			damage += damage_bonus;	
 			damage = (damage + random(damage)) / 2;
 
-			if( damage < 0 ) damage = 0;
+			if(damage < 0) damage = 0;
 			if(me->query("betray/count") || !me->query("family/family_name"))		//firefox 2011.11
 				damage -= damage / 3;
 
@@ -483,14 +513,8 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			//	(6) Inflict the damage.
 			//
 
-			damage = victim->receive_damage("kee", damage, me );
-
-			if( (me->is_killing(victim->query("id")) || weapon)
-				&& random(damage) > (int)victim->query_temp("apply/armor") ) {
-					victim->receive_wound("kee", damage - (int)victim->query_temp("apply/armor"), me);
-					wounded = 1;
-			}
-
+			damage = inflict_damage(me, victim, damage);
+			wounded = 1;
 			result += damage_msg(damage, action["damage_type"]);
 
 			//

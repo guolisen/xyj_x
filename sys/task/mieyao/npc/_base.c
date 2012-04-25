@@ -160,7 +160,7 @@ void copy_status(object me, object ob, int level)
 
 	me->set("chat_chance_combat", c["chance"]);
 
-	me->add_temp("apply/armor", exp / K / K * 5);
+	//me->add_temp("apply/armor", exp / K / K * 5);
 }
 
 //ÉèÖÃÃèÊöĞÅÏ¢

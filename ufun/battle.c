@@ -222,6 +222,13 @@ int query_attr(object target, string attr)
 	return 0;
 }
 
+//获取状态
+int query_state(object target, string state)
+{
+	if(state == "busy") {
+		return target->is_busy();
+	}
+}
 //a与b的比值，归一化0.1-10.0
 float cmp_f(int a, int b)
 {
@@ -281,6 +288,13 @@ int cmp_parm(object me, object target, mapping parm)
 			weight += max2(w, 0);
 		}
 	}
+	if(parm["state"]) {				//状态
+		foreach(int* arr, int w in parm["state"]) {
+			product *= pow(cmp_f(query_state(me, "busy"), query_state(target, "busy")), w);
+			weight += max2(w, 0);
+		}
+	}
+
 	product = pow(product, 1.0 / weight) * 100 + 1;
 	trace("cmp:" + getuid(me) + "/" + getuid(target) + " = " + product);
 	return min2(to_int(product), 10000);

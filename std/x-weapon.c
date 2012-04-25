@@ -34,7 +34,7 @@ varargs void init_type(string type, int damage, int flag)
 		set("actions", (: call_other, WEAPON_D, "query_action" :) );
 		set("verbs", info[1]);
 	}
-	decrease_dodge("weapon_prop");
+	setup();
 }
 
 static mapping _weapons = ([
@@ -83,13 +83,15 @@ void make_fake(object ob)
 {
 	int damage = 1 + ob->query("weapon_prop/damage") / 2;
 
-	set_name(ob->query("name"), ob->query_my_id());
-	init_type(ob->query("skill_type"), damage, ob->query("flag"));
+	set_name(ob->query("name"), ob->query_my_id());	
 	set("unit", ob->query("unit"));
+	set("long", ob->query("long"));
 
 	set("no_get", 1);
 	set("no_stock", 1);
 	set("no_give", 1);
+
+	init_type(ob->query("skill_type"), damage, ob->query("flag"));
 }
 
 void create()

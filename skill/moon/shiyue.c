@@ -22,7 +22,7 @@ int cast(object me, object target)
 	]);
 
 	target = BTL->get_victim(me, target);
-	if(!target) return notify_ok("你想对谁施展蚀月咒？");
+	if(!target) return notify_ok("你想对谁施展蚀月咒？\n");
 	if(target->query_condition(POISON)) return notify_fail(target->name() + "已经中邪了！\n");  
 	if(!BTL->require(me, NAME, req)) return 1;
 	BTL->pay(me, req["prop"]);
@@ -30,18 +30,19 @@ int cast(object me, object target)
 	msv(MSG0, me, target);
 
 	if(BTL->cmp_random20(me, target, cmp_parm) > 85) {
+		int damage =  skill / 2;
 		msv(MSG1, me, target);
-
-		target->apply_condition(POISON, skill / 8);
-		target->receive_damage("sen", skill, me);
-		target->receive_damage("kee", skill);
-		target->receive_wound("sen", skill / 2);
-		target->receive_wound("kee", skill / 2);
+		trace("damage:" + damage);
+		target->apply_condition(POISON, skill / 5);
+		target->receive_damage("sen", damage, me);
+		target->receive_damage("kee", damage);
+		target->receive_wound("sen", damage);
+		target->receive_wound("kee", damage);
 
 		me->start_busy(1);
 	} else {
 		msv(MSG2, me, target);
-		me->apply_condition(POISON, skill / 20);
+		me->apply_condition(POISON, skill / 10);
 	}
 	BTL->fight_enemy(target, me);
 	return 2;

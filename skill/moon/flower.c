@@ -1,121 +1,51 @@
 //天女散花 
-// dream 7/17/97
-// modified by xlb 11/98
-//20100628 change for perform flower,by huadao.
+
 #include <ansi.h>
+#include <xyj_x.h>
 
 inherit SSERVER;
 
+#define NAME	"天女散花"
+#define CD		10
+#define THR		80
+#define MSG0	HIM"\n$N凌空而起，手中幻化出无数花瓣，如骤雨般洒下！\n"
+
+
 int perform(object me, object target)
-{
-        string msg;
-        int damage, ap, dp;
-//        int number, size, i, four,amount;
-//        object *tar;
-		object flowers;
+{	
+	int skill = me->query_skill("baihua-zhang", 1);
+	object* enemies = BTL->enemies(me);
+	int power = me->query("force_factor");
 
-        if( !target ) target = offensive_target(me);
+	mapping req = ([
+		"skill1"	: ([ "baihua-zhang" : 80 ]),
+		"prop"		: ([ "force" : 25 + 4 * power, "mana" : 100 ]),
+	]);
+	mapping cmp_parm = ([
+		"prop"		: ([ DEXP : 1, "str" : -1 ]),
+		"skill_pair": ([ ({"unarmed", "parry"}) : 3 ]),
+		"state"		: ([ "busy" : 1 ]),
+	]);
 
-        if( !target
-        ||      !target->is_character()
-        ||      target->is_corpse()
-        ||      target==me)
-                return notify_fail("你要对谁施展「天女散花」？\n");
+	if(!sizeof(enemies)) return notify_ok("「"NAME"」只能在战斗中使用。\n");
+	if(!BTL->require(me, NAME, req)) return 1;
 
-        if((int)me->query("force") < 25+(int)me->query("force_factor") )
-                return notify_fail("你的内力不够！\n");
-        if((int)me->query("kee") < 100 )
-                return notify_fail("你的气血不足，没法子施用外功！\n");
+	if(!cd_start(me, "im_pfm", CD)) return notify_fail("绝招用的太多太滥就不灵了。\n");
+	BTL->pay(me, req["prop"]);
 
-        if((int)me->query_skill("baihua-zhang", 1) <80)
-                return notify_fail("你的百花掌级别还不够！\n");
-/*
-        tar=all_inventory(me);
-        size = sizeof(tar); 
-        if(size) {
-                for(i=0;i<size;i++)
-                if(tar[i]->query("material") == "flower") {
-                        if (tar[i]->query_amount())
-                              number+=tar[i]->query_amount();
-                        else number++;
-                }
-        }
-        write((string)number+"\n");
+	msv(MSG0, me, target);
 
-		if((int)number < 5)
-                return notify_fail("你的花不足以施展「天女散花」！\n");
-*/
-        if( !flowers=present("ice rose", me) )
-                return notify_fail("没有冰冻玫瑰你如何施展得出「天女散花」！\n");
-
-		if (me->query_temp("moon_pfm_busy")) return notify_fail("你稍后才能再使「天女散花」。\n");
-
-        me->add("force", -125-(int)me->query("force_factor"));
-        me->receive_damage("kee", 100);
-        msg = HIC
-"\n$N微微一笑，身子凌空而起，洒下漫天花雨，一时花香缭绕\n"+
-"$n只觉周身都被花影罩住了，一时竟然不知如何招架，更不用说躲闪了！\n" NOR;
-
-        ap = me->query_skill("baihua-zhang", 1);
-// + me->query_skill("parry");
-        ap = ( ap * ap * ap / (4 * 400) );
-// + (int)me->query("kee");
-        ap = ap*250 + (int)me->query("combat_exp");
-        dp = target->query_skill("parry");
-        dp = ( dp * dp * dp / (4 * 400) );
-// + (int)target->query("kee");
-        dp = dp*250 + target->query("combat_exp"); 
-        if( random((ap + dp)/1000+1) <  dp/1000 ) {
-                msg += HIC "谁知$n竟险中求胜，长袖一摆，已将所有花瓣打落！\n\n"NOR;
-                message_vision(msg, me, target);
-        } else {
-                damage = (int)me->query_skill("baihua-zhang",1) / 10 +
-                        (int)me->query("sen") / 400 + random((int)me->query("sen") / 200 ) +
-                        (int)me->query("kee") / 400 + random((int)me->query("kee") / 200 );
-                msg += HIC "这些花瓣看似柔弱无力，却如疾风骤雨般射向$n,深深的嵌入肉里！\n" NOR;
-//                if (number < 10) damage = damage *  (random(number+1)/5);
-//                else damage = damage * (random(10)/5);
-					if (damage >100) damage = 100;
-					if (damage < 50) damage = 50;
-
-                if (random(10) == 0) damage = damage *  ((5+random(5))/5);
-                else damage = damage * ((1+random(9))/5);
-                        target->receive_damage("sen", me->query("eff_sen")*damage/100, me);
-                        target->receive_damage("kee", me->query("eff_kee")*damage/70, me);
-                        me->improve_skill("baihua-zhang", 1, 1);
-                message_vision(msg, me, target);
-                COMBAT_D->report_status(target);
-         }
-
-
-        if( !target->is_fighting(me) ) {
-                if( living(target) ) {
-                        if( userp(target) ) target->fight_ob(me);
-                        else target->kill_ob(me);
-                }
-        }
-/*        
-        for (i = 0; i< size; i++){
-           if (tar[i]->query("material") == "flower"){
-                amount=tar[i]->query_amount();
-                if (amount) four+=amount;
-                  else four++;
-                if (four <= 5)
-                destruct(tar[i]);
-                else {
-                       tar[i]->set_amount(four-5);
-                       four=5;
-                       break;
-                }
-           }
-        }
-*/
-//      me->start_busy(3);
-		me->set_temp("moon_pfm_busy",1);
-		call_out("remove_effect",1+random(3),me);
-        return 1;
+	foreach(object who in enemies) {
+		if(BTL->cmp_random20(me, who, cmp_parm) > THR) {		
+			int damage =  power / 2 - who->query_temp("apply/armor");		//护甲能有效减少暗器类伤害，打布衣
+			damage = max2(50, 4 * damage);
+			trace("damage:" + damage);
+			who->receive_damage("kee", damage);
+			who->receive_wound("kee", damage);
+			COMBAT_D->report_status(who, 1);
+			BTL->fight_enemy(who, me);
+		}
+	}
+	return 1;
 }
 
-void remove_effect(object me) {
-  if (me)  me->delete_temp("moon_pfm_busy");
-}

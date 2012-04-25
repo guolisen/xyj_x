@@ -106,47 +106,32 @@ int attacking_cast_damage(object attacker, object target, int damage_adj)
 	return damage;
 }
 
-//weiqi 981206
-//this function can be called when want apply a damage to a victim while allow
-//the victim use his/her self-made fabao to defense.
+//Inflict the damage.
+varargs int inflict_damage(object me, object victim, int damage, string type, int silence)
+{
+	int anti_magic = victim->query_temp("apply/anti_magic");
+	
+	damage = max2(2, damage - anti_magic);
+	
+	victim->receive_damage(type, damage, me);
+	victim->receive_wound(type, damage/2, me);
+
+	if(!silence && type == "kee") COMBAT_D->report_status(victim);	
+	if(!silence && type == "sen") COMBAT_D->report_sen_status(victim);
+	return damage;
+}
+
+
 void apply_damage(object winner, object victim, int damage, string damage_type, string msg_hit)
 {
-	int damage_kee = 0;
-	int damage_sen = 0;
-	int adjust = victim->query_temp("apply/anti_magic");
-
-	if( damage <= 0 ) return;
-
-	if(damage_type == "kee")
-		damage_kee = damage;
-	else if(damage_type == "sen")
-		damage_sen = damage;
-	else {
-		damage_kee = damage;
-		damage_sen = damage;
-	}
-
-	damage_kee -= adjust / 2;
-	damage_sen -= adjust / 2;
-
-
-	if(damage_kee > 0 || damage_sen > 0)
-		message_vision(msg_hit, winner, victim);
-	else
-		message_vision("\n只见$N身上法力激荡，将$n的攻势尽数化解。\n", victim, winner);
-
-
-	if( damage_kee > 0 ) {
-		victim->receive_damage("kee", damage_kee, winner);
-		victim->receive_wound("kee", damage_kee/2, winner);	
-		COMBAT_D->report_status(victim);	
-	}
-	if( damage_sen > 0 ) {
-		victim->receive_damage("sen", damage_sen, winner);
-		victim->receive_wound("sen", damage_sen/2, winner);	
-		COMBAT_D->report_sen_status(victim);
-	}
-
+	message_vision(msg_hit, winner, victim);
+	
+	trace("damage:" + damage);
+	
+	if(damage_type == "kee" || damage_type == "both")
+		inflict_damage(winner, victim, damage, "kee");
+	if(damage_type == "sen" || damage_type == "both")
+		inflict_damage(winner, victim, damage, "sen");
 	return;
 }
 
