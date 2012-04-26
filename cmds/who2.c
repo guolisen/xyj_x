@@ -1,28 +1,66 @@
 
 #include <ansi.h>
-#include <net/dns.h>
 #include <mudlib.h>
+
 inherit F_CLEAN_UP;
 
-int sort_user(object,object);
-int help();
+int summary();
+int wiz();
+int family(string name, object who);
 
-//玩家是否在线
-string online_flag(object who)
-{
-	if(interactive(who)) {
-		if(query_idle(who)>120) return "*";
-	} else {
-		if(!who->query_temp("scheme")) return "#";
+mapping _funs = ([
+	0		: (: summary :),
+	"-w"	: (: wiz :),
+]);
+
+void create()
+{ 
+	seteuid(getuid()); 
+	foreach(string id in FAMILY->ids()) {
+		_funs[id] = (: family :);
 	}
-	return " ";	
 }
 
-private void create() { seteuid(getuid()); }
-string *exclude = ({"tianlin","lei"});
-
-mixed main(object me, string arg, int remote)
+mixed main(object me, string arg)
 {
+	function fun = _funs(arg);
+
+	if(fun) return evaluate(fun, me);
+
+	if(arg[0] >= 'a' && arg[0] <= 'z') return match_id(me, arg);
+
+	return match_name(me, arg);
+}
+
+int list();
+
+void print(object ob);
+
+int summary()
+{
+	int i = 0;
+	mapping families = ([]);
+	foreach(object ob in children(USER_OB)) {
+		if(!userp(ob) || wizardp(ob) && !ob->query("env/invisibility")) continue;
+		families[ob->query("family/family_name")]++;
+	}
+
+	foreach(string family in 
+
+}
+int wiz();
+int family(string name, object who);
+
+
+
+	if(opt_banghui)
+		ob = filter_array(ob, (: $1->query("banghui") ==      $2->query("banghui") :), me);
+	else if (opt_party)
+		ob = filter_array(ob, (: $1->query("family/family_name") ==      $2->query("family/family_name") :), me);
+
+
+		printf("共有"HIG"%s"NOR"玩家连线中，系统负担：%s。\n\n", player_cnt, query_load_average());
+
 	string name, str, *option, bigname;
 	object *list, *ob, ob1;
 	int i, ppl_cnt,player_cnt;
@@ -205,27 +243,16 @@ int sort_user(object ob1, object ob2)
 
 int help()
 {
-        write("
+	write("
 
-指令格式 : who [-h] [-l] [-w] [-p] [-f] [-m] [-a] [-d] [<ID>]
+指令格式 : who -w | -f | <ID> | <名字> | <门派ID>
 
-这个指令可以列出所有在游戏中的玩家及其等级。
+这个指令可以列出所有在游戏中的玩家。
 
--h 列出帮助屏幕。
--l 选项列出较长的讯息。
--b 只列出同帮会的玩家。
--p 只列出同门派的玩家。
--w 只列出游戏中的巫师。
--f 只列出游戏中的女玩家。
--m 只列出游戏中的男玩家。
--k 只列出参加PK活动的玩家。
--n 只列出游戏中的无性玩家。
--a 只列出当前游戏中玩家的总人数。
--d 只列出当前游戏中处于断线状态中的玩家。
-
-<ID> 列出<ID>代表玩家所属门派的玩家。
-
-* 表示发呆中，# 表示断线中。
+-w        列出游戏中的巫师
+<ID>      列出ID与之匹配的玩家
+<名字>    列出名字与之匹配的玩家
+<门派ID>  列出门派与之匹配的玩家
 
 相关指令： finger \n\n");
         return 1;

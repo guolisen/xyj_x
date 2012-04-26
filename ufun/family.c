@@ -4,21 +4,29 @@
 #include <ansi.h>
 
 mapping _family_tab = ([
-	0			: ({ 0,			0,		0}),
-	"南海普陀山"	: ({ "普陀山",	"pt",	HIY }),
+	0				: ({ "百姓",		"bx",	0}),
+	"南海普陀山"		: ({ "普陀山",	"pt",	HIY }),
 	"方寸山三星洞"	: ({ "方寸山",	"fc",	HIY }),
-	"五庄观"		: ({ "五庄观",	"wzg",	HIY }),
-	"月宫"		: ({ "月宫",		"moon", HIY }),
+	"五庄观"			: ({ "五庄观",	"wzg",	HIY }),
+	"月宫"			: ({ "月宫",		"moon", HIY }),
 
-	"将军府"		: ({ "将军府",	"jjf",	HIY }),
-	"阎罗地府"	: ({ "地府",		"hell", HIY }),
-	"东海龙宫"	: ({ "龙宫",		"lg",	HIY }),
+	"将军府"			: ({ "将军府",	"jjf",	HIY }),
+	"阎罗地府"		: ({ "地府",		"hell", HIY }),
+	"东海龙宫"		: ({ "龙宫",		"lg",	HIY }),
 
-	"大雪山"		: ({ "大雪山",	"xs",	HIY }),
+	"大雪山"			: ({ "大雪山",	"xs",	HIY }),
 	"陷空山无底洞"	: ({ "无底洞",	"wdd",	HIY }),	
-	"火云洞"		: ({ "火云洞",	"hyd",	HIY }),
-	"盘丝洞"		: ({ "盘丝洞",	"psd",	HIY }),
+	"火云洞"			: ({ "火云洞",	"hyd",	HIY }),
+	"盘丝洞"			: ({ "盘丝洞",	"psd",	HIY }),
 ]);
+
+string* _ids = ({"bx", "pt", "fc", "wzg", "moon", "jjf", "hell", "lg", "xs", "wdd", "hyd", "psd"});
+
+//门派名称集合
+string* names() { return keys(_family_tab); }
+
+//门派id集合
+string* ids() { return _ids; }
 
 //门派简称
 string short(object who)
