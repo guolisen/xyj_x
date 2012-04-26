@@ -99,7 +99,7 @@ int zhenshen(object who)
 		MSG->vison(HIC"$N就地一滚，化为一%s。", who, 0, buff["_unit"] + buff["_name"]);
 
 		BUFF->add(who, buff);
-		BUFF->start_cd2(who, buff, CD);
+		//if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 	}
 
 	return 1;

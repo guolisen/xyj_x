@@ -10,7 +10,7 @@ mixed* _cmd_top_text = ({0, 0});					//ÅÅĞĞ°ñµÄÄÚÈİ
 private int start_cmd_cd(int duration)
 {
 	object who = this_player();
-	if(who && userp(who) && !BUFF->start_cd(who, BG_NO_CMD, HIG"ÃüÁî"NOR, duration)) return 0;
+	if(who && userp(who) && !cd_start(who, "cmd", duration)) return 0;
 	return 1;
 }
 

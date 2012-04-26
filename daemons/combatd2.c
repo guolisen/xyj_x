@@ -295,7 +295,7 @@ int weapon_damage(object who)
 //Inflict the damage.
 varargs int inflict_damage(object me, object victim, int damage, int times)
 {
-	int anti_armor = who->query_temp("apply/anti_armor");							//TODO:ÆÆ¼×
+	int anti_armor = victim->query_temp("apply/anti_armor");
 	int armor = victim->query_temp("apply/armor") - anti_armor;
 	int kee = max2(1, damage - armor / 2);
 	int eff_kee = victim->receive_damage("kee", kee, me) - armor / 2;
@@ -304,6 +304,14 @@ varargs int inflict_damage(object me, object victim, int damage, int times)
 	else return 0;
 	return 1;
 }
+
+void debug_parm(object who, object attacker, int ap, int dp, int pp, int mod_val, int damage)
+{
+	if(!who->query("env/combat")) return;
+	tell_object(who, sprintf( GRN"%s AP£º%d£¬DP£º%d£¬PP£º%d£¬Mod£º%d£¬ÉËº¦Á¦£º%d\n"NOR,
+			attacker->name(), ap, dp, pp, mod_val, damage));
+}
+
 
 // do_attack()
 //
@@ -554,22 +562,8 @@ varargs int do_attack(object me, object victim, object weapon, int attack_type)
 			&& (string)victim->query("env/brief_message") != "YES" ) 
 			message_vision(result, me, victim );
 
-	if( wizardp(me) && (string)me->query("env/combat")=="verbose" ) {
-		if( damage > 0 )
-			tell_object(me, sprintf( GRN "me AP£º%d£¬DP£º%d£¬PP£º%d£¬Mod£º%d£¬ÉËº¦Á¦£º%d\n" NOR,
-			ap, dp, pp, mod_val, damage));
-		else
-			tell_object(me, sprintf( GRN "me AP£º%d£¬DP£º%d£¬PP£º%d£¬Mod£º%d\n" NOR,
-			ap, dp, pp, mod_val));
-	}
-	if( wizardp(victim) && (string)victim->query("env/combat")=="verbose" ) {
-		if( damage > 0 )
-			tell_object(victim, sprintf( GRN "target AP£º%d£¬DP£º%d£¬PP£º%d£¬Mod£º%d£¬ÉËº¦Á¦£º%d\n" NOR,
-			ap, dp, pp, mod_val, damage));
-		else
-			tell_object(victim, sprintf( GRN "target AP£º%d£¬DP£º%d£¬PP£º%d£¬Mod£º%d\n" NOR,
-			ap, dp, pp, mod_val));
-	}
+	debug_parm(me, me, ap, dp, pp, mod_val, damage);
+	debug_parm(victim, me, ap, dp, pp, mod_val, damage);
 
 	if( damage > 0 ) {
 		report_status(victim, wounded);

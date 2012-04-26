@@ -230,7 +230,7 @@ private void do_net_dead()
 	if( objectp(link_ob = query_temp("link_ob")) )  {
 		destruct(link_ob);
 	}
-
+	set_heart_beat(10);								//2012.4
 	if(SCHEME_D->is_doing(this_object())) return;	//2010.12 for scheme
 
 	set_heart_beat(0);

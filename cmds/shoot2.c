@@ -10,6 +10,8 @@
 #define THR		100
 #define CD		3
 
+//开始no_move，进入战斗就终止
+
 #define MSGS "$N拿出%s搭在%s上，向%s方射去。\n";
 
 #define MSG0 HIW"随着一声弓弦响，一道寒光向$N射去!\n"NOR

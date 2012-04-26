@@ -28,7 +28,6 @@ int cast(object me, object target)
 	int force = 100 + 2 * me->query("force_factor");
 	string w, msg;
 	mapping req = ([
-		"cd"		: ([ ID			: 1 ]),
 		"skill1"	: ([ "yaofa"	: 150,	"yinfeng-zhua"	: 150 ]),
 		"prop"		: ([ "mana"		: 50,	"force"			: force ]),
 	]);
@@ -44,11 +43,11 @@ int cast(object me, object target)
 		return notify_ok("打架中不能偷袭。\n");
 
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 	BTL->pay(me, req["prop"]);
 	w = me->query("gender") == "男性" ? word_list[0] : word_list[1];
 	msg = sprintf(tab["attack"], w[0], w[1], w[2]);
 	
-	BUFF->start_cd(me, ID, NAME, CD);
 	if(BTL->random_cmp(me, target, cmp_parm) >= 60) {
 		int damage;		
 		BUFF->start_claw(me, DUATION, skill/3, "$N的"HIW"爪子"NOR"收了回去。");

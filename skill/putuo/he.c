@@ -30,7 +30,6 @@ int cast(object me, object target)
 {
 	int mana = 50 + me->query("mana_factor");
 	mapping req = ([
-		"cd"		: ([ ID				: 1 ]),
 		"skill1"	: ([ "buddhism"		: 120 ]),
 		"prop"		: ([ "mana"			: mana ]),
 	]);
@@ -43,9 +42,10 @@ int cast(object me, object target)
 	target = BTL->get_victim(me, target);
 	if(!target) return notify_ok("你要对谁施放"NAME"？");
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 	BTL->pay(me, req["prop"]);
-	BUFF->start_cd(me, ID, NAME, CD);
+
 	msv(MSG0, me, target);
 	
 	if(BTL->cmp_random20(me, target, cmp_parm) > 125) {

@@ -1,6 +1,10 @@
 // firefox 2011.12
+
 #include <ansi.h>
 #include <xyj_x.h>
+
+#define CD			5
+#define NAME		HIW"霹雳三打"NOR
 
 int perform(object me, object target)
 {
@@ -10,10 +14,10 @@ int perform(object me, object target)
 
 	target = BTL->get_victim(me, target);
 
-	if(!target || !me->is_fighting(target))	return notify_fail("「霹雳三打」只能在战斗中使用！\n");
+	if(!target || !me->is_fighting(target))	return notify_fail("「"NAME"」只能在战斗中使用！\n");
 	if(skill < 60)	return notify_fail("你的千钧棒级别还不够！\n");
 	if(me->query("force") < cost) return notify_fail("你的内力不足！\n");
-	if(!cd_start(me, "im_pfm", 5)) return notify_fail("绝招用的太多太滥就不灵了。\n");
+	if(!cd_start(me, "im_pfm", CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 	me->add("force", -cost);
 

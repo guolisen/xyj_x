@@ -77,14 +77,7 @@ int require(object target, string name, mapping req)
 			}
 		}
 	}
-	if(req["cd"]) {			//检查技能冷却
-		foreach(string k, int v in req["cd"]) {
-			if(BUFF->query_cd(target, k)) {
-				printf("你需要过一段时间才能施放" + name + "。\n");
-				return 0;
-			}
-		}
-	}
+
 	return 1;
 }
 

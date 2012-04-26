@@ -163,8 +163,10 @@ int ji(string tid)
 	if(!target) return notify_fail("必须指定一个目标。\n");
 
 	if(!BTL->require(who, NAME, _act["req"])) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
+
 	BTL->pay(me, _act["req"]["prop"]);
-	BUFF->start_cd(who, _act["cd_id"], name() + "冷却", _act["cd"]);
+
 
 	MSG->vision(_act["msg_start"] + NOR"\n", who, target, _this->name());
 

@@ -1,10 +1,9 @@
-// by firefox 02/21/2010
+// firefox 02/21/2010
 
 #include <xyj_x.h>
 #include <ansi.h>
 
 inherit ITEM;
-inherit F_LOADABLE;
 
 #define DEST		X_DIR"d/psd/yard"
 

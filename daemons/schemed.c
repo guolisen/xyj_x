@@ -5,7 +5,7 @@
 #include <ansi.h>
 #include <xyj_x.h>
 
-#define SPC							10		//每n秒执行一条命令
+#define SPC							20		//每n秒执行一条命令
 
 #define WHO							0
 #define CMDS						1
@@ -14,7 +14,7 @@
 
 void done_input(object me, string text);
 int init(object me);
-int execute_schedule(object me);
+int execute_schedule(object me, mapping tdb);
 
 mapping _users = ([]);
 
@@ -173,15 +173,17 @@ void heart_beat()
 
 	foreach(string id, mixed* arr in _users) {
 		object user = arr[WHO];
-		if(user) {
+		if(userp(user)) {
 			//条指过多/忙/晕倒，本轮被跳过
-			int thr = arr[CMDS] * (interactive(user) ? 2 : SPC);	//离线计划执行慢
+			int thr = arr[CMDS] * (interactive(user) ? 2 : SPC);		//离线计划执行慢
 
 			if((thr < now - arr[START_TIME]) && !user->is_busy() && living(user)) {
 				if(bad_state(user))
 					abort(user);
-				else
-					arr[CMDS] += execute_schedule(user);	//执行指令，并累计指令数
+				else {
+					mapping tdb = user->query_temp("scheme");
+					if(tdb) arr[CMDS] += execute_schedule(user, tdb);	//执行指令，并累计指令数
+				}
 			}
 		} else {
 			map_delete(_users, id);
@@ -274,9 +276,8 @@ int exec_cmds(object who, string cmds)
 }
 
 // 执行计划中
-int execute_schedule(object me)
+int execute_schedule(object me, mapping tdb)
 {
-	mapping tdb = me->query_temp("scheme");
 	string* lines = tdb["lines"];
 	int step = tdb["step"];
 	string cmd = lines[step];

@@ -1,12 +1,12 @@
-// by firefox 11/21/2009
+// firefox 11/21/2009
 
 inherit SSERVER;
 
 #include <xyj_x.h>
 #include <ansi.h>
 
-#define BUFF_ID			"qimen2"
-#define BUFF_NAME		HIW"奇门遁甲阵"NOR
+#define ID				"qimen"
+#define NAME			HIW"奇门遁甲阵"NOR
 #define BUFF_DESC		"施放奇门遁甲。"
 #define CD				20
 
@@ -24,25 +24,25 @@ mapping new_exits(object env);
 int cast(object me, object target)
 {
 	object env = environment(me);
-	mapping buff_ori = BUFF->find(me, BUFF_ID);
+	mapping buff_ori = BUFF->find(me, ID);
 
 	if(buff_ori) {
 		BUFF->remove1(buff_ori);
 	} else {
 		int skill = me->query_skill("taiyi", 1);
 		mapping env_req = ([
-			"ex_value"	: ([ "no_change"	: "这里不能施放"BUFF_NAME"。" ]),
+			"ex_value"	: ([ "no_change"	: "这里不能施放"NAME"。" ]),
 			"ex_class"	: ([ "装修"			: "这里已经被人搞乱了。"]),
 		]);
   		mapping req = ([
-			"cd"		: ([ BUFF_ID		: 1 ]),
 			"skill1"	: ([ "taiyi"		: 60]),
 			"prop"		: ([ "mana"			: 400,	"sen"	: 100 ]),
 		]);
 		object barrier;
 
-		if(!BTL->require(env, BUFF_NAME, env_req)) return 1;
-		if(!BTL->require(me, BUFF_NAME, req)) return 1;
+		if(!BTL->require(env, NAME, env_req)) return 1;
+		if(!BTL->require(me, NAME, req)) return 1;
+		if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 		seteuid(getuid());
 		barrier = new(X_DIR"obj/fabao/barrier");
@@ -51,12 +51,12 @@ int cast(object me, object target)
 		msv(HIW"$N叽哩咕噜地念了几句咒语，突然间天空白光一闪!\n"NOR, me);
 		if(barrier->move_to(env)) {
 			mapping env_buff = ([
-				"id"		: BUFF_ID,
-				"name"		: BUFF_NAME,
+				"id"		: ID,
+				"name"		: NAME,
 				"class"		: "装修",
 				"comment"	: BUFF_DESC,
 				"replace"	: ([
-					"short"		: BUFF_NAME,
+					"short"		: NAME,
 					"long"		: room_long,
 					"exits"		: new_exits(env),
 				]),
@@ -67,8 +67,8 @@ int cast(object me, object target)
 				"_barrier"	: barrier,
 			]);
 			mapping buff = ([
-				"id"		: BUFF_ID,
-				"name"		: BUFF_NAME,
+				"id"		: ID,
+				"name"		: NAME,
 				"comment"	: BUFF_DESC,
 				"_env"		: env,
 			]);
@@ -76,7 +76,6 @@ int cast(object me, object target)
 			BUFF->link_each(env_buff, buff);
 			BUFF->add(env, env_buff);
 			BUFF->add(me, buff);
-			BUFF->start_cd2(me, buff, CD);
 			me->start_busy(2);
 		}
 	}
@@ -86,7 +85,7 @@ int cast(object me, object target)
 int post_act(mapping buff)
 {
 	destruct(buff["_barrier"]);
-	tell_room(buff["me"], "金光一闪，"BUFF_NAME"消失了。\n"NOR); 
+	tell_room(buff["me"], "金光一闪，"NAME"消失了。\n"); 
 	return 1;
 }
 

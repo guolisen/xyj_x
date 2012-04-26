@@ -31,7 +31,6 @@ int cast(object me, object target)
 	int skill = me->query_skill("gouhunshu", 1);
 	int mana = 25 + 2*(int)me->query("mana_factor");
 	mapping req = ([
-		"cd"		: ([ ID				: 1 ]),
 		"skill1"	: ([ "gouhunshu"	: 250]),
 		"prop"		: ([ "mana"			: mana,		"sen"			: 50]),
 	]);
@@ -44,8 +43,9 @@ int cast(object me, object target)
 	if(!objectp(target)) return notify_ok("你要勾谁的魂魄？\n");
 
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 	BTL->pay(me, req["prop"]);
-	BUFF->start_cd(me, ID, NAME, CD);
+
 	message_vision(HIC"$N对$n阴阴地笑着：阎王叫你三更死，不敢留你到五更。。。\n"NOR, me, target);
 
 	success = BTL->cmp_parm(me, target, cmp_parm);

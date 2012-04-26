@@ -27,7 +27,6 @@ int cast(object me, object target)
 {
 	int thr = 100;
 	mapping req = ([
-		"cd"		: ([ ID				: 1 ]),
 		"skill1"	: ([ "pansi-dafa"	: 30 ]),
 		"prop"		: ([ "mana"			: 50 ]),
 	]);
@@ -41,9 +40,9 @@ int cast(object me, object target)
 	if(!target) return notify_ok("你要网谁？");
 	
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 	BTL->pay(me, req["prop"]);
-	BUFF->start_cd(me, ID, NAME, CD);
 
 	msv(MSG0, me, target);
 

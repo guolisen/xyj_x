@@ -1,4 +1,4 @@
-// สดิยึไ?
+
 inherit SSERVER;
 #include <ansi.h>
 #include <xyj_x.h>

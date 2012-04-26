@@ -58,15 +58,15 @@ int perform(object me, object target)
 	int mana = 10 + me->query("mana_factor");
 	int force = 10 + me->query("force_factor");
 	mapping req = ([
-		"cd"		: ([ ID				: 1 ]),
 		"skill1"	: ([ "buddhism"		: 140,	"jienan-zhi"	: 140 ]),
 		"prop"		: ([ "mana"			: mana,	"force"			: force]),
 	]);
 
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 	BTL->pay(me, req["prop"]);
-	BUFF->start_cd(me, ID, NAME, CD);
+
 	write(MSG0);
 	BUFF->add(me, ([
 		"id"		: ID,

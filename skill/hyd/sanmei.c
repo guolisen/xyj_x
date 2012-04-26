@@ -5,7 +5,6 @@
 
 inherit SSERVER;
 
-#define CD			5		//技能冷却时间
 #define DURATION	60		//技能持续时间
 
 #define BUFF_ID		"sanmei2"
@@ -35,7 +34,6 @@ int cast(object me)
 			"ex_class"	: ([ "装修"		: "这里已经被人搞乱了。"]),
 		]);
 		mapping req = ([
-			"cd"		: ([ BUFF_ID	: 1 ]),
 			"skill1"	: ([ "pingtian-dafa" : 100 ]),
 			"prop"		: ([ "mana"	: skill ]),
 		]);
@@ -71,7 +69,6 @@ int cast(object me)
 		BUFF->link_each(env_buff, buff);
 		BUFF->add(env, env_buff);
 		BUFF->add(me, buff);
-		BUFF->start_cd2(me, buff, CD);
 		
 		me->start_busy(1);
 	}

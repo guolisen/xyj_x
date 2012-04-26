@@ -5,10 +5,10 @@ inherit SSERVER;
 #include <xyj_x.h>
 #include <ansi.h>
 
-#define ID				"yinshen2"
+#define ID				"yinshen"
 #define NAME			HIW"隐身"NOR
-#define DURATION		120
-#define CD				20
+#define DURATION		60
+#define CD				70
 #define PROP			"env/invisibility"
 
 int cast(object me)
@@ -17,7 +17,6 @@ int cast(object me)
 
 	if(buff_ori) {									//解除隐身
 		BUFF->remove1(buff_ori);
-		cd_start(me, ID, CD);
 	}
 	else if(cd_check(me, ID)) {						//隐身
 		int skill = me->query_skill("buddhism", 1);
@@ -39,6 +38,7 @@ int cast(object me)
 			"stop_msg"	: "\n"HIW"白光"NOR"闪过之后，$N又现出了身形。\n",
 		]);
 		if(!BTL->require(me, NAME, req)) return 1;
+		if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 		BTL->pay(me, req["prop"]);
 		BUFF->add(me, buff);
 	}

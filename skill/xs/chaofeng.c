@@ -5,8 +5,9 @@
 
 inherit SSERVER;
 
-#define CD		5
+#define ID		"chaofeng"
 #define NAME	"百鸟朝凤"
+#define CD		5
 
 #define MSG0	HIW"只见$N手中%s"HIW"急颤，幻出满天剑芒，无数%s"HIW"有如百鸟投林般向$n扑来！\n"NOR
 #define MSG1	HIW"$n连忙身行一转，连退数步，闪过了这满天花雨般的一击。\n"NOR
@@ -31,8 +32,7 @@ int perform(object me, object target)
 	string type = "剑气";
 
 	mapping req = ([
-		"cd"		: ([ ID			: 1 ]),
-		"skill1"	: ([ "sword"	: 20,		"bainiao-jian" : 20 ]),
+		"skill1"	: ([ "bainiao-jian" : 30 ]),
 		"skill_map"	: ([ "force"	: "ningxie-force" ]),
 		"prop"		: ([ "force"	: 50 ]),
 	]);
@@ -45,7 +45,7 @@ int perform(object me, object target)
 	target = BTL->get_victim(me, target);
 	if(!target) return notify_ok("你要攻击谁？");
 
-	if(!cd_start(me, "chaofeng", CD)) return notify_fail("绝招用的太多太滥就不灵了。\n");
+	if(!cd_start(me, ID, CD)) return notify_fail("绝招用的太多太滥就不灵了。\n");
 
 	if(n < 1) {
 		type = "剑气";

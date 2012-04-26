@@ -15,13 +15,12 @@ int cast(object me)
 {
 	int skill = me->query_skill("dao", 1);
 	mapping req = ([
-		"cd"		: ([ ID	: 1 ]),
 		"skill1"	: ([ "dao"		: 300 ]),
 		"prop"		: ([ "mana"	: skill * 2 ]),
 	]);
-
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 	BTL->pay(me, req["prop"]);
-	BUFF->start_cd(me, ID, NAME, CD);	
+
 	message_vision(YEL"$N突然张嘴作打喷嚏状，大家急忙后退。啊嚏！众人安然无恙。\n"NOR, me);
 	call_out("make_gas", 3, me);
 	return 1;

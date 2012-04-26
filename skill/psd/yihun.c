@@ -21,7 +21,6 @@ int buff_sb(object me, string relation, object target);
 int cast(object me, object target)
 {
 	mapping req = ([
-		"cd"		: ([ ID				: 1 ]),
 		"skill1"	: ([ "spells"		: 100 ]),
 		"prop"		: ([ "mana"			: 400 ]),
 	]);
@@ -36,12 +35,12 @@ int cast(object me, object target)
 
 	if(BUFF->find(target, ID)) return notify_ok("对方无法被控制！\n");
 	if(!BTL->require(me, NAME, req)) return 1;
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
 
 	BTL->pay(me, req["prop"]);
 
 	msv(HIC"\n$N大喝一声『移魂大法』，只见$N目光如电，直射入$n眼中。\n", me, target);
 	
-	BUFF->start_cd(me, ID, NAME, CD);
 	if(BTL->cmp_random20(me, target, cmp_parm) > 150) {
 		buff_sb(me, MY_SERVANT, target);
 		buff_sb(target, MY_HOST, me);

@@ -16,7 +16,6 @@ int cast(object me, object target)
 {
 	int skill = me->query_skill("spells");
 	mapping req = ([
-		"cd"		: ([ ID			: 1 ]),
 		"skill1"	: ([ "spells"	: 50 ]),
 		"prop"		: ([ "mana"		: skill/2 ]),
 	]);
@@ -31,11 +30,10 @@ int cast(object me, object target)
 	if(me->query_per() < 20) return notify_ok("你太丑了，别去吓人了。\n");
 	if(BUFF->find(target, ID)) return notify_ok("对方已经被迷倒了！\n");
 	if(!BTL->require(me, NAME, req)) return 1;
-
+	if(!cd_start(me, ID, CD)) return notify_fail("你暂时还不能使用"NAME"。\n");
+	
 	BTL->pay(me, req["prop"]);
 	
-	BUFF->start_cd(me, ID, NAME, CD);
-
 	msv(HIM"\n$N深情的望着$n，满眼秋波目光迷离，轻吟催情大法...\n"NOR, me, target);
 
 	if(BTL->cmp_random20(me, target, cmp_parm) > 80) {
