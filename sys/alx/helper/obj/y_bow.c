@@ -1,4 +1,4 @@
-// by firefox 11/21/2009
+// firefox 11/21/2009
 
 #include <armor.h>
 #include <ansi.h>
