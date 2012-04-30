@@ -30,7 +30,7 @@ void create()
 	}) );
 
 	SKI->set_list(this_object(), ({
-		({ "literate",		60, }),
+		({ "literate",		60,		"stealing",	180 }),
 		({ "qianjun-bang",	600,	"stick",	600,	"parry",		180 }),
 		({ "dao",			200,	"spells",	200 }),
 		({ "wuxiangforce",	400,	"force",	400 }),
