@@ -282,8 +282,8 @@ int cmp_parm(object me, object target, mapping parm)
 		}
 	}
 	if(parm["state"]) {				//״̬
-		foreach(int* arr, int w in parm["state"]) {
-			product *= pow(cmp_f(query_state(me, "busy"), query_state(target, "busy")), w);
+		foreach(string id, int w in parm["state"]) {
+			product *= pow(cmp_f(query_state(me, id), query_state(target, id)), w);
 			weight += max2(w, 0);
 		}
 	}

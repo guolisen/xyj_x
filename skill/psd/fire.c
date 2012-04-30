@@ -55,6 +55,7 @@ int cast(object me, object target)
 
 		target->receive_damage("kee", damage, me);
 		target->receive_wound("kee", damage, me);
+		COMBAT_D->report_status(target);
 
 		if(!userp(target) && !random(80))
 			target->command("say 还用得着吗？又烧！何苦呢－－？何必呢－－？");
