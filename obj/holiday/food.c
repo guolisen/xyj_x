@@ -6,13 +6,11 @@ inherit ITEM;
 
 #define PROP		"gift/holiday"
 
-#define DATE		20120101
-#define POT			90000
+#define DATE		20120501
+#define POT			30000
 
 
 //#define ID			"mang guo"
-//#define LONG		"太忙了，祝大家吃得开心，玩得愉快。"
-//string* _prefixs = ({"芒果", "芒果"});
 
 //#define LONG		"愿MUD西游记一年更比一年红火。"
 //#define LONG		"四时花竞巧，九子粽争新。祝大家端午愉快。"
@@ -20,8 +18,11 @@ inherit ITEM;
 
 #define NAME		""
 #define ID			""
-#define LONG		"愿大家节日快乐，原MUD西游记一年更比一年红火。"
-string* _tab = ({ ({"年糕", "nian gao"}), ({"饺子", "jiao zi"}), ({"汤圆", "tang yuan"}) });
+//#define LONG		"愿大家节日快乐，原MUD西游记一年更比一年红火。"
+//string* _tab = ({ ({"年糕", "nian gao"}), ({"饺子", "jiao zi"}), ({"汤圆", "tang yuan"}) });
+#define LONG		"太忙了，祝大家吃得开心，玩得愉快。"
+string* _tab = ({ ({"芒果", "mang guo"}), });
+
 
 void create()
 {
