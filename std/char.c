@@ -106,8 +106,7 @@ void heart_beat()
 
 	// mon add check living. 8/3/98
 	if( !userp(me) && living(me) ) {
-		me->chat();
-		// chat() may do anything -- include destruct(me)
+		me->chat();		// chat() may do anything -- include destruct(me)
 		if( !me ) return;	
 	}
 

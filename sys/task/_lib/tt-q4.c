@@ -47,7 +47,7 @@ int accept_object(object employer, object who, object ob)
 	mapping msg = get_msg(employer);
 	mapping m = data_of(who);
 
-	if(m["state"] != "进行") return 0;
+	if(m["state"] != "进行" || userp(ob)) return 0;
 	
 	if(m["tname"] != ob->query("name")) {
 		msvx(msg["name_err"], employer, who, m["tname"], ob->query("name"));
