@@ -29,7 +29,6 @@ int cast(object me)
 		mapping env_req = ([
 			"ex_value"	: ([ 
 				"no_change"	: "这里不能施放"BUFF_NAME"。",
-				"water"		: "无法在水中放火。",
 			]),
 			"ex_class"	: ([ "装修"		: "这里已经被人搞乱了。"]),
 		]);

@@ -5,10 +5,10 @@
 #include <ansi.h>
 inherit ARMOR;
 
-//Æß²ÊÏ¼ÒÂ
+//Îå²ÊÏÉÒÂ
 void create()
 {
-	set_name(HIY"ÁúÁÛ»Æ½ğÏ¸¼×"NOR, ({ "dragon armor", "armor"}));
+	set_name(HIY"Îå²ÊÏÉÒÂ"NOR, ({ "dragon armor", "armor"}));
 	set_weight(1);
 
 	if( clonep() )
