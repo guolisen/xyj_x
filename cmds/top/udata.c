@@ -2,7 +2,7 @@
 #include "_base.h"
 
 
-string _format = "%s%-3d%-7s%-20s%8d\n";
+string _format = "%s%-3d%-7s%-24s%8d\n";
 string _header = "   ÃÅÅÉ   Íæ¼Ò                ";
 
 
