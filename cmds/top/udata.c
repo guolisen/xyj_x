@@ -39,9 +39,9 @@ void create()
 		({ "dx",	"道行(千年)",	DEXP,			K*K,		10 }),
 		({ "force",	"  内力(年)",	"maximum_force",100,		10 }),
 		({ "mana",	"  法力(年)",	"maximum_mana",	100,		10 }),
-		({ "kee",	"  气血(K)",		"kee",			1,			K }),
-		({ "sen",	"  精神(K)",		"sen",			1,			K }),
-		({ "stl",	"  战功(M)",		"sys_alx/exp",	K*K,		0 }),
+		({ "kee",	"  气血(K)",	"max_kee",		1,			K }),
+		({ "sen",	"  精神(K)",	"max_sen",		1,			K }),
+		({ "stl",	"  战功(M)",	"sys_alx/exp",	K*K,		0 }),
 	});
 
 	_lists = ([]);
